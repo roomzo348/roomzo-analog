@@ -12,7 +12,7 @@ import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
