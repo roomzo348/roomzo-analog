@@ -1,0 +1,45 @@
+<div class="blog-layout" *ngIf="post">
+  
+  <article class="blog-container">
+    <button class="back-link" routerLink="/blog">
+      <mat-icon>arrow_back</mat-icon> Back to Articles
+    </button>
+
+    <header class="blog-header">
+      <h1 class="blog-title">{{ post.title }}</h1>
+      <div class="blog-meta">
+        <div class="author-avatar">{{ post.author.charAt(0) }}</div>
+        <div class="meta-details">
+          <span class="author-name">{{ post.author }}</span>
+          <span class="date-time">{{ post.date }} • {{ post.readTime }}</span>
+        </div>
+      </div>
+    </header>
+
+    <figure class="blog-hero">
+      <img [src]="post.imageUrl" [alt]="post.title" loading="lazy">
+    </figure>
+
+    <div class="blog-body" [innerHTML]="safeContent"></div>
+
+    <div class="blog-footer-cta">
+      <h3>Ready to find your next home?</h3>
+      <p>Join thousands of verified users on Roomzo today.</p>
+      <button class="cta-btn" routerLink="/explore-listing">Start Exploring</button>
+    </div>
+  </article>
+
+  <aside class="sidebar-container desktop-only">
+    <h3>Keep Reading</h3>
+    <div class="related-list">
+      <a [routerLink]="['/blog', item.slug]" class="related-card" *ngFor="let item of recentPosts">
+        <img [src]="item.imageUrl" alt="thumbnail" loading="lazy">
+        <div class="related-text">
+          <h4>{{ item.title }}</h4>
+          <span>{{ item.date }}</span>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+</div>

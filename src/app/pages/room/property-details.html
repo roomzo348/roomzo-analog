@@ -1,0 +1,635 @@
+<div class="loading-state" *ngIf="isLoading">
+  <div class="modern-spinner"></div>
+  <p>Loading property details...</p>
+</div>
+
+<div class="page-container" *ngIf="!isLoading && property">
+
+  <section class="gallery-container mobile-only" *ngIf="isBrowser">
+    <div class="gallery-stage">
+      <div class="mobile-gallery-toolbar">
+        <button class="mobile-floating-btn back-btn" routerLink="/explore-listing" aria-label="Go back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="toolbar-actions">
+          <button class="mobile-floating-btn share-btn" (click)="shareProperty()" aria-label="Share property">
+            <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
+          </button>
+          <button class="mobile-floating-btn report-btn" (click)="reportProperty()" aria-label="Report property">
+            <mat-icon>flag</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="mobile-gallery-scroll"
+        #galleryScroll
+        (scroll)="onGalleryScroll()"
+        role="region"
+        aria-label="Property photos"
+      >
+        <article
+          class="gallery-slide"
+          *ngFor="let photo of getDisplayPhotos(); let i = index"
+          [attr.aria-label]="'Photo ' + (i + 1) + ' of ' + getDisplayPhotos().length"
+        >
+          <div class="slide-frame" (click)="openZoomViewer(i, $event)">
+            <img
+              class="slide-bg"
+              [src]="optimizeImageUrl(photo.photoUrl)"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+            />
+            <img
+              class="slide-img"
+              [src]="optimizeImageUrl(photo.photoUrl)"
+              [alt]="generatePropertyAltText(property, i)"
+              [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+              decoding="async"
+              draggable="false"
+            />
+          </div>
+        </article>
+      </div>
+
+      <span class="photo-counter" *ngIf="getDisplayPhotos().length > 1">
+        <mat-icon>photo_library</mat-icon>
+        {{ activePhotoIndex + 1 }} / {{ getDisplayPhotos().length }}
+      </span>
+    </div>
+
+    <div class="mobile-thumbnail-strip" #thumbStrip *ngIf="getDisplayPhotos().length > 1">
+      <button
+        type="button"
+        class="thumb"
+        *ngFor="let photo of getDisplayPhotos(); let i = index"
+        [class.active]="i === activePhotoIndex"
+        [attr.data-thumb-index]="i"
+        [attr.aria-label]="'View photo ' + (i + 1)"
+        (click)="scrollToPhoto(i)"
+      >
+        <img
+          [src]="optimizeImageUrl(photo.photoUrl)"
+          [alt]="'Photo ' + (i + 1) + ' thumbnail'"
+          loading="lazy"
+          decoding="async"
+          draggable="false"
+        />
+      </button>
+    </div>
+  </section>
+
+  <section class="gallery-section desktop-only mt-24">
+    <div class="gallery-grid">
+      <div class="main-img relative">
+        <div class="overlay-tags-container">
+          <div class="tags-left">
+            <span class="img-tag tag-verified"><mat-icon>verified</mat-icon> Verified Owner</span>
+            <span class="img-tag tag-danger"><mat-icon>block</mat-icon> No Brokerage</span>
+            <span class="img-tag tag-success"><mat-icon>bolt</mat-icon> Available Now</span>
+          </div>
+          <div class="tags-right">
+            <span class="img-tag tag-dark"><mat-icon>camera_alt</mat-icon> 1 / {{ property.photos?.length || 1 }}</span>
+          </div>
+        </div>
+
+        <img [src]="optimizeImageUrl((property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg')" [alt]="generatePropertyAltText(property, 0)" loading="eager" decoding="async" width="800" height="600" (click)="openImage(property.photos[0]?.photoUrl)">
+      </div>
+      <div class="side-img" *ngIf="property.photos?.length > 1">
+        <img [src]="optimizeImageUrl(property.photos[1].photoUrl)" [alt]="generatePropertyAltText(property, 1)" loading="lazy" decoding="async" (click)="openImage(property.photos[1]?.photoUrl)">
+      </div>
+      <div class="side-img" *ngIf="property.photos?.length > 2">
+        <img [src]="property.photos[2].photoUrl" alt="Side 2" (click)="openImage(property.photos[2]?.photoUrl)">
+      </div>
+      <div class="side-img" *ngIf="property.photos?.length > 3">
+        <img [src]="property.photos[3].photoUrl" alt="Side 3" (click)="openImage(property.photos[3]?.photoUrl)">
+      </div>
+      <div class="side-img relative" *ngIf="property.photos?.length > 4" (click)="openImage(property.photos[4]?.photoUrl)">
+        <img [src]="property.photos[4].photoUrl" alt="More" style="filter: brightness(0.6);">
+        <div class="more-photos-overlay">+{{ property.photos.length - 4 }} Photos</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="content-wrapper">
+
+    <header class="property-header stagger-item">
+      <div class="header-content">
+        <div class="title-section">
+          <app-seo-breadcrumb class="desktop-only" [items]="breadcrumbItems"></app-seo-breadcrumb>
+          <div class="mobile-eyebrow-row mobile-only">
+            <span class="type-eyebrow">
+              <mat-icon>verified</mat-icon> Owner listed · No brokerage
+            </span>
+            <span class="posted-inline" *ngIf="property.createdOn">
+              <mat-icon>schedule</mat-icon> {{ property.createdOn | date: 'MMM d, y' }}
+            </span>
+          </div>
+          <h1>{{ property.propertyType }} in {{ property.street }}</h1>
+          <p class="address">
+            <mat-icon>location_on</mat-icon>
+            <span>{{ property.street }}, {{ property.city }}, {{ property.state }}</span>
+          </p>
+        </div>
+        <div class="action-buttons desktop-only">
+          <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
+            <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
+            {{ isCopied ? 'Copied!' : 'Share' }}
+          </button>
+          <button class="btn-outline report-btn" (click)="reportProperty()">
+            <mat-icon>flag</mat-icon>
+            Report
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="mobile-summary-card mobile-only stagger-item">
+      <div class="summary-top">
+        <div class="summary-price">
+          <span class="rent-label">Monthly rent</span>
+          <div class="price-highlight">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
+        </div>
+        <div class="summary-top-right">
+          <span class="rating-pill" *ngIf="reviewCount > 0">
+            <mat-icon>star</mat-icon>
+            {{ avgRating | number:'1.1-1' }}
+            <span class="rating-count">({{ reviewCount }})</span>
+          </span>
+          <span class="availability-chip" [class.rented]="isPropertyRented()">
+            <mat-icon>{{ isPropertyRented() ? 'block' : 'check_circle' }}</mat-icon>
+            {{ isPropertyRented() ? 'Rented' : 'Available' }}
+          </span>
+        </div>
+      </div>
+      <div class="summary-meta">
+        <span class="meta-pill"><mat-icon>bed</mat-icon>{{ property.bedrooms }} BHK</span>
+        <span class="meta-pill"><mat-icon>square_foot</mat-icon>{{ property.propertySize | number }} sq ft</span>
+        <span class="meta-pill"><mat-icon>bathtub</mat-icon>{{ property.bathrooms || 1 }} Bath</span>
+        <span class="meta-pill"><mat-icon>directions_car</mat-icon>{{ property.parking || 1 }} Parking</span>
+      </div>
+    </section>
+
+    <section class="premium-specs-grid desktop-only">
+      <div class="spec-card">
+        <mat-icon>bed</mat-icon>
+        <div class="spec-val">{{ property.bedrooms }} BHK</div>
+        <div class="spec-lbl">Bedrooms</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>square_foot</mat-icon>
+        <div class="spec-val">{{ property.propertySize | number }}</div>
+        <div class="spec-lbl">Sq. Ft.</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>bathtub</mat-icon>
+        <div class="spec-val">{{ property.bathrooms || 1 }}</div>
+        <div class="spec-lbl">Bathrooms</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>directions_car</mat-icon>
+        <div class="spec-val">{{ property.parking || 1 }}</div>
+        <div class="spec-lbl">Parking</div>
+      </div>
+    </section>
+
+    <section class="verification-badges-section stagger-item">
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>person</mat-icon></div>
+        <strong>Direct contact</strong>
+        <span>Reach the lister directly</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>money_off</mat-icon></div>
+        <strong>No brokerage</strong>
+        <span>No Roomzo fee to contact</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>location_on</mat-icon></div>
+        <strong>Visit first</strong>
+        <span>Confirm location on site</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>photo_camera</mat-icon></div>
+        <strong>Owner photos</strong>
+        <span>Match them in person</span>
+      </div>
+    </section>
+
+    <div class="content-layout stagger-item">
+      
+      <div class="details-column">
+        
+        <section class="info-block detail-card desc-roomzo-layout">
+          <div class="desc-content">
+  <h2>Description</h2>
+  <!-- Removed the [class.truncated] logic to always show full content -->
+  <div>
+    <ul *ngIf="formattedDescription.length > 1; else singleDesc" class="custom-bullet-list">
+      <li *ngFor="let line of formattedDescription">{{ line }}</li>
+    </ul>
+    <ng-template #singleDesc>
+      <p>{{ property.description }}</p>
+    </ng-template>
+  </div>
+  <!-- Removed the "See More" button completely -->
+</div>
+
+          <div class="why-roomzo-card">
+            <h3>Why Roomzo?</h3>
+            <ul class="roomzo-benefits">
+              <li><mat-icon>check_circle</mat-icon> Direct Owner Contact</li>
+              <li><mat-icon>check_circle</mat-icon> No Brokerage</li>
+              <li><mat-icon>check_circle</mat-icon> Owner-listed options</li>
+              <li><mat-icon>check_circle</mat-icon> Fast & Reliable Support</li>
+            </ul>
+            <mat-icon class="watermark-icon">security</mat-icon>
+          </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="info-block detail-card" *ngIf="displayConditions.length > 0">
+          <h2>Listing conditions</h2>
+          <div class="conditions-chip-row">
+            <span class="condition-chip" *ngFor="let cond of displayConditions">
+              <mat-icon>{{ cond.icon }}</mat-icon>
+              {{ cond.label }}
+            </span>
+          </div>
+        </section>
+
+        <div class="divider" *ngIf="displayConditions.length > 0"></div>
+
+        <section class="info-block detail-card">
+          <h2>What this place offers</h2>
+          <div class="amenities-grid">
+            <div class="amenity-item" *ngFor="let am of displayAmenities">
+              <mat-icon>{{ am.icon }}</mat-icon> {{ am.label }}
+            </div>
+          </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <section class="info-block detail-card reviews-section">
+          <div class="reviews-header">
+            <div>
+              <h2>Ratings &amp; Reviews</h2>
+              <p class="text-muted" *ngIf="reviewCount > 0">{{ reviewCount }} review{{ reviewCount === 1 ? '' : 's' }}</p>
+              <p class="text-muted" *ngIf="reviewCount === 0">No reviews yet — be the first!</p>
+            </div>
+            <div class="rating-summary" *ngIf="reviewCount > 0">
+              <span class="rating-big">{{ avgRating | number:'1.1-1' }}</span>
+              <div class="rating-stars">
+                <mat-icon *ngFor="let star of getStarArray(avgRating)"
+                  [class.filled]="star <= avgRating">star</mat-icon>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-form-card" *ngIf="isBrowser">
+            <h3>Share your experience</h3>
+            <div class="star-picker">
+              <button type="button" class="star-btn" *ngFor="let star of getStarArray(5)"
+                [class.active]="star <= reviewRating"
+                (click)="setReviewRating(star)"
+                [attr.aria-label]="'Rate ' + star + ' stars'">
+                <mat-icon>{{ star <= reviewRating ? 'star' : 'star_border' }}</mat-icon>
+              </button>
+            </div>
+            <textarea
+              class="review-textarea"
+              [(ngModel)]="reviewComment"
+              rows="3"
+              maxlength="2000"
+              placeholder="Tell others about this room — cleanliness, location, owner behaviour..."
+            ></textarea>
+            <button type="button" class="btn-primary review-submit-btn"
+              [disabled]="isSubmittingReview"
+              (click)="submitReview()">
+              {{ isSubmittingReview ? 'Submitting...' : 'Submit Review' }}
+            </button>
+          </div>
+
+          <div class="reviews-loader" *ngIf="isLoadingReviews">
+            <div class="modern-spinner"></div>
+          </div>
+
+          <div class="reviews-list" *ngIf="!isLoadingReviews && reviews.length > 0">
+            <article class="review-card" *ngFor="let review of reviews">
+              <div class="review-card-header">
+                <div class="reviewer-avatar">{{ (review.reviewerName || 'U').charAt(0) | uppercase }}</div>
+                <div class="reviewer-meta">
+                  <strong>{{ review.reviewerName || 'Roomzo User' }}</strong>
+                  <span class="review-date">{{ formatReviewDate(review.createdOn) }}</span>
+                </div>
+                <div class="review-stars-inline">
+                  <mat-icon *ngFor="let star of getStarArray(review.rating)"
+                    [class.filled]="star <= review.rating">star</mat-icon>
+                </div>
+              </div>
+              <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
+            </article>
+          </div>
+        </section>
+
+        <div class="divider" *ngIf="property.guidebook"></div>
+
+        <section class="info-block detail-card guidebook-section" *ngIf="property.guidebook">
+          <div class="guidebook-group" *ngIf="property.guidebook.rules?.length > 0 || property.guidebook.customRules">
+            <h2>House Rules</h2>
+            <ul class="rules-list" *ngIf="property.guidebook.rules?.length > 0">
+              <li *ngFor="let rule of property.guidebook.rules">
+                <mat-icon class="rule-icon">assignment</mat-icon>
+                <span>{{ rule.ruleText || rule }}</span>
+              </li>
+            </ul>
+            <div class="custom-note" *ngIf="property.guidebook.customRules">
+              <mat-icon>format_quote</mat-icon>
+              <p>{{ property.guidebook.customRules }}</p>
+            </div>
+          </div>
+
+          <div class="guidebook-group" *ngIf="property.guidebook.nearbyPlaces?.length > 0">
+            <h2 style="margin-top: 32px;">What's nearby</h2>
+            <div class="nearby-grid">
+              <div class="nearby-card" *ngFor="let place of property.guidebook.nearbyPlaces">
+                <div class="place-icon">
+                  <mat-icon *ngIf="place.type === 'transport'">train</mat-icon>
+                  <mat-icon *ngIf="place.type === 'restaurant'">restaurant</mat-icon>
+                  <mat-icon *ngIf="place.type === 'hospital'">local_hospital</mat-icon>
+                  <mat-icon *ngIf="!['transport','restaurant','hospital'].includes(place.type)">place</mat-icon>
+                </div>
+                <div class="place-details">
+                  <span class="place-name">{{ place.name }}</span>
+                  <span class="place-dist">{{ place.distance }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <div class="divider"></div>
+        <section class="info-block detail-card safety-section">
+          <div class="safety-card">
+            <div class="safety-header">
+              <mat-icon class="shield-icon">gpp_maybe</mat-icon>
+              <h3>Tenant Safety Tips</h3>
+            </div>
+            <ul class="safety-list">
+              <li><mat-icon>verified_user</mat-icon> Meet in a public place first</li>
+              <li><mat-icon>money_off</mat-icon> Never pay advance without visiting the property</li>
+              <li><mat-icon>fact_check</mat-icon> Verify owner and property details carefully</li>
+              <li><mat-icon>history_edu</mat-icon> Read the agreement before signing</li>
+              <li><mat-icon>psychology</mat-icon> Trust your instincts and stay alert</li>
+            </ul>
+          </div>
+        </section>
+        <div class="divider"></div>
+        <section class="info-block detail-card">
+          <div class="map-header-row">
+            <div>
+              <h2>Where you'll be</h2>
+              <p class="text-muted">{{ property.city }}, {{ property.state }}</p>
+            </div>
+            <button class="btn-outline map-nav-btn" (click)="openGoogleMaps()" *ngIf="property.latitude || property.city">
+              <mat-icon>directions</mat-icon> Navigate
+            </button>
+          </div>
+
+          <div class="map-container">
+            <iframe *ngIf="mapUrl" [src]="mapUrl"></iframe>
+            <div class="map-loader" *ngIf="!mapUrl">
+              <div class="modern-spinner"></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="mobile-owner-card mobile-only" *ngIf="isContactAvailable()">
+          <div class="agent-profile">
+            <div class="avatar">{{ ownerName.charAt(0) | uppercase }}</div>
+            <div class="agent-info-text">
+              <p class="listed-by">Listed by</p>
+              <h4>{{ ownerName }}</h4>
+            </div>
+          </div>
+          <button type="button" class="btn-primary btn-contact-inline" (click)="contactAgent()">Contact Owner</button>
+        </div>
+
+        <div class="rented-notice mobile-only" *ngIf="isPropertyRented()">
+          <mat-icon>info</mat-icon>
+          <p>This property has been marked as rented by the owner. Contact options are unavailable.</p>
+        </div>
+      </div>
+
+      <div class="sidebar-column">
+        <div class="booking-card">
+          <div class="price-header">
+            <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
+          </div>
+          
+          <div class="status-tag" [ngClass]="{'available': !isPropertyRented(), 'rented': isPropertyRented()}">
+            <mat-icon>{{ isPropertyRented() ? 'block' : 'check_circle' }}</mat-icon>
+            {{ getAvailabilityLabel() }}
+          </div>
+          
+          <button class="btn-primary full-width mt-16" 
+                  *ngIf="isContactAvailable()"
+                  [ngClass]="{'pulse-highlight': highlightContact}" 
+                  (click)="contactAgent()">
+            Contact Owner
+          </button>
+
+          <div class="desktop-contact-actions mt-16" *ngIf="isContactAvailable()">
+            <button class="btn-outline dt-call-btn" (click)="handleContactAction('call')">
+              <mat-icon>call</mat-icon> Call
+            </button>
+            <button class="btn-outline dt-whatsapp-btn" (click)="handleContactAction('whatsapp')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+              </svg>
+              WhatsApp
+            </button>
+          </div>
+
+          <div class="rented-notice desktop-only mt-16" *ngIf="isPropertyRented()">
+            <mat-icon>info</mat-icon>
+            <p>This property has been marked as rented. Contact options are unavailable.</p>
+          </div>
+
+          <button class="btn-outline full-width mt-16" (click)="scheduleTour()" *ngIf="isContactAvailable()">Schedule a Tour</button>
+        </div>
+
+        <div class="agent-card">
+          <div class="agent-profile">
+            <div class="avatar">{{ ownerName.charAt(0) | uppercase }}</div>
+            <div class="agent-info-text">
+              <p class="listed-by">Listed By</p>
+              <h4>{{ ownerName }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <section class="similar-section" *ngIf="similarProperties.length > 0">
+      <h2>Nearby properties you might like</h2>
+      <div class="similar-grid">
+        <a [routerLink]="['/room', home.id]" class="similar-card" *ngFor="let home of similarProperties">
+          <img [src]="(home.photos && home.photos.length > 0) ? home.photos[0].photoUrl : 'assets/placeholder.jpg'" [alt]="generatePropertyAltText(home)" loading="lazy" decoding="async" width="300" height="225">
+          <div class="sim-details">
+            <div class="sim-price">{{ formatPrice(home.rentAmount) }}<span>/mo</span></div>
+            <h4>{{ home.propertyType }} in {{ home.street  }}</h4>
+            <p>{{ home.bedrooms }} Beds • {{ home.bathrooms }} Baths</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <app-related-searches [cityName]="property.city"></app-related-searches>
+
+  </div> 
+</div>
+
+<div class="mobile-bottom-bar mobile-only sticky-contact-actions" *ngIf="!isLoading && property && isContactAvailable()">
+  <button class="action-btn btn-call" (click)="handleContactAction('call')">
+    <mat-icon>call</mat-icon> Call Owner
+  </button>
+  <button class="action-btn btn-whatsapp" (click)="handleContactAction('whatsapp')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+    </svg>
+    WhatsApp
+  </button>
+</div>
+
+<div class="not-found-state" *ngIf="!isLoading && !property">
+  <mat-icon>search_off</mat-icon>
+  <h2>Property not found</h2>
+  <button class="btn-primary" routerLink="/explore-listing">Back to Explore</button>
+</div>
+
+<div class="modal-overlay contact-modal-overlay" *ngIf="showContactModal" (click)="closeContactModal()">
+  <div class="modal-content contact-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Contact Details</h3>
+      <button class="close-btn" (click)="closeContactModal()" type="button" aria-label="Close"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="contact-modal-loader" *ngIf="isLoadingContact">
+        <div class="modern-spinner"></div>
+        <p>Loading owner contact…</p>
+      </div>
+
+      <ng-container *ngIf="!isLoadingContact">
+      <div class="mini-safety-alert">
+        <mat-icon>warning</mat-icon>
+        <p><strong>Protect yourself:</strong> Never transfer money or pay an advance without visiting the property and meeting the owner.</p>
+      </div>
+      <div class="owner-profile">
+        <div class="avatar-large">{{ (ownerDetails.name || 'O').charAt(0) | uppercase }}</div>
+        <h4>{{ ownerDetails.name || 'Property Owner' }}</h4>
+        <p class="verified-badge"><mat-icon>verified</mat-icon> Verified Owner</p>
+      </div>
+      
+      <div class="contact-info-box">
+        <div class="info-row" *ngIf="ownerDetails.propertyPhone || ownerDetails.ownerPhone">
+          <mat-icon>phone</mat-icon>
+          <div class="info-row-text">
+            <label>Property Contact</label>
+            <a [href]="'tel:' + (ownerDetails.propertyPhone || ownerDetails.ownerPhone)" class="contact-link">{{ ownerDetails.propertyPhone || ownerDetails.ownerPhone }}</a>
+          </div>
+        </div>
+
+        <div class="divider-thin" *ngIf="(ownerDetails.propertyPhone || ownerDetails.ownerPhone) && ownerDetails.email"></div>
+        
+        <div class="info-row" *ngIf="ownerDetails.email">
+          <mat-icon>email</mat-icon>
+          <div class="info-row-text">
+            <label>Email Address</label>
+            <a [href]="'mailto:' + ownerDetails.email" class="contact-link contact-link--email">{{ ownerDetails.email }}</a>
+          </div>
+        </div>
+      </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showReportModal" (click)="closeReportModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Report Property</h3>
+      <button class="close-btn" (click)="closeReportModal()"><mat-icon>close</mat-icon></button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="reasonSelect">Why are you reporting this property?</label>
+        <select id="reasonSelect" [(ngModel)]="reportReason" class="form-control">
+          <option value="" disabled selected>Select a reason</option>
+          <option *ngFor="let reason of reportReasonsList" [value]="reason">{{ reason }}</option>
+        </select>
+      </div>
+
+      <div class="form-group mt-16">
+        <label for="descriptionText">Additional Details (Optional)</label>
+        <textarea id="descriptionText" [(ngModel)]="reportDescription" class="form-control" rows="4" placeholder="Please provide more context..."></textarea>
+      </div>
+
+      <button class="btn-primary full-width mt-24 report-submit-btn" 
+              (click)="submitReport()" 
+              [disabled]="!reportReason">
+        Submit Report
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  class="image-zoom-overlay mobile-only"
+  *ngIf="zoomViewerOpen"
+  (click)="closeZoomViewer()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Zoomed property photo"
+>
+  <div class="zoom-top-bar" (click)="$event.stopPropagation()">
+    <button type="button" class="zoom-close-btn" (click)="closeZoomViewer()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+    <span class="zoom-counter">{{ zoomPhotoIndex + 1 }} / {{ getDisplayPhotos().length }}</span>
+    <span class="zoom-top-spacer" aria-hidden="true"></span>
+  </div>
+
+  <div
+    class="zoom-stage"
+    (click)="$event.stopPropagation()"
+    (touchstart)="onZoomTouchStart($event)"
+    (touchmove)="onZoomTouchMove($event)"
+    (touchend)="onZoomTouchEnd($event)"
+    (touchcancel)="onZoomTouchEnd($event)"
+  >
+    <img
+      class="zoom-image"
+      [src]="optimizeImageUrl(getZoomPhotoUrl())"
+      [alt]="generatePropertyAltText(property, zoomPhotoIndex)"
+      [style.transform]="zoomTransform"
+      draggable="false"
+    />
+  </div>
+
+  <p class="zoom-hint-text" (click)="$event.stopPropagation()">Pinch or double-tap to zoom · Swipe for next photo</p>
+</div>
+
+<app-safety-consent-bottom-sheet
+      [isOpen]="isConsentModalOpen()"
+      [pendingAction]="pendingAction()"
+      (accept)="onConsentAccepted($event)"
+      (closeModal)="isConsentModalOpen.set(false)"
+    />

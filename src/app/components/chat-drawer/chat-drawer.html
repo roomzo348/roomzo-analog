@@ -1,0 +1,87 @@
+<div class="chat-overlay" [class.open]="isOpen" (click)="closeDrawer()"></div>
+
+<aside class="chat-drawer" [class.open]="isOpen">
+  <header class="drawer-header">
+    <div class="header-top">
+      <h2>Messages</h2>
+      <button class="close-btn" (click)="closeDrawer()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    @if (!activeChatUserId) {
+      <div class="chat-tabs">
+        <button [class.active]="activeTab === 'accepted'" (click)="activeTab = 'accepted'">
+          Accepted
+        </button>
+        <button [class.active]="activeTab === 'requests'" (click)="activeTab = 'requests'">
+          Requests
+          @if (requestCount > 0) {
+            <span class="badge">{{ requestCount }}</span>
+          }
+        </button>
+      </div>
+    }
+  </header>
+
+  @if (!activeChatUserId) {
+    <div class="conversation-list">
+      @if (loading) {
+        <div class="loader loading-container">Loading chats...</div>
+      } @else {
+        @for (conv of filteredConversations; track conv.conversationId) {
+          <div class="conv-item" (click)="openChat(conv)">
+            <div class="avatar">{{ conv.otherUserName.charAt(0) | uppercase }}</div>
+            <div class="conv-details">
+              <h4>{{ conv.otherUserName }}</h4>
+              <p class="last-msg">{{ conv.lastMessageContent || 'Started a conversation' }}</p>
+            </div>
+            @if (conv.unreadCount > 0) {
+              <div class="unread-dot"></div>
+            }
+          </div>
+        }
+        @if (filteredConversations.length === 0) {
+          <div class="empty-state">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            <p>No {{ activeTab }} messages yet.</p>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  @if (activeChatUserId) {
+    <div class="active-chat-view">
+      <div class="chat-sub-header">
+        <button class="back-btn" (click)="backToList()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h4>{{ activeChatName }}</h4>
+      </div>
+
+      @if (activeTab === 'requests' && !hasAcceptedCurrentChat) {
+        <div class="request-banner">
+          <p>This is a new request. Reply to accept.</p>
+          <button (click)="acceptRequest()">Accept Request</button>
+        </div>
+      }
+
+      <div class="messages-container" #scrollMe>
+        @for (msg of currentMessages; track msg.id) {
+          <div class="message-bubble" [class.sent]="msg.senderId === currentUserId" [class.received]="msg.senderId !== currentUserId">
+            <p>{{ msg.content }}</p>
+            <span class="time">{{ msg.createdAt | date:'shortTime' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." (keyup.enter)="sendMessage()">
+        <button class="send-btn" [disabled]="!newMessage.trim()" (click)="sendMessage()">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</aside>

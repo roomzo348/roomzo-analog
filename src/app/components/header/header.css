@@ -1,0 +1,554 @@
+/* ========================================================
+   DESKTOP HEADER - TRANSPARENT TO SOLID
+======================================================== */
+.rz-header {
+  position: fixed; /* Fixes it to the top so hero banner sits behind it */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: transparent;
+  transition: all 0.3s ease-in-out;
+  padding: 12px 0; /* Slightly taller when transparent */
+}
+
+/* --- THE SCOLL STATE (Solid Background) --- */
+.rz-header.scrolled {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 6px 0; /* Shrinks slightly on scroll */
+}
+
+.rz-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  max-width: var(--rz-max-width, 1200px);
+  margin: 0 auto;
+}
+
+/* --- Logo Styling --- */
+.brand .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans); /* Use sans-serif for brand if matching image */
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #ffffff; /* White initially */
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.brand .logo mat-icon { font-size: 28px; width: 28px; height: 28px; }
+
+/* Switch logo to teal when scrolled */
+.rz-header.scrolled .brand .logo {
+  color: var(--rz-primary); 
+}
+
+/* --- Center Navigation --- */
+.nav-desktop {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.nav-desktop a {
+  color: #ffffff; /* White initially */
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: color 0.2s;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4); /* Makes text readable over bright images */
+}
+
+/* Switch links to dark grey when scrolled */
+.rz-header.scrolled .nav-desktop a {
+  color: var(--rz-text-main);
+  text-shadow: none;
+}
+.rz-header.scrolled .nav-desktop a:hover {
+  color: var(--rz-primary);
+}
+
+/* --- Right Actions (Login & Button) --- */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.login-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.rz-header.scrolled .login-link {
+  color: var(--rz-text-main);
+  text-shadow: none;
+}
+.rz-header.scrolled .login-link:hover {
+  color: var(--rz-primary);
+}
+
+/* List Property Button matches image */
+.list-btn {
+  background: var(--rz-primary);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: var(--rz-radius-sm, 8px);
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.list-btn:hover { background: var(--rz-primary-hover); }
+
+/* --- Profile Dropdown (Logged In State) --- */
+.auth-desktop { display: flex; align-items: center; }
+.profile-menu { position: relative; }
+
+.profile-btn {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 4px 8px 4px 4px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+}
+
+.profile-btn--link {
+  padding: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-btn--link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
+.rz-header.scrolled .profile-btn {
+  background: none;
+  border-color: #e5e7eb;
+  color: var(--rz-text-main);
+}
+
+.avatar-circle {
+  width: 32px; height: 32px;
+  background: var(--rz-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: bold;
+}
+
+.dropdown {
+  position: absolute;
+  top: 130%; right: 0;
+  width: 220px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  z-index: 1000;
+  padding: 8px 0;
+}
+.user-info { padding: 12px 16px; display: flex; flex-direction: column; }
+.user-info strong { font-size: 14px; color: #111827; }
+.user-info span { font-size: 12px; color: #6b7280; }
+.divider { height: 1px; background: #e5e7eb; margin: 4px 0; }
+.menu-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 10px 16px; border: none; background: none;
+  text-align: left; font-size: 14px; color: #374151; cursor: pointer; text-decoration: none;
+}
+.menu-item:hover { background: #f3f4f6; color: var(--rz-primary); }
+.menu-item.logout { color: #ef4444; }
+
+
+/* ========================================================
+   MOBILE APP RESPONSIVENESS (Max-width: 900px)
+   (Keep your existing mobile styles untouched below)
+======================================================== */
+.mobile-bottom-nav { display: none; }
+.mobile-dropdown-overlay { display: none; }
+
+@media (max-width: 900px) {
+  .nav-desktop, .login-link, .list-btn { display: none !important; }
+  
+  .rz-header {
+    background: transparent;
+    padding: 12px 0;
+  }
+  .rz-header.scrolled {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  /* Rest of your Mobile Nav CSS goes here exactly as before */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; 
+    left: 0; 
+    width: 100%;
+    background: #ffffff;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08); /* Stronger shadow to separate from content */
+    z-index: 1000;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 10px 16px;
+    /* CRITICAL: Safe area for iPhones */
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    text-decoration: none; color: #6b7280; font-size: 11px; font-weight: 600; flex: 1; gap: 4px; cursor: pointer;
+  }
+  .nav-item mat-icon { font-size: 26px; width: 26px; height: 26px; }
+  .nav-item.active-link { color: var(--rz-primary); }
+  .center-action { position: relative; justify-content: flex-end; }
+  .center-action span { margin-top: 30px; } 
+  .fab-button {
+    background: var(--rz-primary); color: white;
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
+    box-shadow: 0 4px 12px rgba(25, 97, 83, 0.3); border: 5px solid #ffffff; transition: transform 0.2s;
+  }
+  .fab-button mat-icon { font-size: 32px; width: 32px; height: 32px; }
+  .fab-button:active { transform: translateX(-50%) scale(0.95); }
+  
+  /* Mobile dropdown overlay rules... */
+  .mobile-dropdown-overlay { display: block; position: fixed; bottom: 80px; left: 0; width: 100%; z-index: 999; }
+  .overlay-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 1000; }
+  .mobile-dropdown { background: white; margin: 0 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; z-index: 1001; padding: 12px 0; animation: slideUp 0.3s ease-out; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+}
+
+/* --- Desktop Profile & Dropdown --- */
+.user-profile-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50px;
+  transition: background 0.2s;
+}
+.user-profile-container:hover { background: #f1f5f9; }
+
+.avatar-circle {
+  width: 40px; height: 40px;
+  background: var(--rz-primary); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem;
+  overflow: hidden;
+}
+
+.avatar-circle.has-photo {
+  background: #e2e8f0;
+}
+
+.avatar-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropdown-arrow { color: var(--rz-text-muted); transition: transform 0.3s ease; }
+.dropdown-arrow.rotated { transform: rotate(180deg); color: var(--rz-primary); }
+
+/* The Floating Menu */
+.dropdown-menu {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  background: white; width: 240px; border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  border: 1px solid var(--rz-border);
+  opacity: 0; visibility: hidden; transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000; overflow: hidden;
+}
+.dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.dropdown-header { padding: 16px; display: flex; flex-direction: column; }
+.dropdown-header strong { font-size: 1.05rem; color: var(--rz-text-main); }
+.dropdown-header span { font-size: 0.85rem; color: var(--rz-text-muted); }
+
+.divider { height: 1px; background: var(--rz-border); width: 100%; }
+
+.dropdown-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; color: var(--rz-text-main);
+  text-decoration: none; font-weight: 500; font-size: 0.95rem;
+  background: transparent; border: none; width: 100%; text-align: left;
+  cursor: pointer; transition: 0.2s; font-family: inherit;
+}
+.dropdown-item mat-icon { font-size: 20px; width: 20px; height: 20px; color: var(--rz-text-muted); }
+.dropdown-item:hover { background: #f8fafc; color: var(--rz-primary); }
+.dropdown-item:hover mat-icon { color: var(--rz-primary); }
+
+.text-danger { color: #ef4444; }
+.text-danger mat-icon { color: #ef4444; }
+.text-danger:hover { background: #fef2f2; color: #dc2626; }
+.text-danger:hover mat-icon { color: #dc2626; }
+
+/* Add/Update these in your header.css */
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  /* Make the mobile dropdown look like a bottom sheet */
+  .mobile-dropdown {
+    position: fixed;
+    bottom: 80px; 
+    left: 16px;
+    right: 16px;
+    background: white;
+    border-radius: 20px;
+    z-index: 1001;
+    overflow: hidden;
+  }
+  /* --- Free Badge Indicator --- */
+  .free-badge {
+    position: absolute;
+    top: -46px; /* Sits right at the top edge of the FAB */
+    left: 50%;
+    margin-left: 12px; /* Pushes it slightly to the right */
+    background: linear-gradient(135deg, #0f766e, #0d9488); /* Matches theme */
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+    border: 2px solid #ffffff; /* Gives it a cutout effect against the background */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(15, 118, 110, 0.3);
+    z-index: 1002;
+    pointer-events: none; /* Prevents it from blocking clicks */
+    animation: badgeFloat 2.5s ease-in-out infinite;
+  }
+
+  /* Gentle floating animation to draw attention */
+  @keyframes badgeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+}
+
+.dropdown-icon {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-icon.rotated {
+  transform: rotate(180deg);
+}
+/* --- New Premium Floating Menu Wrapper --- */
+/* --- Transparent Wrapper --- */
+.speed-dial-wrapper {
+  position: fixed;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px)); /* Floats cleanly above the navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px; /* Forces a wide, clear gap between the two icons */
+  z-index: 1001;
+  pointer-events: none; /* Lets clicks pass through the empty space */
+}
+
+/* --- Individual Floating Buttons --- */
+.mini-fab {
+  pointer-events: auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px; /* <-- CHANGED: Reduced from 8px to 2px for a tight, cohesive fit */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+/* --- Labels Floating Below --- */
+.mini-fab-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1; /* <-- ADDED: Removes invisible padding above and below the text */
+  color: #ffffff; 
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6); 
+  opacity: 0;
+  animation: popOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation-delay: 0.05s; 
+}
+
+/* The actual circular icons */
+.mini-fab-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* The "Pop" animation */
+  animation: popOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Specific Icon Accents */
+.flatmate-btn .mini-fab-icon { color: #059669; }
+.property-btn .mini-fab-icon { color: var(--rz-primary, #2563eb); }
+.mini-fab-icon mat-icon { font-size: 26px; width: 26px; height: 26px; }
+
+/* Shrink slightly when tapped */
+.mini-fab:active .mini-fab-icon {
+  transform: scale(0.9);
+}
+
+/* --- Labels Floating Below --- */
+
+
+/* --- Animations & Backdrop --- */
+@keyframes popOut {
+  0% { transform: translateY(20px) scale(0.5); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.fab-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4); /* Slightly darker to make the white icons stand out */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  animation: fadeInBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* The red close button */
+.fab-button.fab-active {
+  z-index: 1001;
+  transform: translateX(-50%) rotate(135deg);
+  background: #ef4444 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+}
+/* ========================================================
+   NEW CHAT UI CLASSES 
+======================================================== */
+/* ========================================================
+   CREATIVE CHAT BUTTON – TEAL GRADIENT (RoomZo Brand)
+======================================================== */
+
+/* Mobile Chat Button */
+.mobile-chat-btn {
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  border: none;
+  color: white !important;
+  position: relative;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
+}
+
+.mobile-chat-btn mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.mobile-chat-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
+}
+
+/* Desktop Chat Button */
+.desktop-chat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: white !important;
+  transition: 0.2s;
+  padding: 8px 16px;
+  border-radius: 40px;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+}
+
+.desktop-chat-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15, 118, 110, 0.3);
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+}
+
+.desktop-chat-link mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+/* Unread Badge – pulsating red dot */
+.mobile-chat-btn .unread-badge,
+.desktop-chat-link .unread-badge-desktop {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+  animation: pulse 1.2s infinite;
+}
+
+.desktop-chat-link .unread-badge-desktop {
+  position: relative;
+  top: -4px;
+  right: 0;
+  margin-left: 4px;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* Hide desktop chat button on mobile screens */
+@media (max-width: 900px) {
+  .desktop-chat-link {
+    display: none;
+  }
+}

@@ -1,0 +1,219 @@
+<div class="profile-page">
+
+  <div class="loading-block" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading your profile…</p>
+  </div>
+
+  <div class="alert-banner" *ngIf="profileLoadWarning && !isLoading">
+    <mat-icon>info</mat-icon>
+    <p>{{ profileLoadWarning }}</p>
+  </div>
+
+  <!-- Hub view -->
+  <section class="profile-hub" *ngIf="!isLoading && viewMode === 'hub'">
+    <div class="profile-hero">
+      <div class="avatar-wrap">
+        <img *ngIf="profilePhotoUrl; else initialsAvatar" [src]="profilePhotoUrl" alt="Profile photo" class="avatar-img" />
+        <ng-template #initialsAvatar>
+          <span class="avatar-initials">{{ initials }}</span>
+        </ng-template>
+        <button type="button" class="avatar-edit-btn" (click)="openEditSidebar()" aria-label="Edit profile photo">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+
+      <h1>{{ displayName }}</h1>
+
+      <div class="profile-meta" *ngIf="profile?.usertype || profile?.email">
+        <span class="user-type-chip" *ngIf="profile?.usertype">{{ profile?.usertype }}</span>
+        <span class="meta-dot" *ngIf="profile?.usertype && profile?.email">·</span>
+        <span class="meta-email" *ngIf="profile?.email">{{ profile?.email }}</span>
+      </div>
+
+      <div class="profile-progress-card">
+        <div class="progress-top">
+          <div class="progress-title-wrap">
+            <mat-icon class="progress-icon">account_circle</mat-icon>
+            <span class="progress-title">Profile progress</span>
+          </div>
+          <span class="progress-pct" [class.complete]="profileCompletionPercent === 100">
+            {{ profileCompletionPercent }}%
+          </span>
+        </div>
+
+        <div class="progress-track" role="progressbar"
+          [attr.aria-valuenow]="profileCompletionPercent"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Profile ' + profileCompletionPercent + ' percent complete'">
+          <div class="progress-fill" [style.width.%]="profileCompletionPercent"></div>
+        </div>
+
+        <p class="progress-hint" *ngIf="profileCompletionPercent < 100">
+          Add <strong>{{ profileIncompleteHint }}</strong> to complete your profile.
+        </p>
+
+        <button type="button" class="progress-cta" *ngIf="profileCompletionPercent < 100" (click)="openEditSidebar()">
+          Complete profile
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <p class="progress-done" *ngIf="profileCompletionPercent === 100">
+          <mat-icon>verified</mat-icon>
+          Your profile is fully complete
+        </p>
+      </div>
+    </div>
+
+    <div class="action-cards">
+      <button type="button" class="action-card" (click)="openEditSidebar()">
+        <span class="action-icon"><mat-icon>person</mat-icon></span>
+        <span class="action-label">My Profile</span>
+      </button>
+
+      <button type="button" class="action-card" (click)="openSavedView()">
+        <span class="action-icon"><mat-icon>bookmark</mat-icon></span>
+        <span class="saved-badge" *ngIf="favoriteListings.length">{{ favoriteListings.length }}</span>
+        <span class="action-label">Saved</span>
+      </button>
+    </div>
+
+    <div class="menu-list">
+      <a routerLink="/my-listings" class="menu-row" *ngIf="isOwner">
+        <span class="menu-icon"><mat-icon>list_alt</mat-icon></span>
+        <span class="menu-text">Manage Listings</span>
+        <mat-icon class="menu-chevron">chevron_right</mat-icon>
+      </a>
+
+      <button type="button" class="menu-row menu-row--logout" (click)="logout()">
+        <span class="menu-icon menu-icon--logout"><mat-icon>logout</mat-icon></span>
+        <span class="menu-text">Logout</span>
+        <mat-icon class="menu-chevron">chevron_right</mat-icon>
+      </button>
+    </div>
+  </section>
+
+  <!-- Saved view -->
+  <section class="saved-view" *ngIf="!isLoading && viewMode === 'saved'">
+    <header class="saved-header">
+      <button type="button" class="back-btn" (click)="viewMode = 'hub'" aria-label="Back to profile">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h2>Saved properties</h2>
+        <p>Properties you've bookmarked for later.</p>
+      </div>
+    </header>
+
+    <div class="empty-mini" *ngIf="!favoriteListings.length">
+      <mat-icon>favorite_border</mat-icon>
+      <p>No saved properties yet. Browse listings and tap the heart to save.</p>
+      <a routerLink="/explore-listing" class="btn-outline">Browse rentals</a>
+    </div>
+
+    <div class="favorites-grid" *ngIf="favoriteListings.length">
+      <app-listing-card
+        *ngFor="let listing of favoriteListings"
+        [listing]="listing"
+        [showActions]="false"
+        (view)="viewProperty($event)">
+      </app-listing-card>
+    </div>
+  </section>
+
+  <!-- Edit profile sidebar -->
+  <div
+    class="edit-sidebar-backdrop"
+    *ngIf="isEditSidebarOpen"
+    (click)="closeEditSidebar()"
+    [class.visible]="isEditSidebarOpen">
+  </div>
+
+  <aside class="edit-sidebar" [class.open]="isEditSidebarOpen" aria-label="Edit profile">
+    <header class="sidebar-header">
+      <div>
+        <h2>Edit Profile</h2>
+        <p>Update your account information to keep your profile current.</p>
+        <div class="sidebar-progress">
+          <div class="sidebar-progress-row">
+            <span>{{ profileCompletionPercent }}% complete</span>
+          </div>
+          <div class="progress-track progress-track--compact">
+            <div class="progress-fill" [style.width.%]="profileCompletionPercent"></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="sidebar-close" (click)="closeEditSidebar()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="sidebar-photo-block">
+      <div class="sidebar-avatar-wrap">
+        <img *ngIf="profilePhotoPreview || profilePhotoUrl; else sidebarInitials" [src]="profilePhotoPreview || profilePhotoUrl" alt="Profile preview" />
+        <ng-template #sidebarInitials>
+          <span class="sidebar-avatar-initials">{{ initials }}</span>
+        </ng-template>
+      </div>
+      <div class="sidebar-photo-actions">
+        <label class="photo-upload-btn">
+          <input type="file" accept="image/*" (change)="onPhotoSelected($event)" [disabled]="isUploadingPhoto" hidden />
+          <mat-icon>photo_camera</mat-icon>
+          {{ isUploadingPhoto ? 'Uploading…' : 'Add photo (optional)' }}
+        </label>
+        <button type="button" class="photo-remove-btn" *ngIf="profilePhotoPreview || profilePhotoUrl" (click)="removePhoto()" [disabled]="isUploadingPhoto">
+          Remove
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="sidebar-form">
+      <label class="field">
+        <span>Full name</span>
+        <input type="text" formControlName="name" placeholder="Your full name" autocomplete="name" />
+      </label>
+
+      <label class="field">
+        <span>Display name</span>
+        <input type="text" formControlName="displayName" placeholder="Shown on your account" />
+      </label>
+
+      <label class="field">
+        <span>Mobile number</span>
+        <input type="tel" formControlName="phone" placeholder="10-digit mobile" autocomplete="tel" inputmode="tel" />
+      </label>
+
+      <label class="field field-readonly-wrap">
+        <span>Email</span>
+        <input type="email" formControlName="email" class="field-readonly" readonly tabindex="-1" aria-readonly="true" />
+        <small class="field-hint">Email is linked to your login and cannot be changed here.</small>
+      </label>
+
+      <label class="field">
+        <span>Age</span>
+        <input type="number" formControlName="age" min="13" max="120" placeholder="e.g. 24" inputmode="numeric" />
+      </label>
+
+      <label class="field">
+        <span>City</span>
+        <input type="text" formControlName="city" placeholder="e.g. Prayagraj" />
+      </label>
+
+      <label class="field">
+        <span>Address</span>
+        <textarea formControlName="address" rows="3" placeholder="House no., street, locality"></textarea>
+      </label>
+
+      <label class="field">
+        <span>State</span>
+        <input type="text" formControlName="state" placeholder="e.g. Uttar Pradesh" />
+      </label>
+
+      <button type="submit" class="btn-save" [disabled]="isSaving || profileForm.invalid || isUploadingPhoto">
+        <mat-icon>save</mat-icon>
+        {{ isSaving ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </form>
+  </aside>
+</div>

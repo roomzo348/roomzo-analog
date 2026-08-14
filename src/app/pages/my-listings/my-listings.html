@@ -1,0 +1,180 @@
+<div class="page-container">
+
+    <header class="dashboard-header">
+        <div class="header-main">
+            <div class="header-text">
+                <span class="header-kicker mobile-only">Owner dashboard</span>
+                <h1>{{ activeTab === 'favorites' ? 'Saved Properties' : 'My Properties' }}</h1>
+                <p class="header-desc">Manage your listings, update statuses, and track performance.</p>
+                <p class="header-meta mobile-only" *ngIf="!isLoading">
+                    <ng-container *ngIf="activeTab === 'my-properties'">{{ listings.length }} listing{{ listings.length === 1 ? '' : 's' }}</ng-container>
+                    <ng-container *ngIf="activeTab === 'favorites'">{{ favoriteListings.length }} saved</ng-container>
+                </p>
+            </div>
+            <a routerLink="/list-property" class="btn-add-listing" aria-label="Add new listing">
+                <mat-icon>add</mat-icon>
+                <span>Add Listing</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="tab-switcher" role="tablist" aria-label="Portfolio sections">
+      <button class="tab-btn" [class.active]="activeTab === 'my-properties'" (click)="switchTab('my-properties')">
+        <mat-icon>real_estate_agent</mat-icon>
+        <span class="tab-label-full">My Properties</span>
+        <span class="tab-label-short">Listings</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'favorites'" (click)="switchTab('favorites')">
+        <mat-icon>favorite</mat-icon>
+        <span class="tab-label-full">Favorites</span>
+        <span class="tab-label-short">Saved</span>
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="modern-spinner"></div>
+        <p>Loading your portfolio...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length === 0">
+        <div class="empty-icon-circle">
+            <mat-icon>holiday_village</mat-icon>
+        </div>
+        <h3>No properties listed yet</h3>
+        <p>Get started by listing your first property today. It's fast and easy!</p>
+        <button class="btn-primary mt-4" routerLink="/list-property">List Your Property</button>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length === 0">
+      <div class="empty-icon-circle">
+        <mat-icon>favorite_border</mat-icon>
+      </div>
+      <h3>No favorites saved yet</h3>
+      <p>Save properties you like and they will appear here for quick access.</p>
+    </div>
+
+    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length > 0">
+
+        <div class="property-card" *ngFor="let prop of listings">
+
+            <div class="card-image" (click)="editProperty(prop.id)" style="cursor: pointer;">
+                <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
+                
+                <div class="status-badge" [ngClass]="'badge-' + getStatusLabel(prop.isRented).toLowerCase()">
+                    <span class="dot"></span> {{ getStatusLabel(prop.isRented) | titlecase }}
+                </div>
+
+                <!-- Posted Date Badge -->
+                <div class="posted-date-badge">
+                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
+                </div>
+            </div>
+
+            <div class="card-content">
+                <div class="header-row">
+                    <h3>{{ prop.propertyName || prop.propertyType }}</h3>
+                    <span class="price">{{ formatPrice(prop.rentAmount) }}</span>
+                </div>
+
+                <p class="location">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ prop.city }}, {{ prop.state }}</span>
+                </p>
+
+                <div class="listing-insights" *ngIf="activeTab === 'my-properties'">
+                  <span class="insight-chip">
+                    <mat-icon>visibility</mat-icon>
+                    {{ getListingInsights(prop.id).views }} views
+                  </span>
+                  <span class="insight-chip">
+                    <mat-icon>call</mat-icon>
+                    {{ getListingInsights(prop.id).contacts }} contacts
+                  </span>
+                  <span class="insight-chip">
+                    <mat-icon>share</mat-icon>
+                    {{ getListingInsights(prop.id).shares }} shares
+                  </span>
+                </div>
+
+                <div class="stats-row">
+                    <span><mat-icon>bed</mat-icon> {{ prop.bedrooms }} Bed</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize }} SqFt</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>home</mat-icon> {{ prop.propertyType }}</span>
+                </div>
+
+               <div class="action-row">
+                    
+                    <mat-select 
+    [value]="prop.isRented" 
+    (selectionChange)="changeStatus(prop, $event)"
+    class="custom-status-select"
+    [ngClass]="'select-' + getStatusLabel(prop.isRented).toLowerCase()"
+    panelClass="custom-select-panel">
+    <mat-option [value]="0">Active</mat-option>
+    <mat-option [value]="1">Rented</mat-option>
+    <mat-option [value]="2">Hidden</mat-option>
+</mat-select>
+
+                  <div class="btn-group">
+    <a [routerLink]="['/room', prop.id]" class="btn-icon" title="View Property">
+        <mat-icon>visibility</mat-icon>
+    </a>
+    
+    <button class="btn-icon edit" (click)="editProperty(prop.id)" title="Edit Listing">
+        <mat-icon>edit</mat-icon>
+    </button>
+
+    <button class="btn-icon delete" (click)="deleteProperty(prop.id)" title="Delete Listing">
+        <mat-icon>delete_outline</mat-icon>
+    </button>
+</div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length > 0">
+        <div class="property-card" *ngFor="let prop of favoriteListings">
+            <div class="card-image" [routerLink]="['/room', prop.id]" style="cursor: pointer;">
+                <img [src]="(prop.photos && prop.photos.length > 0) ? (prop.photos[0].photoUrl || prop.photos[0].url) : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Saved home">
+                <div class="posted-date-badge">
+                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
+                </div>
+            </div>
+
+            <div class="card-content">
+                <div class="header-row">
+                    <h3>{{ prop.propertyName || prop.propertyType || 'Saved property' }}</h3>
+                    <span class="price">{{ formatPrice(prop.rentAmount || 0) }}</span>
+                </div>
+
+                <p class="location">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ prop.city || prop.state ? (prop.city + ', ' + prop.state) : 'Location available' }}</span>
+                </p>
+
+                <div class="stats-row">
+                    <span><mat-icon>bed</mat-icon> {{ prop.bedrooms || 0 }} Bed</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize || 0 }} SqFt</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>home</mat-icon> {{ prop.propertyType || 'Property' }}</span>
+                </div>
+
+                <div class="action-row">
+                    <span class="favorite-pill">
+                        <mat-icon>favorite</mat-icon> Saved
+                    </span>
+                    <a [routerLink]="['/room', prop.id]" class="btn-icon" title="View Property">
+                        <mat-icon>visibility</mat-icon>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

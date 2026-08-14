@@ -1,0 +1,251 @@
+:host {
+  display: block;
+  background-color: var(--rz-text-main, #111827);
+  color: #9ca3af;
+  font-family: var(--font-sans);
+}
+
+.rz-footer {
+  padding: 80px 0 32px;
+}
+
+.container {
+  max-width: var(--rz-max-width, 1200px);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Top Layout: Switched to Fluid Flexbox --- */
+.footer-top {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping on smaller desktops/tablets */
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+/* Assign flexible bases so they can breathe instead of fighting for rigid grid space */
+.brand-col { flex: 2 1 280px; }
+.links-col { flex: 1 1 140px; }
+.subscribe-col { flex: 1.5 1 260px; }
+
+/* 1. Brand Column */
+.brand-col .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  margin-bottom: 16px;
+  transition: color 0.2s;
+}
+.brand-col .logo mat-icon { color: var(--rz-primary); font-size: 32px; width: 32px; height: 32px; }
+.brand-col .logo:hover { color: var(--rz-primary); }
+
+.brand-col p { 
+  line-height: 1.6; 
+  max-width: 320px; 
+  font-size: 1.05rem; 
+  margin: 0; 
+}
+.brand-col a { color: #93c5fd; }
+.footer-identity {
+  margin-top: 12px !important;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  max-width: 360px;
+}
+
+/* 2. Links Column (Now a Flex Column for better control) */
+.links-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.links-col h4, .subscribe-col h4 { 
+  color: #ffffff; 
+  font-size: 1.2rem; 
+  font-weight: 600; 
+  margin: 0 0 24px 0; 
+}
+
+.links-col a {
+  align-self: flex-start; /* Keeps the hover effect tight to the text */
+  color: #9ca3af;
+  text-decoration: none;
+  margin-bottom: 16px;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+}
+
+.links-col a:hover { 
+  color: var(--rz-primary); 
+  transform: translateX(6px); 
+}
+
+/* 3. Subscribe Column */
+.subscribe-desc {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+}
+
+.subscribe-form { 
+  display: flex; 
+  gap: 8px; 
+  background: #1f2937; 
+  padding: 6px;
+  border-radius: var(--rz-radius-pill, 50px);
+  border: 1px solid #374151;
+  transition: border-color 0.2s;
+}
+.subscribe-form:focus-within {
+  border-color: var(--rz-primary);
+}
+
+.subscribe-form input {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+.subscribe-form input::placeholder { color: #6b7280; }
+
+.subscribe-btn {
+  background: var(--rz-primary);
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--rz-radius-pill, 50px);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.subscribe-btn:hover { background: var(--rz-primary-hover); }
+
+/* --- Bottom Bar --- */
+.bottom-bar {
+  border-top: 1px solid #374151; 
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.social-links { display: flex; gap: 16px; }
+
+.social-link {
+  color: #9ca3af;
+  background: #1f2937;
+  width: 44px; 
+  height: 44px;
+  border-radius: 50%;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.social-link:hover { 
+  background: var(--rz-primary); 
+  color: #ffffff; 
+  transform: translateY(-4px); 
+  box-shadow: 0 8px 16px rgba(25, 97, 83, 0.4); 
+}
+.social-link svg { width: 20px; height: 20px; fill: currentColor; }
+.social-link[aria-label="Instagram"] svg { fill: none; } 
+
+/* ========================================================
+   RESPONSIVE ADJUSTMENTS (FOOTER FIX)
+======================================================== */
+@media (max-width: 900px) {
+  .rz-footer { 
+    padding: 60px 0 24px; 
+    overflow: hidden; 
+  }
+  
+  .container {
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box;
+  }
+
+  .footer-top { 
+    flex-direction: column; /* Stack everything on mobile */
+    align-items: center; /* Centers all flex children cross-axis */
+    gap: 40px; 
+    text-align: center;
+    width: 100%;
+  }
+
+  .brand-col .logo { justify-content: center; }
+  .brand-col p { max-width: 100%; margin: 0 auto; }
+  
+  /* --- The Mobile Centering Fix for Links --- */
+  .links-col {
+    align-items: center; /* Forces the links to be perfectly centered */
+  }
+  
+  .links-col a {
+    align-self: center; /* Overrides the flex-start we set for desktop */
+  }
+  
+  /* UX Tweaks: Slide links UP on hover instead of right when centered */
+  .links-col a:hover {
+    transform: translateY(-4px);
+  }
+
+  /* --- Newsletter Mobile Fix --- */
+  .subscribe-col { 
+    width: 100%; 
+    align-items: center;
+  }
+  
+  .subscribe-form {
+    display: flex;
+    flex-direction: column; 
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px; /* Prevents input from getting ridiculously wide on tablets */
+  }
+  
+  .subscribe-form input {
+    width: 100%;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px; 
+    padding: 14px 16px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  
+  .subscribe-btn {
+    width: 100%;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  /* --- Bottom Bar --- */
+  .bottom-bar { 
+    flex-direction: column-reverse; 
+    gap: 24px; 
+    text-align: center; 
+    width: 100%;
+  }
+  
+  .social-links { 
+    justify-content: center; 
+    flex-wrap: wrap; 
+  }
+}

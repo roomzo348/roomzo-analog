@@ -1,0 +1,119 @@
+<header class="rz-header" [class.scrolled]="isScrolled || !isHomePage">
+  <div class="container">
+    
+    <div class="brand">
+      <a routerLink="/" class="logo">
+        <mat-icon>home</mat-icon> RoomZo
+      </a>
+    </div>
+
+    <nav class="nav-desktop">
+      <a routerLink="/explore-listing">Rent</a>
+      <a routerLink="/flatmates">Flatmates</a>
+      <a routerLink="/list-property">List Property</a>
+      <a routerLink="/about">About</a>
+      <a routerLink="/blog">Blog</a> <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
+      
+     
+    </nav>
+
+    <div class="actions">
+      <div class="auth-desktop">
+        <ng-container *ngIf="!isLoggedIn">
+          <a routerLink="/owner-auth" class="login-link">Login/SignUp</a>
+        </ng-container>
+
+        <ng-container *ngIf="isLoggedIn">
+          <a routerLink="/profile" class="profile-btn profile-btn--link desktop-only" aria-label="My profile">
+            <div class="avatar-circle" [class.has-photo]="profilePhotoUrl">
+              <img *ngIf="profilePhotoUrl; else desktopInitials" [src]="profilePhotoUrl" alt="" class="avatar-photo" />
+              <ng-template #desktopInitials>{{ userInitial }}</ng-template>
+            </div>
+          </a>
+        </ng-container>
+      </div>
+
+      <ng-container *ngIf="isLoggedIn">
+        <button class="mobile-chat-btn mobile-only" (click)="openFavorites()" type="button" aria-label="Open favorites">
+          <mat-icon>favorite</mat-icon>
+        </button>
+
+        <!-- <button class="mobile-chat-btn mobile-only" (click)="openChatDrawer()" type="button" aria-label="Open chat">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <span class="unread-badge" *ngIf="hasUnreadMessages"></span>
+        </button> -->
+      </ng-container>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-bottom-nav">
+  <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+    <mat-icon>home</mat-icon>
+    <span>Home</span>
+  </a>
+  <a routerLink="/explore-listing" routerLinkActive="active-link" class="nav-item">
+    <mat-icon>search</mat-icon>
+    <span>Rent</span>
+  </a>
+
+  <div class="nav-item center-action">
+    <button class="fab-button" (click)="togglePostMenu()" [class.fab-active]="isPostMenuOpen">
+      <mat-icon>{{ isPostMenuOpen ? 'close' : 'add' }}</mat-icon>
+    </button>
+    <span class="free-badge" *ngIf="!isPostMenuOpen">Free</span>
+    <span>Post</span>
+
+    <div class="speed-dial-wrapper" *ngIf="isPostMenuOpen">
+      <button class="mini-fab flatmate-btn" (click)="handleListFlatmate()">
+        <div class="mini-fab-icon"><mat-icon>person_add</mat-icon></div>
+        <span class="mini-fab-label">Flatmate</span>
+      </button>
+      
+      <button class="mini-fab property-btn" (click)="handleListProperty()">
+        <div class="mini-fab-icon"><mat-icon>home_work</mat-icon></div>
+        <span class="mini-fab-label">Property</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="fab-backdrop" *ngIf="isPostMenuOpen" (click)="togglePostMenu()"></div>
+
+  <a routerLink="/flatmates" routerLinkActive="active-link" class="nav-item">
+    <mat-icon>smart_display</mat-icon>
+    <span>Flatmates</span>
+  </a>
+  <a
+    class="nav-item profile-nav-item"
+    [routerLink]="isLoggedIn ? '/profile' : null"
+    routerLinkActive="active-link"
+    [routerLinkActiveOptions]="{ exact: false }"
+    [class.active-link]="!isLoggedIn && isMenuOpen"
+    (click)="onProfileNavClick($event)">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<!-- Mobile login prompt (guests only) -->
+<div class="mobile-dropdown-overlay" *ngIf="isMenuOpen && !isLoggedIn">
+  <div class="overlay-backdrop" (click)="closeMenu()"></div>
+  <div class="mobile-dropdown">
+    <div class="user-info" style="padding: 24px; text-align: center;">
+      <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 12px; margin-left:auto; margin-right:auto;">account_circle</mat-icon>
+      <h3 style="margin: 0; font-size: 18px;">Welcome to RoomZo</h3>
+      <p style="font-size: 14px; color: #6b7280; margin-top: 8px;">Log in to manage your listings and profile.</p>
+      <button class="btn-primary" routerLink="/owner-auth" (click)="closeMenu()" style="width: 100%; margin-top: 20px;">
+        Login / Sign Up
+      </button>
+      <div class="divider"></div>
+      <a routerLink="/about" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>info</mat-icon> About RoomZo
+      </a>
+      <a routerLink="/blog" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>article</mat-icon> Blog
+      </a>
+    </div>
+  </div>
+</div>

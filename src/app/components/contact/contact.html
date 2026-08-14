@@ -1,0 +1,139 @@
+<div class="page-wrapper">
+  <div class="container">
+    
+    <header class="page-header">
+      <h1>Contact Roomzo</h1>
+      <p>Have questions about a listing, need help reporting an issue, or want to list your property? Fill out the form below or email support@roomzo.in.</p>
+    </header>
+
+    <div class="contact-grid">
+      
+      <div class="form-card">
+        <h2>Send us a message</h2>
+        
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" formControlName="fullName" placeholder="Your name">
+              <div class="error" *ngIf="contactForm.get('fullName')?.touched && contactForm.get('fullName')?.invalid">Name is required</div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" formControlName="email" placeholder="your.email@example.com">
+              <div class="error" *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.invalid">Valid email required</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" formControlName="phone" placeholder="Your phone number">
+              <div class="error" *ngIf="contactForm.get('phone')?.touched && contactForm.get('phone')?.invalid">Valid phone number required</div>
+            </div>
+
+            <div class="form-group">
+              <label>Subject</label>
+              <mat-select formControlName="subject" placeholder="Select an inquiry type" class="custom-contact-select" panelClass="custom-select-panel">
+                <mat-option value="rent">Renting</mat-option>
+                <mat-option value="list">Listing a Property</mat-option>
+                <mat-option value="general">General Question</mat-option>
+              </mat-select>
+              <div class="error" *ngIf="contactForm.get('subject')?.touched && contactForm.get('subject')?.invalid">Please select a subject</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Message</label>
+            <textarea formControlName="message" rows="5" placeholder="Tell us how we can help you..."></textarea>
+            <div class="error" *ngIf="contactForm.get('message')?.touched && contactForm.get('message')?.invalid">Message is required</div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+          </button>
+
+          <p id="contactUs" class="form-footer">
+            By submitting this form, you agree to our privacy policy. We typically reply within 24 hours.
+          </p>
+        </form>
+      </div>
+
+      <div class="info-column">
+        
+        <div class="info-card">
+          <h3>Contact Information</h3>
+          
+          <div class="info-item" *ngFor="let item of contactInfo">
+          <div class="icon-circle">
+              <mat-icon *ngIf="!item.isBrand">{{ item.icon }}</mat-icon>
+              
+              <svg *ngIf="item.isBrand && item.icon === 'instagram'" 
+                   xmlns="http://www.w3.org/2000/svg" 
+                   width="24" height="24" viewBox="0 0 24 24" 
+                   fill="none" stroke="currentColor" stroke-width="2" 
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+
+              <svg *ngIf="item.isBrand && item.icon === 'facebook'" 
+                   xmlns="http://www.w3.org/2000/svg" 
+                   width="24" height="24" viewBox="0 0 24 24" 
+                   fill="none" stroke="currentColor" stroke-width="2" 
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
+            </div>
+            <div class="info-content">
+              <span class="label">{{ item.title }}</span>
+              
+              <ng-container *ngIf="!item.isLink">
+                <div class="value">{{ item.content }}</div>
+              </ng-container>
+
+              <ng-container *ngIf="item.isLink">
+                <a [href]="item.url" target="_blank" rel="noopener noreferrer" class="social-dm-link">
+                  {{ item.content }} <mat-icon class="external-icon">open_in_new</mat-icon>
+                </a>
+              </ng-container>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="map-card service-areas-card">
+          <div class="service-areas-body">
+            <mat-icon class="map-pin">travel_explore</mat-icon>
+            <h3>Where Roomzo focuses</h3>
+            <p>We currently highlight owner-listed rentals across:</p>
+            <ul>
+              <li>Prayagraj (Uttar Pradesh)</li>
+              <li>Varanasi (Uttar Pradesh)</li>
+              <li>Pune (Maharashtra)</li>
+              <li>Lucknow (Uttar Pradesh)</li>
+            </ul>
+            <p class="service-note">Online support via email and social channels — we do not claim a walk-in office map on this page.</p>
+            <a routerLink="/explore-listing" class="browse-listings-btn">
+              <mat-icon>search</mat-icon>
+              <span>Browse listings</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="faq-banner">
+      <div class="faq-content">
+        <h3>Looking for quick answers?</h3>
+        <p>Check out our Frequently Asked Questions to find what you need faster.</p>
+      </div>
+      <button class="btn-white" (click)="goToFaq()">View FAQ</button>
+    </div>
+
+  </div>
+</div>

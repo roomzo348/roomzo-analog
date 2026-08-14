@@ -1,0 +1,117 @@
+.auth-wrapper {
+  /* Using your root variable for background if desired, or relying on bg-light */
+  min-height: 100vh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px; /* Mobile first, perfect for tablets/desktop center */
+  border-radius: 1rem;
+}
+
+.border-bottom-primary {
+  border-bottom: 3px solid var(--rz-primary) !important;
+}
+
+.text-primary {
+  color: var(--rz-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--rz-primary) !important;
+}
+
+.btn-primary {
+  background-color: var(--rz-primary);
+  border-color: var(--rz-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--rz-primary-hover); /* Slightly darker shade of primary */
+}
+
+/* Make inputs look exactly like the screenshot */
+.form-control, .form-select, .input-group-text {
+  border: 1px solid var(--rz-border);
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.1);
+  border-color: var(--rz-primary);
+}
+
+.input-group-text {
+  background-color: #f8fafc; /* Tailwind gray-50 equivalent */
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.letter-spacing-lg {
+  letter-spacing: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.pt-header {
+  padding-top: 100px !important; /* Adjust based on your header height */
+}
+
+/* Spinner styling inside buttons */
+.spinner-border-sm {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-width: 0.2em;
+}
+
+/* Ensure buttons don't shrink when text is replaced by spinner */
+.btn-lg {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth transition for max-width changes */
+.auth-card {
+  transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 600px) {
+  .pt-header {
+    padding-top: 80px !important;
+  }
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Optional: Removes the inner border between the input and the eye icon */
+.border-end-0 {
+  border-right: none !important;
+}
+
+.input-group-text {
+  background-color: #f8fafc;
+  z-index: 10; /* Forces the icon to stay above the input border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 45px; /* Ensures it doesn't get squished */
+}
+.input-group-text mat-icon {
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

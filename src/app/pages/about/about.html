@@ -1,0 +1,86 @@
+<div class="page-wrapper">
+
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>About Roomzo</h1>
+      <p>An Indian rental discovery platform that connects tenants with property owners — built for transparency, safety habits, and direct contact.</p>
+      <div class="hero-actions">
+        <a class="btn-white" routerLink="/explore-listing">Browse listings</a>
+        <button type="button" class="btn-outline-light" (click)="goToContact()">Contact support</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission-section">
+    <div class="container">
+      <div class="section-header center">
+        <span class="eyebrow">WHO WE ARE</span>
+        <h2>Roomzo makes finding rooms, PGs, and flats clearer and more direct.</h2>
+        <p class="subtext">
+          Roomzo (roomzo.in) is a technology platform for rental listings. Owners publish rooms, paying guest stays,
+          and flats; seekers browse by city and category, read details, and contact owners by call or WhatsApp after
+          a short safety reminder. We are <strong>not</strong> a brokerage firm and we do not claim that every
+          offline deal is risk-free — we focus on useful discovery tools and practical safety guidance.
+        </p>
+      </div>
+
+      <div class="about-prose">
+        <h3>Why Roomzo exists</h3>
+        <p>
+          Renting in India often involves brokers, opaque fees, and pressure to pay before seeing a property.
+          Students moving to Prayagraj or Varanasi, and professionals relocating to Pune or Lucknow, need a simple
+          way to discover options and speak to the person responsible for the property. Roomzo was built for that flow:
+          search → compare → contact → visit → decide.
+        </p>
+        <h3>What we do</h3>
+        <ul>
+          <li>Host owner-submitted listings with photos, rent, location, and amenities.</li>
+          <li>Offer city pages, category guides, and search filters so users can explore meaningfully.</li>
+          <li>Enable call and WhatsApp contact with safety messaging (visit before you pay; watch for scam patterns).</li>
+          <li>Provide report tools when a listing appears fraudulent or incorrect.</li>
+          <li>Publish educational blog and FAQ content about renting safely.</li>
+        </ul>
+        <h3>What we do not do</h3>
+        <ul>
+          <li>We do not guarantee listing accuracy — owners are responsible for their content.</li>
+          <li>We do not hold deposits, execute rent agreements, or transfer property keys on your behalf.</li>
+          <li>We do not promise “zero scam” outcomes; safety depends on user caution and offline verification.</li>
+        </ul>
+        <h3>Where we focus</h3>
+        <p>
+          Active discovery today emphasises cities such as Prayagraj, Varanasi, Pune, and Lucknow, with more cities
+          planned as inventory grows. Both students and working professionals use Roomzo, as do owners who want
+          inbound interest without listing only through agents.
+        </p>
+        <h3>Contact</h3>
+        <p>
+          Support email: <a href="mailto:support@roomzo.in">support@roomzo.in</a><br />
+          Website: <a href="https://www.roomzo.in">https://www.roomzo.in</a>
+        </p>
+      </div>
+
+      <div class="values-grid">
+        <div class="value-card" *ngFor="let v of values">
+          <div class="icon-box">
+            <mat-icon>{{ v.icon }}</mat-icon>
+          </div>
+          <h3>{{ v.title }}</h3>
+          <p>{{ v.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container center">
+      <h2>Ready to explore rentals?</h2>
+      <p>Browse owner-listed rooms, PGs, and flats — and always visit before you pay a deposit.</p>
+      <div class="cta-actions">
+        <button type="button" class="btn-white" routerLink="/explore-listing">Browse Listings</button>
+        <button type="button" (click)="goToContact()" class="btn-dark-outline">Contact Us</button>
+      </div>
+    </div>
+  </section>
+
+</div>

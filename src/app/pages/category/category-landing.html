@@ -1,0 +1,90 @@
+<main class="category-landing">
+  <div class="container mtCont">
+    
+    <app-seo-breadcrumb [items]="breadcrumbItems" class="d-none d-md-block"></app-seo-breadcrumb>
+
+    <header class="category-header">
+      <div class="query-pill">
+        <mat-icon>search</mat-icon> POPULAR QUERIES
+      </div>
+      
+      <h1>
+        {{ category.label }} — owner-listed rentals on Roomzo
+      </h1>
+      
+      <p>{{ categoryGuide?.intro || category.seoDescription || 'Explore rooms, PGs and flats listed by owners. Contact them directly after reviewing details and safety tips.' }}</p>
+      
+      <!-- <button type="button" class="cta-btn elevated-shadow" (click)="handleCategoryRoute(category, $event)">
+        Browse {{ category.label }}
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </button> -->
+    </header>
+
+    <div class="category-list">
+      
+      <a *ngFor="let cat of allCategories" 
+         href="javascript:void(0)"
+         (click)="handleCategoryRoute(cat, $event)"
+         class="category-card">
+        
+        <div class="cat-icon-wrapper">
+          <mat-icon>{{ getIconForCategory(cat.slug) }}</mat-icon>
+        </div>
+        
+        <div class="cat-details">
+          <h3>{{ cat.label }}</h3>
+          <p>{{ getSubtitleForCategory(cat.slug) }}</p>
+        </div>
+        
+        <mat-icon class="chevron">chevron_right</mat-icon>
+      </a>
+
+      <div class="promo-banner">
+        <div class="promo-content">
+          <div class="promo-icon"><mat-icon>campaign</mat-icon></div>
+          <div class="promo-text">
+            <h4>Can't find your perfect room?</h4>
+            <p>Post your requirement for FREE and let owners contact you!</p>
+          </div>
+        </div>
+        <button class="btn-promo" routerLink="/list-property">
+          Post Now <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+    </div>
+
+    <app-content-guide
+      *ngIf="categoryGuide"
+      kicker="Category guide"
+      [title]="category.label + ': what to know before you rent'"
+      [intro]="categoryGuide.intro"
+      [sections]="guideSections">
+    </app-content-guide>
+
+    <section class="browse-city">
+      <h2 class="section-title">Browse by City</h2>
+      <div class="city-scroll-wrapper">
+        <div class="city-chip" (click)="goToCity('prayagraj')" [class.active]="categorySlug.includes('prayagraj')">
+          <mat-icon>location_city</mat-icon> Prayagraj
+        </div>
+        <div class="city-chip" (click)="goToCity('varanasi')" [class.active]="categorySlug.includes('varanasi')">
+          <mat-icon>temple_hindu</mat-icon> Varanasi
+        </div>
+        <div class="city-chip" (click)="goToCity('lucknow')" [class.active]="categorySlug.includes('lucknow')">
+          <mat-icon>account_balance</mat-icon> Lucknow
+        </div>
+        <div class="city-chip" (click)="goToCity('pune')" [class.active]="categorySlug.includes('pune')">
+          <mat-icon>domain</mat-icon> Pune
+        </div>
+      </div>
+    </section>
+
+    <div class="related-searches-wrapper">
+      <app-related-searches></app-related-searches>
+    </div>
+
+  </div>
+</main>

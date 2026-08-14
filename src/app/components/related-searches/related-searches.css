@@ -1,0 +1,65 @@
+.related-searches {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.related-searches.compact {
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.related-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #0f172a;
+}
+
+.related-desc {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.related-links,
+.city-quick-links nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.related-chip,
+.city-chip {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  color: #0f766e;
+  background: #fff;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.related-chip:hover,
+.city-chip:hover {
+  background: #ecfdf5;
+  border-color: #0f766e;
+}
+
+.city-quick-links {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.city-quick-links h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: #334155;
+}

@@ -1,0 +1,255 @@
+.live-modal {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  max-height: min(620px, 82vh);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+}
+
+.modal-close-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.live-modal-hero {
+  position: relative;
+  flex-shrink: 0;
+  padding: 24px 20px 18px;
+  background:
+    linear-gradient(135deg, #0f2823 0%, #196153 55%, #1d7a68 100%);
+  color: #fff;
+  text-align: center;
+}
+
+.live-modal-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(74, 222, 128, 0.18), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.08), transparent 40%);
+  pointer-events: none;
+}
+
+.live-badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.live-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  animation: livePulse 1.8s infinite;
+}
+
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.65); }
+  70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+.live-modal-hero h2 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 6px;
+  padding: 0 28px;
+  font-size: clamp(1.2rem, 3.8vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.hero-subline {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.live-cities-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.live-city-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.live-city-card mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #bbf7d0;
+}
+
+.live-city-card strong {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.live-city-card span {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4ade80;
+}
+
+.live-modal-body {
+  flex-shrink: 0;
+  padding: 16px 16px 18px;
+}
+
+.live-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.live-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.live-stat-card mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #196153;
+}
+
+.live-stat-card .stat-number {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.live-stat-card .stat-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+@media (max-width: 520px) {
+  .live-modal {
+    max-height: min(520px, 72vh);
+    border-radius: 18px;
+  }
+
+  .live-modal-hero {
+    padding: 20px 14px 14px;
+  }
+
+  .live-modal-hero h2 {
+    padding: 0 24px 0 8px;
+    font-size: 1.15rem;
+  }
+
+  .hero-subline {
+    font-size: 0.8rem;
+  }
+
+  .live-cities-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .live-city-card {
+    padding: 8px 6px;
+  }
+
+  .live-city-card strong {
+    font-size: 0.7rem;
+  }
+
+  .live-modal-body {
+    padding: 14px 14px 16px;
+  }
+
+  .live-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .live-stat-card {
+    padding: 6px 2px;
+    gap: 2px;
+    border-radius: 10px;
+  }
+
+  .live-stat-card mat-icon {
+    display: none;
+  }
+
+  .live-stat-card .stat-number {
+    font-size: 0.78rem;
+  }
+
+  .live-stat-card .stat-label {
+    font-size: 0.55rem;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+}

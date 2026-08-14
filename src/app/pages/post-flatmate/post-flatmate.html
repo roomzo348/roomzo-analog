@@ -1,0 +1,132 @@
+<div class="fm-wrapper">
+  <div class="container" style="max-width: 760px;">
+
+    <div class="text-center mb-4 fade-in-up">
+      <h2 class="fw-bold mb-1">Post About You</h2>
+      <p>Find the perfect flatmate with a verified profile.</p>
+    </div>
+
+    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+
+      <div class="fm-card fade-in-up" style="animation-delay: 0.1s;">
+        <h4 class="fm-card-title"><mat-icon>person</mat-icon> The Host & Location</h4>
+        
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="fm-label">Full Name</label>
+            <input type="text" class="fm-control" formControlName="name" placeholder="e.g. Rahul Sharma"
+              [class.is-invalid]="isInvalid('name')">
+          </div>
+
+          <div class="col-md-6">
+            <label class="fm-label">Contact Number (WhatsApp)</label>
+            <div class="fm-input-group" [class.is-invalid]="isInvalid('phoneNumber')">
+              <span class="fm-prefix-icon fw-bold" style="color: var(--rz-text-main); padding-right: 8px;">+91</span>
+              <input type="text" maxlength="10" class="fm-control ps-1" formControlName="phoneNumber" placeholder="9876543210">
+            </div>
+            <small class="text-danger mt-1 d-block" *ngIf="isInvalid('phoneNumber')">Enter a valid 10-digit number</small>
+          </div>
+
+          <div class="col-md-3 col-6">
+            <label class="fm-label">Age</label>
+            <input type="number" class="fm-control" formControlName="age" placeholder="24"
+              [class.is-invalid]="isInvalid('age')">
+          </div>
+
+          <div class="col-md-3 col-6">
+            <label class="fm-label">Gender</label>
+            <select class="fm-control" formControlName="gender"
+              [class.is-invalid]="isInvalid('gender')">
+              <option value="" disabled>Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Any">Any</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="fm-label">Profession</label>
+            <input type="text" class="fm-control" formControlName="profession" placeholder="e.g. Software Engineer"
+              [class.is-invalid]="isInvalid('profession')">
+          </div>
+
+          <div class="col-md-6">
+            <label class="fm-label">Rent Per Month</label>
+            <div class="fm-input-group" [class.is-invalid]="isInvalid('budget')">
+              <span class="fm-prefix-icon fw-bold" style="color: var(--rz-text-main);">₹</span>
+              <input type="text" class="fm-control ps-2" formControlName="budget" placeholder="15,000">
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <label class="fm-label">Flat Address</label>
+            <div class="fm-input-group" [class.is-invalid]="isInvalid('flatAddress')">
+              <input type="text" class="fm-control" formControlName="flatAddress" placeholder="e.g. 404, Sunshine Apts...">
+              <button type="button" class="fm-append-btn" (click)="detectLocation()" [disabled]="isDetectingLocation">
+                <mat-icon *ngIf="!isDetectingLocation">my_location</mat-icon>
+                <span class="d-none d-sm-inline" *ngIf="!isDetectingLocation">Pin Location</span>
+                <div class="spinner-border spinner-border-sm" *ngIf="isDetectingLocation"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fm-card fade-in-up" style="animation-delay: 0.2s;">
+        <h4 class="fm-card-title"><mat-icon>style</mat-icon> Lifestyle & Photos</h4>
+        
+        <div class="row g-4">
+          <div class="col-12">
+            <label class="fm-label">House Vibe & Bio</label>
+            <textarea class="fm-control" formControlName="bio" placeholder="We are two people already living and looking for third one to divide the rent."
+              [class.is-invalid]="isInvalid('bio')"></textarea>
+          </div>
+
+          <div class="col-12 mt-3">
+            <label class="fm-label">Preferred Habits & Vibe <span class="text-muted fw-normal">(Select up to 5)</span></label>
+            
+            <div class="fm-horizontal-scroll">
+              <button 
+                type="button" 
+                class="fm-chip" 
+                *ngFor="let habit of predefinedHabits"
+                [class.active]="preferences.includes(habit)"
+                (click)="togglePreference(habit)">
+                {{ habit }}
+              </button>
+            </div>
+            
+            <div class="fm-tags-container" *ngIf="preferences.length > 0">
+              <span class="fm-tag" *ngFor="let pref of preferences; let i = index">
+                {{ pref }} <mat-icon (click)="removePreference(i)">close</mat-icon>
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <label class="fm-label">Property Photos</label>
+            <div class="fm-upload-zone" onclick="document.getElementById('fmFileInput').click()">
+              <mat-icon>add_photo_alternate</mat-icon>
+              <strong>Upload Photos</strong>
+              <span>Tap to browse (Max 5)</span>
+              <input type="file" id="fmFileInput" hidden multiple accept="image/*" (change)="onFileSelected($event)">
+            </div>
+
+            <div class="fm-preview-grid" *ngIf="previewUrls.length > 0">
+              <div class="fm-preview-item" *ngFor="let url of previewUrls; let i = index">
+                <img [src]="url" alt="Preview">
+                <button type="button" class="fm-remove-btn" (click)="removeImage(i)"><mat-icon>close</mat-icon></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary w-100 py-3 rounded-3 mb-4" style="font-size: 1.1rem; box-shadow: var(--rz-shadow-md);" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Publish Profile</span>
+        <div class="spinner-border spinner-border-sm text-light" *ngIf="isSubmitting"></div>
+      </button>
+
+    </form>
+  </div>
+</div>

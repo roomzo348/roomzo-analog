@@ -1,0 +1,168 @@
+:host {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  color: #111827;
+}
+
+.faq-page {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* --- Header --- */
+.faq-header {
+  background-color: var(--rz-primary); /* Your Brand Primary Blue */
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.faq-header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+}
+
+.faq-header p {
+  font-size: 18px;
+  color: #bfdbfe; /* Light blue text */
+  margin: 0;
+}
+
+/* --- Container --- */
+.faq-container {
+  max-width: 800px;
+  margin: -40px auto 0; /* Pull up to overlap header */
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* --- Tabs --- */
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  background: white;
+  padding: 8px;
+  border-radius: 50px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.tab-btn:hover {
+  color: var(--rz-primary);
+  background: #f3f4f6;
+}
+
+.tab-btn.active {
+  background-color: var(--rz-primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3);
+}
+
+/* --- Accordion Items --- */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.faq-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-question h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.chevron {
+  color: #9ca3af;
+  transition: transform 0.3s ease;
+}
+
+/* Open State Animation */
+.faq-item.open .chevron {
+  transform: rotate(180deg);
+  color: #1e3a8a;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+}
+
+.faq-answer p {
+  margin: 12px 0 0 0;
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* --- CTA Section --- */
+.still-stuck {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.still-stuck h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.still-stuck p {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .faq-header { padding: 40px 20px 80px; } /* More bottom padding for overlap */
+  
+  .tabs-container {
+    flex-wrap: wrap;
+    border-radius: 12px;
+    width: 100%;
+  }
+  
+  .tab-btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}

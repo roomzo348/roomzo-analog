@@ -1,0 +1,55 @@
+{
+  "Prayagraj": [
+    {
+      "name": "Allahpur",
+      "imageUrl": "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=200&q=80"
+    },
+    {
+      "name": "Civil Lines",
+      "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&q=80"
+    },
+    {
+      "name": "Phaphamau",
+      "imageUrl": "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?w=200&q=80"
+    },
+    {
+      "name": "Stanley Road",
+      "imageUrl": "https://images.unsplash.com/photo-1473221326025-9183b46be8cb?w=200&q=80"
+    },
+    {
+      "name": "Teliyarganj",
+      "imageUrl": "https://images.unsplash.com/photo-1519999482648-25049ddd37b1?w=200&q=80"
+    },
+    {
+      "name": "George",
+      "imageUrl": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=200&q=80"
+    },
+    {
+      "name": "Jhusi",
+      "imageUrl": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&q=80"
+    },
+    {
+      "name": "Katra",
+      "imageUrl": "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=200&q=80"
+    },
+    {
+      "name": "Mutthiganj",
+      "imageUrl": "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=200&q=80"
+    },
+    {
+      "name": "Naini",
+      "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=200&q=80"
+    }
+    
+  ],
+  "Pune": [
+    {
+      "name": "Koregaon Park",
+      "imageUrl": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&q=80"
+    },
+    {
+      "name": "Viman Nagar",
+      "imageUrl": "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=200&q=80"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /owner-auth
+Disallow: /list-property
+Disallow: /my-listings
+Disallow: /edit-listing/
+Disallow: /post-flatmate
+
+Sitemap: https://www.roomzo.in/sitemap.xml

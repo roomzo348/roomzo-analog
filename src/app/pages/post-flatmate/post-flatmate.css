@@ -1,0 +1,231 @@
+.fm-wrapper {
+  padding-top: 100px;
+  padding-bottom: 80px;
+  background-color: var(--rz-bg);
+  min-height: 100vh;
+}
+
+/* ── Clean Card Structure ── */
+.fm-card {
+  background: var(--rz-bg-card);
+  border-radius: var(--rz-radius, 16px);
+  padding: 32px;
+  box-shadow: var(--rz-shadow-sm);
+  border: 1px solid var(--rz-border);
+  margin-bottom: 24px;
+}
+
+.fm-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--rz-text-main);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rz-border);
+}
+
+.fm-card-title mat-icon { color: var(--rz-primary); }
+
+/* ── Minimalist Form Inputs ── */
+.fm-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rz-text-main); 
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.fm-control {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  background: #F9FAFB;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius, 12px);
+  color: var(--rz-text-main);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.fm-control::placeholder { color: var(--rz-text-muted); opacity: 0.6; }
+
+.fm-control:focus {
+  background: #FFFFFF;
+  border-color: var(--rz-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); 
+}
+
+.fm-control.is-invalid {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+textarea.fm-control { resize: vertical; min-height: 100px; }
+
+/* ── Seamless Input Groups (For Icons & Buttons) ── */
+.fm-input-group {
+  display: flex;
+  background: #F9FAFB;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius, 12px);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.fm-input-group.is-invalid {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.fm-input-group:focus-within {
+  background: #FFFFFF;
+  border-color: var(--rz-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.fm-input-group .fm-control {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Icon inside input */
+.fm-prefix-icon {
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  color: var(--rz-text-muted);
+}
+.fm-prefix-icon mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+/* Buttons appended to inputs */
+.fm-append-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--rz-border);
+  color: var(--rz-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.fm-append-btn:hover { background: rgba(37, 99, 235, 0.05); }
+
+/* ── Habit Tags ── */
+.fm-tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.fm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(37, 99, 235, 0.1); 
+  color: var(--rz-primary);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: popIn 0.2s ease-out;
+}
+
+.fm-tag mat-icon {
+  font-size: 16px; width: 16px; height: 16px;
+  cursor: pointer; opacity: 0.7; transition: 0.2s;
+}
+.fm-tag mat-icon:hover { opacity: 1; color: #ef4444; }
+
+/* ── Photo Upload Zone ── */
+.fm-upload-zone {
+  border: 2px dashed var(--rz-border);
+  background: #F9FAFB;
+  border-radius: var(--rz-radius, 12px);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  text-align: center;
+}
+
+.fm-upload-zone:hover {
+  border-color: var(--rz-primary);
+  background: #FFFFFF;
+}
+
+.fm-upload-zone mat-icon { font-size: 36px; width: 36px; height: 36px; color: var(--rz-primary); }
+.fm-upload-zone strong { font-size: 1rem; color: var(--rz-text-main); }
+.fm-upload-zone span { font-size: 0.85rem; color: var(--rz-text-muted); }
+
+.fm-preview-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.fm-preview-item { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; }
+.fm-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.fm-remove-btn {
+  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; border-radius: 50%; color: white;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.fm-remove-btn mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+/* ── Animations ── */
+.fade-in-up { animation: fadeInUp 0.4s ease forwards; opacity: 0; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 768px) {
+  .fm-card { padding: 20px; }
+  .fm-wrapper { padding-top: 80px; }
+}
+
+/* ── Horizontal Scrollable Tiles ── */
+.fm-horizontal-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  -webkit-overflow-scrolling: touch; 
+}
+
+.fm-horizontal-scroll::-webkit-scrollbar {
+  display: none; 
+}
+
+/* ── Selectable Chips ── */
+.fm-chip {
+  white-space: nowrap;
+  padding: 10px 18px;
+  border-radius: 100px;
+  background: #F9FAFB;
+  border: 1px solid var(--rz-border);
+  color: var(--rz-text-muted);
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.fm-chip:hover {
+  border-color: var(--rz-primary);
+  color: var(--rz-primary);
+}
+
+.fm-chip.active {
+  background: rgba(37, 99, 235, 0.08); 
+  border-color: var(--rz-primary);
+  color: var(--rz-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}

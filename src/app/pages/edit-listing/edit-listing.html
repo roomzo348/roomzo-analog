@@ -1,0 +1,254 @@
+<div class="page-container">
+  <div class="page-header">
+    <button type="button" class="back-btn" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon> Back
+    </button>
+    <div class="header-text">
+      <h1>Edit Property</h1>
+      <p>Update any detail — all fields are editable.</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="modern-spinner"></div>
+    <p>Loading property details...</p>
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form" novalidate>
+
+    <!-- Basic Info -->
+    <section class="card">
+      <div class="card-header">
+        <h3><mat-icon>home_work</mat-icon> Basic Information</h3>
+      </div>
+
+      <div class="form-group" formGroupName="final">
+        <label>Property Title <span class="req">*</span></label>
+        <input type="text" formControlName="name" placeholder="e.g. Spacious 2BHK near Metro">
+        <span class="error-text" *ngIf="finalGroup.get('name')?.invalid && finalGroup.get('name')?.touched">Title is required.</span>
+      </div>
+
+      <h4 class="subsection-label">Property Type <span class="req">*</span></h4>
+      <div class="property-type-grid" formGroupName="details">
+        <label class="type-card" *ngFor="let type of propertyTypes"
+          [class.selected]="detailsGroup.get('propertyType')?.value === type.value">
+          <input type="radio" formControlName="propertyType" [value]="type.value" hidden>
+          <mat-icon>{{ type.icon }}</mat-icon>
+          <span>{{ type.label }}</span>
+        </label>
+      </div>
+
+      <div class="form-grid two-col" formGroupName="final">
+        <div class="form-group">
+          <label>Monthly Rent (₹) <span class="req">*</span></label>
+          <div class="input-with-icon">
+            <mat-icon>currency_rupee</mat-icon>
+            <input type="number" formControlName="rentAmount" placeholder="15000" min="0">
+          </div>
+          <span class="error-text" *ngIf="finalGroup.get('rentAmount')?.invalid && finalGroup.get('rentAmount')?.touched">Rent is required.</span>
+        </div>
+        <div class="form-group">
+          <label>Owner Contact Number <span class="req">*</span></label>
+          <div class="input-with-icon">
+            <mat-icon>phone</mat-icon>
+            <input type="tel" formControlName="contactNo" placeholder="10-digit mobile" maxlength="10">
+          </div>
+          <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('required') && finalGroup.get('contactNo')?.touched">Contact is required.</span>
+          <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('pattern') && finalGroup.get('contactNo')?.touched">Must be exactly 10 digits.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location -->
+    <section class="card" formGroupName="details">
+      <div class="card-header">
+        <h3><mat-icon>location_on</mat-icon> Location</h3>
+      </div>
+
+      <div formGroupName="address" class="form-grid">
+        <div class="form-group full-width">
+          <label>Street Address <span class="req">*</span></label>
+          <input type="text" formControlName="street" placeholder="House no., street name">
+        </div>
+        <div class="form-group">
+          <label>Landmark / Area <span class="req">*</span></label>
+          <input type="text" formControlName="landmark" placeholder="Near City Mall, Civil Lines">
+          <span class="helper-text">Used for zone-wise search on Roomzo.</span>
+        </div>
+        <div class="form-group">
+          <label>City <span class="req">*</span></label>
+          <input type="text" formControlName="city" placeholder="City">
+        </div>
+        <div class="form-group">
+          <label>State <span class="req">*</span></label>
+          <input type="text" formControlName="state" placeholder="State">
+        </div>
+        <div class="form-group">
+          <label>Pincode <span class="req">*</span></label>
+          <input type="text" formControlName="zip" placeholder="400001">
+        </div>
+      </div>
+    </section>
+
+    <!-- Accommodation -->
+    <section class="card" formGroupName="details">
+      <div class="card-header">
+        <h3><mat-icon>king_bed</mat-icon> Accommodation</h3>
+      </div>
+
+      <div class="counter-card">
+        <div class="counter-row">
+          <div class="counter-label">
+            <strong>Bedrooms</strong>
+            <span>Private sleeping areas</span>
+          </div>
+          <div class="counter-controls">
+            <button type="button" class="counter-btn" (click)="updateCounter('bedrooms', -1)"><mat-icon>remove</mat-icon></button>
+            <span>{{ detailsGroup.get('bedrooms')?.value }}</span>
+            <button type="button" class="counter-btn" (click)="updateCounter('bedrooms', 1)"><mat-icon>add</mat-icon></button>
+          </div>
+        </div>
+        <div class="divider-thin"></div>
+        <div class="counter-row">
+          <div class="counter-label">
+            <strong>Bathrooms</strong>
+            <span>Full or half baths</span>
+          </div>
+          <div class="counter-controls">
+            <button type="button" class="counter-btn" (click)="updateCounter('bathrooms', -1)"><mat-icon>remove</mat-icon></button>
+            <span>{{ detailsGroup.get('bathrooms')?.value }}</span>
+            <button type="button" class="counter-btn" (click)="updateCounter('bathrooms', 1)"><mat-icon>add</mat-icon></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Total Size (Sq Ft) <span class="req">*</span></label>
+        <input type="number" formControlName="propertySize" placeholder="e.g. 1200" min="0">
+      </div>
+    </section>
+
+    <!-- Description -->
+    <section class="card" formGroupName="final">
+      <div class="card-header">
+        <h3><mat-icon>description</mat-icon> Description</h3>
+      </div>
+      <div class="form-group">
+        <label>Property Description <span class="req">*</span></label>
+        <textarea formControlName="description" rows="6" placeholder="Highlight the best features of your property..."></textarea>
+        <span class="helper-text">Press Enter for a new line — each line becomes a bullet point on the listing.</span>
+      </div>
+    </section>
+
+    <!-- Listing Conditions -->
+    <section class="card" formGroupName="conditions">
+      <div class="card-header">
+        <h3><mat-icon>groups</mat-icon> Listing Conditions</h3>
+      </div>
+      <p class="section-hint">Who is this room for? Select all that apply.</p>
+      <div class="amenities-grid">
+        <label class="amenity-pill condition-pill" *ngFor="let item of listingConditions"
+          [class.selected]="conditionsGroup.get(item.formControlName)?.value">
+          <input type="checkbox" [formControlName]="item.formControlName" hidden>
+          <mat-icon>{{ conditionsGroup.get(item.formControlName)?.value ? 'check_circle' : item.icon }}</mat-icon>
+          {{ item.label }}
+        </label>
+      </div>
+    </section>
+
+    <!-- Amenities -->
+    <section class="card" formGroupName="amenities">
+      <div class="card-header">
+        <h3><mat-icon>checklist</mat-icon> Amenities</h3>
+      </div>
+
+      <ng-container *ngFor="let group of amenityGroups">
+        <h4 class="subsection-label">{{ group.title }}</h4>
+        <div class="amenities-grid">
+          <label class="amenity-pill" *ngFor="let item of group.items"
+            [class.selected]="amenitiesGroup.get(item.formControlName)?.value">
+            <input type="checkbox" [formControlName]="item.formControlName" hidden>
+            <mat-icon>{{ amenitiesGroup.get(item.formControlName)?.value ? 'check_circle' : item.icon }}</mat-icon>
+            {{ item.label }}
+          </label>
+        </div>
+      </ng-container>
+    </section>
+
+    <!-- Guidebook -->
+    <section class="card" formGroupName="guidebook">
+      <div class="card-header">
+        <h3><mat-icon>menu_book</mat-icon> Rules & Surroundings</h3>
+      </div>
+
+      <h4 class="subsection-label">House Rules</h4>
+      <div class="amenities-grid">
+        <div class="amenity-pill rule-pill" *ngFor="let rule of commonRules"
+          [class.selected]="isRuleSelected(rule.value)" (click)="toggleRule(rule.value)">
+          <mat-icon>{{ isRuleSelected(rule.value) ? 'check_circle' : rule.icon }}</mat-icon>
+          {{ rule.label }}
+        </div>
+      </div>
+
+      <div class="form-group mt-20">
+        <label>Additional Rules / Notes</label>
+        <textarea formControlName="customRules" rows="3" placeholder="Any other rules for tenants..."></textarea>
+      </div>
+
+      <h4 class="subsection-label mt-24">What's Nearby?</h4>
+      <div formArrayName="nearby">
+        <div class="nearby-row" *ngFor="let place of nearbyPlaces.controls; let i = index" [formGroupName]="i">
+          <mat-icon class="nearby-icon">place</mat-icon>
+          <input type="text" formControlName="name" placeholder="Place name">
+          <input type="text" formControlName="distance" placeholder="Distance (e.g. 5 min walk)">
+          <button type="button" class="btn-icon-danger" (click)="removeNearbyPlace(i)" *ngIf="nearbyPlaces.length > 1" title="Remove">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button type="button" class="btn-dashed" (click)="addNearbyPlace()">
+        <mat-icon>add</mat-icon> Add Another Place
+      </button>
+    </section>
+
+    <!-- Photos -->
+    <section class="card">
+      <div class="card-header">
+        <h3><mat-icon>photo_library</mat-icon> Photos</h3>
+        <span class="photo-count" [class.warn]="totalPhotoCount < 2">{{ totalPhotoCount }} / min 2</span>
+      </div>
+
+      <div class="photo-grid" *ngIf="totalPhotoCount > 0">
+        <div class="photo-thumb" *ngFor="let url of existingPhotoUrls; let i = index">
+          <img [src]="url" alt="Property photo">
+          <button type="button" class="remove-photo" (click)="removeExistingPhoto(i)" title="Remove photo">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="photo-thumb new" *ngFor="let preview of newImagePreviews; let i = index">
+          <img [src]="preview" alt="New photo">
+          <span class="new-badge">New</span>
+          <button type="button" class="remove-photo" (click)="removeNewPhoto(i)" title="Remove photo">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <label class="photo-upload-zone" [class.uploading]="isUploading">
+        <mat-icon>cloud_upload</mat-icon>
+        <span *ngIf="!isUploading">Click to add more photos</span>
+        <span *ngIf="isUploading">Processing images...</span>
+        <input type="file" multiple accept="image/*" (change)="onFileSelected($event)" hidden [disabled]="isUploading">
+      </label>
+      <span class="error-text" *ngIf="totalPhotoCount > 0 && totalPhotoCount < 2">At least 2 photos are required.</span>
+    </section>
+
+    <div class="actions-footer">
+      <button type="button" class="btn-outline" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving || isUploading">
+        <mat-icon *ngIf="isSaving" class="spinner">sync</mat-icon>
+        {{ isSaving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+</div>

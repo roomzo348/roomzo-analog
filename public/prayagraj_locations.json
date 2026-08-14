@@ -1,0 +1,794 @@
+[
+  {
+    "id": "pg_sub_001",
+    "name": "Civil Lines",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4526,
+    "longitude": 81.8341,
+    "tags": ["central business district", "cbd", "shopping", "malls", "high street"]
+  },
+  {
+    "id": "pg_sub_002",
+    "name": "Katra",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4641,
+    "longitude": 81.8512,
+    "tags": ["market", "student hub", "shopping", "commercial"]
+  },
+  {
+    "id": "pg_sub_003",
+    "name": "Naini",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.3994,
+    "longitude": 81.8617,
+    "tags": ["industrial area", "residential area", "across yamuna"]
+  },
+  {
+    "id": "pg_sub_004",
+    "name": "George Town",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4515,
+    "longitude": 81.8569,
+    "tags": ["posh residential", "medical hubs", "tagore town adjacent"]
+  },
+  {
+    "id": "pg_sub_005",
+    "name": "Tagore Town",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4565,
+    "longitude": 81.8543,
+    "tags": ["residential", "coaching center hub", "central"]
+  },
+  {
+    "id": "pg_sub_006",
+    "name": "Jhalwa",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4305,
+    "longitude": 81.7709,
+    "tags": ["iiit allahabad", "upcoming residential", "suburb"]
+  },
+  {
+    "id": "pg_sub_007",
+    "name": "Phaphamau",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.5412,
+    "longitude": 81.8621,
+    "tags": ["across ganga", "bridge area", "suburb", "residential"]
+  },
+  {
+    "id": "pg_sub_008",
+    "name": "Jhusi (Jusi)",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4347,
+    "longitude": 81.9056,
+    "tags": ["historical", "across ganga east", "residential", "kumbh area"]
+  },
+  {
+    "id": "pg_sub_009",
+    "name": "Chauk (Chowk)",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4418,
+    "longitude": 81.8315,
+    "tags": ["old city", "traditional market", "dense wholesale"]
+  },
+  {
+    "id": "pg_sub_010",
+    "name": "Preetam Nagar",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4358,
+    "longitude": 81.7981,
+    "tags": ["housing colony", "residential", "west prayagraj"]
+  },
+  {
+    "id": "pg_sub_011",
+    "name": "Allahapur",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4529,
+    "longitude": 81.8792,
+    "tags": ["student residential", "dense area", "matiyara chauraha"]
+  },
+  {
+    "id": "pg_sub_012",
+    "name": "Teliyarganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4925,
+    "longitude": 81.8601,
+    "tags": ["mnnit campus", "north prayagraj", "residential"]
+  },
+  {
+    "id": "pg_sub_013",
+    "name": "Rajapur",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4678,
+    "longitude": 81.8291,
+    "tags": ["residential area", "near ganga bank"]
+  },
+  {
+    "id": "pg_sub_014",
+    "name": "Kalyani Devi",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4301,
+    "longitude": 81.8276,
+    "tags": ["old residential", "temple area"]
+  },
+  {
+    "id": "pg_sub_015",
+    "name": "Muthiganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4332,
+    "longitude": 81.8414,
+    "tags": ["old city commercial", "wholesale market"]
+  },
+  {
+    "id": "pg_sub_016",
+    "name": "Kydganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4308,
+    "longitude": 81.8549,
+    "tags": ["yamuna bank", "old residential", "cremation ghat close"]
+  },
+  {
+    "id": "pg_sub_017",
+    "name": "Daraganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4512,
+    "longitude": 81.8845,
+    "tags": ["oldest neighborhood", "ganga bank", "religious hub", "priests"]
+  },
+  {
+    "id": "pg_sub_018",
+    "name": "Alopibagh",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4581,
+    "longitude": 81.8758,
+    "tags": ["residential", "temple zone", "near flyover"]
+  },
+  {
+    "id": "pg_sub_019",
+    "name": "Mumfordganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4745,
+    "longitude": 81.8465,
+    "tags": ["planned residential", "quiet area", "british layout"]
+  },
+  {
+    "id": "pg_sub_020",
+    "name": "Allenganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4682,
+    "longitude": 81.8589,
+    "tags": ["residential", "near university", "posh north"]
+  },
+  {
+    "id": "pg_sub_021",
+    "name": "Lukarganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4471,
+    "longitude": 81.8152,
+    "tags": ["railway colony adjacent", "residential area"]
+  },
+  {
+    "id": "pg_sub_022",
+    "name": "Khushhal Parvat",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4371,
+    "longitude": 81.8198,
+    "tags": ["old settlement area"]
+  },
+  {
+    "id": "pg_sub_023",
+    "name": "Sulem Sarai",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4423,
+    "longitude": 81.7812,
+    "tags": ["gt road west", "commercial market", "residential"]
+  },
+  {
+    "id": "pg_sub_024",
+    "name": "Dhoomanganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4491,
+    "longitude": 81.7695,
+    "tags": ["police station zone", "west residential sprawling"]
+  },
+  {
+    "id": "pg_sub_025",
+    "name": "Subedarganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4542,
+    "longitude": 81.7915,
+    "tags": ["railway hub", "defense land", "residential colony"]
+  },
+  {
+    "id": "pg_sub_026",
+    "name": "Cantonment (Cantt)",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4619,
+    "longitude": 81.8124,
+    "tags": ["military zone", "clean green", "restricted development"]
+  },
+  {
+    "id": "pg_sub_027",
+    "name": "Ashok Nagar",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4602,
+    "longitude": 81.8315,
+    "tags": ["posh residential", "central", "near civil lines"]
+  },
+  {
+    "id": "pg_sub_028",
+    "name": "New Cantonment",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4731,
+    "longitude": 81.8015,
+    "tags": ["army base area", "green belt"]
+  },
+  {
+    "id": "pg_sub_029",
+    "name": "Govindpur",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4691,
+    "longitude": 81.8842,
+    "tags": ["dense colony", "allahapur extensions"]
+  },
+  {
+    "id": "pg_sub_030",
+    "name": "Salori",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4789,
+    "longitude": 81.8612,
+    "tags": ["student capital", "pg room rentals", "highly dense"]
+  },
+  {
+    "id": "pg_sub_031",
+    "name": "Chatham Lines",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4715,
+    "longitude": 81.8412,
+    "tags": ["recruitment ground", "government establishments"]
+  },
+  {
+    "id": "pg_sub_032",
+    "name": "Beli Gaon / Beli Colony",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4701,
+    "longitude": 81.8329,
+    "tags": ["government quarters", "hospital zone"]
+  },
+  {
+    "id": "pg_sub_033",
+    "name": "Meerapur",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4215,
+    "longitude": 81.8192,
+    "tags": ["south old city", "yamuna side residential"]
+  },
+  {
+    "id": "pg_sub_034",
+    "name": "Gaughat",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4201,
+    "longitude": 81.8305,
+    "tags": ["yamuna intake waterworks", "old neighborhood"]
+  },
+  {
+    "id": "pg_sub_035",
+    "name": "Malviya Nagar",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4402,
+    "longitude": 81.8415,
+    "tags": ["commercial dense", "old city limits"]
+  },
+  {
+    "id": "pg_sub_036",
+    "name": "Badshahi Mandi",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4429,
+    "longitude": 81.8368,
+    "tags": ["wholesale market trade", "old lanes"]
+  },
+  {
+    "id": "pg_sub_037",
+    "name": "Bahadurganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4378,
+    "longitude": 81.8445,
+    "tags": ["cloth market core", "congested residential"]
+  },
+  {
+    "id": "pg_sub_038",
+    "name": "Minhajpur",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4491,
+    "longitude": 81.8212,
+    "tags": ["mid city grid", "near railway tracks"]
+  },
+  {
+    "id": "pg_sub_039",
+    "name": "Shahganj",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4445,
+    "longitude": 81.8242,
+    "tags": ["busy commercial crossroad", "old sector"]
+  },
+  {
+    "id": "pg_sub_040",
+    "name": "Leader Road",
+    "category": "Sub-Area",
+    "parent": "Prayagraj",
+    "latitude": 25.4441,
+    "longitude": 81.8299,
+    "tags": ["commercial stretch", "travel agents", "station access"]
+  },
+  {
+    "id": "pg_land_001",
+    "name": "Triveni Sangam",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4284,
+    "longitude": 81.8864,
+    "tags": ["holy confluence", "ganga", "yamuna", "saraswati", "boat rides", "kumbh mela spot"]
+  },
+  {
+    "id": "pg_land_002",
+    "name": "Akbar Allahabad Fort",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4298,
+    "longitude": 81.8778,
+    "tags": ["mughal fort", "army control", "yamuna bank", "prahlad ghat entry"]
+  },
+  {
+    "id": "pg_land_003",
+    "name": "Anand Bhawan Museum",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4646,
+    "longitude": 81.8561,
+    "tags": ["nehru family home", "freedom struggle monument", "tourist site"]
+  },
+  {
+    "id": "pg_land_004",
+    "name": "Swaraj Bhawan",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4652,
+    "longitude": 81.8558,
+    "tags": ["historical palace", "inc old headquarters", "adjacent to anand bhawan"]
+  },
+  {
+    "id": "pg_land_005",
+    "name": "Chandrashekhar Azad Park (Company Garden)",
+    "category": "Landmark - Park",
+    "parent": "Prayagraj",
+    "latitude": 25.4578,
+    "longitude": 81.8482,
+    "tags": ["alfred park", "walking track", "biggest green lung", "martyrdom site"]
+  },
+  {
+    "id": "pg_land_006",
+    "name": "Bade Hanuman Ji Temple (Lete Hanuman)",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4305,
+    "longitude": 81.8804,
+    "tags": ["reclining hanuman idol", "near fort flat ground", "high spiritual value"]
+  },
+  {
+    "id": "pg_land_007",
+    "name": "Khusro Bagh",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4449,
+    "longitude": 81.8229,
+    "tags": ["mughal tombs", "jahangir family history", "mango orchards", "lukarganj entry"]
+  },
+  {
+    "id": "pg_land_008",
+    "name": "All Saints Cathedral (Patthar Girja)",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4532,
+    "longitude": 81.8361,
+    "tags": ["gothic architecture church", "british era building", "civil lines roundabout"]
+  },
+  {
+    "id": "pg_land_009",
+    "name": "Alopi Devi Mandir",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4568,
+    "longitude": 81.8791,
+    "tags": ["shakti peeth", "no idol wooden palanquin worship", "alopibagh"]
+  },
+  {
+    "id": "pg_land_010",
+    "name": "Mankameshwar Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4241,
+    "longitude": 81.8519,
+    "tags": ["yamuna bank shiva temple", "saraswati ghat approach"]
+  },
+  {
+    "id": "pg_land_011",
+    "name": "Saraswati Ghat",
+    "category": "Landmark - Recreational",
+    "parent": "Prayagraj",
+    "latitude": 25.4225,
+    "longitude": 81.8542,
+    "tags": ["yamuna riverfront", "evening aarti", "boating stepped pavilion"]
+  },
+  {
+    "id": "pg_land_012",
+    "name": "Jawahar Planetarium",
+    "category": "Landmark - Educational",
+    "parent": "Prayagraj",
+    "latitude": 25.4642,
+    "longitude": 81.8565,
+    "tags": ["space shows", "astronomy", "inside anand bhawan premises"]
+  },
+  {
+    "id": "pg_land_013",
+    "name": "Prayagraj Museum",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4559,
+    "longitude": 81.8492,
+    "tags": ["national museum artifacts", "inside company garden", "sculptures gallery"]
+  },
+  {
+    "id": "pg_land_014",
+    "name": "Akshayavat Tree (Inside Fort)",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4289,
+    "longitude": 81.8772,
+    "tags": ["immortal banyan tree", "patalpuri temple compound", "sacred tree"]
+  },
+  {
+    "id": "pg_land_015",
+    "name": "Shankar Viman Mandapam",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4335,
+    "longitude": 81.8799,
+    "tags": ["multi storey south style temple", "near sangam bund road"]
+  },
+  {
+    "id": "pg_land_016",
+    "name": "Minto Park (Madan Mohan Malaviya Park)",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4248,
+    "longitude": 81.8471,
+    "tags": ["east india company transfer spot 1858", "yamuna view park"]
+  },
+  {
+    "id": "pg_land_017",
+    "name": "Someshwar Mahadev Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4191,
+    "longitude": 81.8992,
+    "tags": ["araur shore shiva temple", "naini side coast"]
+  },
+  {
+    "id": "pg_land_018",
+    "name": "Nagvasuki Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4658,
+    "longitude": 81.8912,
+    "tags": ["serpent god temple", "daraganj north bank nag panchami"]
+  },
+  {
+    "id": "pg_land_019",
+    "name": "Mayo Memorial Hall",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4605,
+    "longitude": 81.8409,
+    "tags": ["british red stone tower", "sports complex now", "near stans colony"]
+  },
+  {
+    "id": "pg_land_020",
+    "name": "Public Library (Thornhill Mayne Memorial)",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.4589,
+    "longitude": 81.8469,
+    "tags": ["gothic architecture library", "inside company garden", "old manuscripts"]
+  },
+  {
+    "id": "pg_land_021",
+    "name": "Ganga Gallery",
+    "category": "Landmark - Educational",
+    "parent": "Prayagraj",
+    "latitude": 25.4891,
+    "longitude": 81.8682,
+    "tags": ["river ecosystem exhibition", "national academy of sciences"]
+  },
+  {
+    "id": "pg_land_022",
+    "name": "New Yamuna Bridge (Naini Bridge)",
+    "category": "Landmark - Infrastructure",
+    "parent": "Prayagraj",
+    "latitude": 25.4242,
+    "longitude": 81.8419,
+    "tags": ["cable stayed iconic bridge", "sunset spot", "connects city to naini"]
+  },
+  {
+    "id": "pg_land_023",
+    "name": "Old Naini Bridge",
+    "category": "Landmark - Infrastructure",
+    "parent": "Prayagraj",
+    "latitude": 25.4281,
+    "longitude": 81.8549,
+    "tags": ["double decker rail road bridge", "historical iron structure"]
+  },
+  {
+    "id": "pg_land_024",
+    "name": "Curzon Bridge (Phaphamau Bridge)",
+    "category": "Landmark - Historical",
+    "parent": "Prayagraj",
+    "latitude": 25.5189,
+    "longitude": 81.8605,
+    "tags": ["century old rail bridge over ganga", "heritage structure views"]
+  },
+  {
+    "id": "pg_land_025",
+    "name": "Kalyani Devi Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4299,
+    "longitude": 81.8269,
+    "tags": ["ancient shakti shrine", "historical old city custom"]
+  },
+  {
+    "id": "pg_land_026",
+    "name": "Lalita Devi Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4345,
+    "longitude": 81.8159,
+    "tags": ["meerapur region shrine", "sidh peeth temple track"]
+  },
+  {
+    "id": "pg_land_027",
+    "name": "Takshakeshwar Nath Mahadev",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.3912,
+    "longitude": 81.8115,
+    "tags": ["south end shiva pit", "dariyabad corner yamuna ring"]
+  },
+  {
+    "id": "pg_land_028",
+    "name": "Patalpuri Temple",
+    "category": "Landmark - Religious",
+    "parent": "Prayagraj",
+    "latitude": 25.4291,
+    "longitude": 81.8769,
+    "tags": ["underground deep rock temple", "inside ramparts"]
+  },
+  {
+    "id": "pg_land_029",
+    "name": "Kumbh Mela Sector Grounds",
+    "category": "Landmark - Cultural",
+    "parent": "Prayagraj",
+    "latitude": 25.4412,
+    "longitude": 81.8956,
+    "tags": ["seasonal transient tent city layout", "parade ground plains"]
+  },
+  {
+    "id": "pg_land_030",
+    "name": "Qila Ghat",
+    "category": "Landmark - Recreational",
+    "parent": "Prayagraj",
+    "latitude": 25.4278,
+    "longitude": 81.8721,
+    "tags": ["fort base steps", "boat hire station", "ganga edge parking"]
+  },
+  {
+    "id": "pg_inst_001",
+    "name": "University of Allahabad (Main Campus)",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4631,
+    "longitude": 81.8625,
+    "tags": ["oxford of the east", "central university", "historic academic buildings"]
+  },
+  {
+    "id": "pg_inst_002",
+    "name": "MNNIT Allahabad",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4921,
+    "longitude": 81.8665,
+    "tags": ["motilal nehru national institute of technology", "engineering college", "teliyarganj"]
+  },
+  {
+    "id": "pg_inst_003",
+    "name": "IIIT Allahabad",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4322,
+    "longitude": 81.7705,
+    "tags": ["indian institute of information technology", "jhalwa tech campus"]
+  },
+  {
+    "id": "pg_inst_004",
+    "name": "Allahabad High Court Complex",
+    "category": "Institute - Judiciary",
+    "parent": "Prayagraj",
+    "latitude": 25.4522,
+    "longitude": 81.8189,
+    "tags": ["judiciary supreme block", "gt road landmark", "lawyers block"]
+  },
+  {
+    "id": "pg_inst_005",
+    "name": "Moti Lal Nehru Medical College (MLN)",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4549,
+    "longitude": 81.8595,
+    "tags": ["government medical college hospital", "lowther road center"]
+  },
+  {
+    "id": "pg_inst_006",
+    "name": "SHUATS Naini",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4112,
+    "longitude": 81.8491,
+    "tags": ["sam higginbottom university", "agriculture engineering", "naini campus"]
+  },
+  {
+    "id": "pg_inst_007",
+    "name": "Ewing Christian College (ECC)",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4285,
+    "longitude": 81.8599,
+    "tags": ["gaughat line degree college", "autonomous legacy school"]
+  },
+  {
+    "id": "pg_inst_008",
+    "name": "CMP Degree College",
+    "category": "Institute",
+    "parent": "Prayagraj",
+    "latitude": 25.4419,
+    "longitude": 81.8645,
+    "tags": ["chaudhary mahadeo prasad college", "george town fringes student pocket"]
+  },
+  {
+    "id": "pg_tran_001",
+    "name": "Prayagraj Junction Railway Station (PRYJ)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.4495,
+    "longitude": 81.8281,
+    "tags": ["main junction station", "civil lines exit", "city side lead road exit"]
+  },
+  {
+    "id": "pg_tran_002",
+    "name": "Subedarganj Station (SFG)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.4529,
+    "longitude": 81.7955,
+    "tags": ["west satellite rail terminus", "ncr north bypass rails"]
+  },
+  {
+    "id": "pg_tran_003",
+    "name": "Prayag Junction (PRG)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.4792,
+    "longitude": 81.8519,
+    "tags": ["north route station track", "near salori teliyarganj threshold"]
+  },
+  {
+    "id": "pg_tran_004",
+    "name": "Daraganj Railway Station (DRGJ)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.4525,
+    "longitude": 81.8891,
+    "tags": ["small station near sangam tracks", "ner meter line upgraded"]
+  },
+  {
+    "id": "pg_tran_005",
+    "name": "Naini Junction Railway Station (NYN)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.3895,
+    "longitude": 81.8592,
+    "tags": ["south end main track splitter", "industrial zone cross link"]
+  },
+  {
+    "id": "pg_tran_006",
+    "name": "Prayagraj Rambagh Station (PRRB)",
+    "category": "Transit - Rail",
+    "parent": "Prayagraj",
+    "latitude": 25.4419,
+    "longitude": 81.8485,
+    "tags": ["v處理 varanasi lines terminal", "old core city lines station"]
+  },
+  {
+    "id": "pg_tran_007",
+    "name": "Civil Lines Bus Stand",
+    "category": "Transit - Bus",
+    "parent": "Prayagraj",
+    "latitude": 25.4502,
+    "longitude": 81.8329,
+    "tags": ["upsrtc upsrtc state buses", "intercity terminal hub"]
+  },
+  {
+    "id": "pg_tran_008",
+    "name": "Zero Road Bus Stand",
+    "category": "Transit - Bus",
+    "parent": "Prayagraj",
+    "latitude": 25.4389,
+    "longitude": 81.8321,
+    "tags": ["regional southern state bus links", "congested city core yard"]
+  },
+  {
+    "id": "pg_tran_009",
+    "name": "Prayagraj Airport (IXD) - Bamrauli",
+    "category": "Transit - Air",
+    "parent": "Prayagraj",
+    "latitude": 25.4404,
+    "longitude": 81.7348,
+    "tags": ["domestic airport civil terminal", "bamrauli air force zone link"]
+  },
+  {
+    "id": "pg_peri_001",
+    "name": "Shringverpur",
+    "category": "Peripheral - Tourist",
+    "parent": "Prayagraj District",
+    "latitude": 25.5925,
+    "longitude": 81.6492,
+    "tags": ["ramayana trail landmark", "nishadraj kingdom site", "40km out north-west"]
+  }
+]

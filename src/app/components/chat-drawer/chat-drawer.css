@@ -1,0 +1,162 @@
+/* Overlay to darken background */
+.chat-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.chat-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Premium Side Drawer */
+.chat-drawer {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--rz-bg-card, #ffffff);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* ✅ NEW: Stops the input box from bleeding out the bottom */
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.chat-drawer.open {
+  right: 0;
+}
+
+/* Header & Tabs */
+.drawer-header {
+  padding: 20px 20px 0 20px;
+  border-bottom: 1px solid var(--rz-border, #e5e7eb);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.header-top h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--rz-text-main); }
+.close-btn { background: none; border: none; cursor: pointer; color: var(--rz-text-muted); }
+
+.chat-tabs {
+  display: flex;
+  gap: 20px;
+}
+.chat-tabs button {
+  background: none; border: none; padding: 10px 0; font-weight: 600;
+  color: var(--rz-text-muted); cursor: pointer; position: relative;
+  font-size: 0.95rem;
+}
+.chat-tabs button.active { color: var(--rz-primary); }
+.chat-tabs button.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+  height: 3px; background: var(--rz-primary); border-radius: 3px 3px 0 0;
+}
+.badge { background: #ef4444; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 6px; }
+
+/* Conversation List */
+.conversation-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+.conv-item {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  cursor: pointer; transition: background 0.2s;
+}
+.conv-item:hover { background: #f8fafc; }
+.avatar {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--rz-primary);
+  color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;
+}
+.conv-details { flex: 1; overflow: hidden; }
+.conv-details h4 { margin: 0 0 4px 0; font-size: 1rem; color: var(--rz-text-main); }
+.last-msg { margin: 0; font-size: 0.85rem; color: var(--rz-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unread-dot { width: 10px; height: 10px; background: var(--rz-primary); border-radius: 50%; }
+
+/* Active Chat View */
+/* Active Chat View */
+.active-chat-view { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 0; /* ✅ NEW: Critical flexbox fix to stop it from pushing the input down */
+  /* Remove 'height: 100%' entirely */
+}
+.chat-sub-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+  border-bottom: 1px solid var(--rz-border);
+}
+.back-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; }
+.chat-sub-header h4 { margin: 0; font-size: 1.1rem; }
+
+.messages-container {
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 20px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px;
+  background: #f8fafc;
+  min-height: 0; /* ✅ NEW: Ensures this box scrolls instead of expanding forever */
+}
+.message-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; position: relative; }
+.message-bubble p { margin: 0; font-size: 0.95rem; line-height: 1.4; }
+.message-bubble .time { font-size: 0.7rem; opacity: 0.7; display: block; margin-top: 4px; text-align: right; }
+
+.sent { align-self: flex-end; background: var(--rz-primary); color: white; border-bottom-right-radius: 4px; }
+.received { align-self: flex-start; background: white; border: 1px solid var(--rz-border); border-bottom-left-radius: 4px; color: var(--rz-text-main); }
+
+/* Input Area */
+.chat-input-area {
+  padding: 16px 20px; 
+  /* Add safe-area-inset to prevent the iPhone home bar from covering the input */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: white; 
+  border-top: 1px solid var(--rz-border);
+  display: flex; 
+  gap: 10px; 
+  align-items: center;
+}
+.chat-input-area input {
+  flex: 1; padding: 12px 16px; border-radius: 50px; border: 1px solid var(--rz-border);
+  outline: none; font-size: 0.95rem; background: #f8fafc;
+}
+.chat-input-area input:focus { border-color: var(--rz-primary); }
+.send-btn {
+  width: 42px; height: 42px; border-radius: 50%; background: var(--rz-primary);
+  color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.send-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+/* Mobile Adjustment */
+@media (max-width: 768px) {
+  .chat-drawer {
+    right: 0; 
+    top: auto; /* Reset top positioning */
+    bottom: -100%; /* Hide the drawer below the screen initially */
+    height: 85dvh; /* 'dvh' adapts to the mobile address bar popping in/out */
+    border-radius: 24px 24px 0 0; 
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .chat-drawer.open { 
+    bottom: 0; /* Snap it perfectly to the bottom of the visible screen */
+  }
+}
+/* Add this to your chat-drawer.css */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* Adjust this height based on your preference */
+  color: var(--rz-text-muted, #6b7280);
+  font-size: 0.95rem;
+  font-weight: 500;
+}

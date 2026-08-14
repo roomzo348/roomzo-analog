@@ -1,0 +1,55 @@
+<div class="faq-page">
+  
+  <header class="faq-header">
+    <h1>Frequently Asked Questions</h1>
+    <p>Have questions? We're here to help.</p>
+  </header>
+
+  <div class="faq-container">
+    
+    <div class="tabs-container">
+      <button class="tab-btn" 
+        [class.active]="activeCategory === 'General'" 
+        (click)="setCategory('General')">
+        General
+      </button>
+      <button class="tab-btn" 
+        [class.active]="activeCategory === 'Tenants'" 
+        (click)="setCategory('Tenants')">
+        For Tenants
+      </button>
+      <button class="tab-btn" 
+        [class.active]="activeCategory === 'Owners'" 
+        (click)="setCategory('Owners')">
+        For Owners
+      </button>
+    </div>
+
+    <div class="faq-list">
+      
+      <div class="faq-item" 
+           *ngFor="let item of displayFaqs" 
+           [class.open]="item.isOpen"
+           (click)="toggleItem(item)">
+        
+        <div class="faq-question">
+          <h3>{{ item.question }}</h3>
+          <mat-icon class="chevron">expand_more</mat-icon>
+        </div>
+        
+        <div class="faq-answer" [style.max-height]="item.isOpen ? '200px' : '0'">
+          <p>{{ item.answer }}</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="still-stuck">
+      <h3>Still have questions?</h3>
+      <p>Can't find the answer you're looking for? Please chat to our friendly team.</p>
+      <button mat-flat-button color="primary" (click)="goToContact()" >Get in touch</button>
+    </div>
+
+  </div>
+</div>

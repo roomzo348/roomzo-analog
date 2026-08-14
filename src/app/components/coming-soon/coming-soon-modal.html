@@ -1,0 +1,33 @@
+<div class="live-modal">
+  <button type="button" class="modal-close-btn" (click)="close()" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="live-modal-hero">
+    <div class="live-badge">
+      <span class="live-pulse" aria-hidden="true"></span>
+      Now Live
+    </div>
+
+    <h2>Roomzo is live in<br>Prayagraj, Varanasi, Lucknow &amp; Pune</h2>
+    <p class="hero-subline">Owner-listed rooms, PGs &amp; flats — no brokerage.</p>
+
+    <div class="live-cities-row">
+      <div class="live-city-card" *ngFor="let city of liveCities">
+        <mat-icon>{{ city.icon }}</mat-icon>
+        <strong>{{ city.name }}</strong>
+        <span>Live</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-modal-body">
+    <div class="live-stats-grid">
+      <div class="live-stat-card" *ngFor="let stat of stats">
+        <mat-icon>{{ stat.icon }}</mat-icon>
+        <span class="stat-number">{{ stat.value }}</span>
+        <span class="stat-label">{{ stat.label }}</span>
+      </div>
+    </div>
+  </div>
+</div>

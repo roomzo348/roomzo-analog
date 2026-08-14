@@ -1,0 +1,261 @@
+/* ============================================================
+   HERO — RoomZo
+   Theme color: #196153 (deep teal)
+
+   Image: Unsplash photo-1484154218962-a197022b5858
+   Bright, airy modern room interior — warm whites + wood tones
+   complement the deep teal perfectly. 100% free commercial use.
+   Alt option: photo-1556909114-f6e7ad7d3136 (cozy desk setup)
+============================================================ */
+
+.hero-full {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: url('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1400&q=85')
+              center center / cover no-repeat;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  /* Teal-tinted overlay instead of plain black — ties to brand */
+  background:
+    linear-gradient(
+      105deg,
+      rgba(15, 40, 35, 0.88) 0%,
+      rgba(15, 40, 35, 0.60) 50%,
+      rgba(15, 40, 35, 0.10) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(15, 40, 35, 0.75) 0%,
+      transparent 55%
+    );
+  z-index: 1;
+}
+
+.hero-content-center {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 960px;
+  padding: 56px 24px 44px;
+  text-align: left;
+}
+
+/* ---- Heading ---- */
+.hero-content-center h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+  margin: 0 0 6px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+
+.hero-accent {
+  /* Lighter teal-green for accent — visible on dark overlay */
+  color: #4ade80;
+  display: block;
+}
+
+/* ---- Sub ---- */
+.hero-sub {
+  font-family: 'Outfit', sans-serif;
+  color: rgba(255,255,255,0.80);
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0 0 18px;
+}
+
+/* ---- Trust badges ---- */
+.hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+}
+
+.badge-pill mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: #4ade80;
+}
+
+.badge-sep {
+  color: rgba(255,255,255,0.35);
+  font-size: 1rem;
+}
+
+/* ============================================================
+   STATS STRIP — below hero
+============================================================ */
+.hero-stats-strip {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  max-width: 960px;
+  width: calc(100% - 32px);
+  margin: 14px auto 0;
+  padding: 16px 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.stat-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  color: #196153;
+  flex-shrink: 0;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.stat-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #196153;
+}
+
+.stat-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+  margin: 0 8px;
+}
+
+/* ============================================================
+   MOBILE (≤ 768px)
+============================================================ */
+@media (max-width: 768px) {
+  .hero-full {
+    min-height: 370px;
+  }
+
+  .hero-content-center {
+    padding: 0 16px 22px !important;
+  }
+
+  .hero-content-center h1 {
+    font-size: 1.65rem;
+    margin: 0 0 4px;
+  }
+
+  .hero-accent {
+    font-size: 1.75rem;
+  }
+
+  .hero-sub {
+    font-size: 0.85rem;
+    margin: 0 0 12px;
+  }
+
+  .hero-badges {
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+
+  .badge-pill {
+    padding: 5px 11px;
+    font-size: 0.80rem;
+  }
+
+  /* Stats mobile — all 4 in one row */
+  .hero-stats-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: calc(100% - 20px);
+    margin: 10px auto 0;
+    padding: 10px 4px;
+    border-radius: 12px;
+    gap: 0;
+  }
+
+  .stat-item {
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 2px;
+  }
+
+  .stat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+
+  .stat-text {
+    align-items: center;
+  }
+
+  .stat-number {
+    font-size: 0.8rem;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 0.56rem;
+    white-space: nowrap;
+    line-height: 1.15;
+  }
+
+  .stat-divider {
+    display: block;
+    align-self: center;
+    height: 28px;
+    margin: 0 1px;
+    flex-shrink: 0;
+  }
+}
+
+/* Removed animated city rotate — replaced with static 4+ Cities */

@@ -1,0 +1,333 @@
+<div class="page-wrapper">
+  <div class="container">
+
+    <div class="modern-stepper desktop-only">
+      <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+        <div class="step-icon"><mat-icon *ngIf="currentStep > 1">check</mat-icon><span *ngIf="currentStep <= 1">1</span></div>
+        <div class="step-label">Details</div>
+      </div>
+      <div class="step-divider" [class.completed]="currentStep > 1"></div>
+      <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+        <div class="step-icon"><mat-icon *ngIf="currentStep > 2">check</mat-icon><span *ngIf="currentStep <= 2">2</span></div>
+        <div class="step-label">Amenities</div>
+      </div>
+      <div class="step-divider" [class.completed]="currentStep > 2"></div>
+      <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+        <div class="step-icon"><mat-icon *ngIf="currentStep > 3">check</mat-icon><span *ngIf="currentStep <= 3">3</span></div>
+        <div class="step-label">Guidebook</div>
+      </div>
+      <div class="step-divider" [class.completed]="currentStep > 3"></div>
+      <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
+        <div class="step-icon"><mat-icon *ngIf="currentStep > 4">check</mat-icon><span *ngIf="currentStep <= 4">4</span></div>
+        <div class="step-label">Photos & Price</div>
+      </div>
+    </div>
+
+    <div class="mobile-progress mobile-only">
+      <div class="step-indicator">
+        <span class="current-step-label">Step {{currentStep}} of {{totalSteps}}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+      </div>
+    </div>
+
+    <div class="main-card">
+      <form [formGroup]="listingForm">
+
+        <div *ngIf="currentStep === 1" formGroupName="details">
+          <h1 class="section-title">Tell us about your property</h1>
+          <p class="section-subtitle">Start with the basics so we can categorize your listing correctly.</p>
+
+          <h2 class="subsection-title">What kind of place is it? <span class="req-star">*</span></h2>
+          <div class="property-type-grid">
+            <label class="type-card" *ngFor="let type of propertyTypes"
+              [class.selected]="detailsGroup.get('propertyType')?.value === type.value">
+              <input type="radio" formControlName="propertyType" [value]="type.value" hidden>
+              <mat-icon class="type-icon">{{type.icon}}</mat-icon>
+              <span class="type-label">{{type.label}}</span>
+              <div class="selection-ring"><mat-icon>check</mat-icon></div>
+            </label>
+          </div>
+          <span class="error-text" *ngIf="detailsGroup.get('propertyType')?.invalid && detailsGroup.get('propertyType')?.touched">
+            Please select a property type.
+          </span>
+
+          <h2 class="subsection-title move-down mt-32">Property Location <span class="req-star">*</span></h2>
+          
+          <div class="map-picker-container" [class.map-error]="detailsGroup.get('address.latitude')?.invalid && detailsGroup.get('address.latitude')?.touched">
+            
+            <div class="map-header">
+              <div>
+                <p class="input-helper mb-0">Pinpoint your exact location on the map.</p>
+              </div>
+              
+              <div class="map-actions">
+                <div class="search-location-inline">
+                  <input type="text" [formControl]="searchControl" placeholder="🔍 Search Civil Lines...">
+                  
+                  <div class="autocomplete-dropdown" *ngIf="searchResults.length > 0">
+                    <div class="suggestion-item" *ngFor="let result of searchResults" (click)="selectLocation(result)">
+                      <mat-icon>place</mat-icon>
+                      <span>{{ result.display_name }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="button" class="btn-outline btn-small" (click)="detectLocation()">
+                  <mat-icon>my_location</mat-icon> <span class="desktop-only">Auto-Detect</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="propertyMap" class="property-map mt-16"></div>
+          </div>
+          <span class="error-text" *ngIf="detailsGroup.get('address.latitude')?.invalid && detailsGroup.get('address.latitude')?.touched">
+            Please select your location on the map.
+          </span>
+
+          <div formGroupName="address" class="address-grid mt-24">
+            <div class="input-group full-width">
+              <label class="input-label">Street Address <span class="req-star">*</span></label>
+              <input type="text" formControlName="street" placeholder="e.g. 123 Main St">
+              <span class="error-text" *ngIf="detailsGroup.get('address.street')?.invalid && detailsGroup.get('address.street')?.touched">Street address is required.</span>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Landmark <span class="req-star">*</span></label>
+              <input type="text" formControlName="landmark" placeholder="Near City Mall">
+              <span class="error-text" *ngIf="detailsGroup.get('address.landmark')?.invalid && detailsGroup.get('address.landmark')?.touched">Landmark is required.</span>
+            </div>
+            <div class="input-group">
+              <label class="input-label">City <span class="req-star">*</span></label>
+              <input type="text" formControlName="city" placeholder="City">
+              <span class="error-text" *ngIf="detailsGroup.get('address.city')?.invalid && detailsGroup.get('address.city')?.touched">City is required.</span>
+            </div>
+            <div class="input-group">
+              <label class="input-label">State <span class="req-star">*</span></label>
+              <input type="text" formControlName="state" placeholder="State">
+              <span class="error-text" *ngIf="detailsGroup.get('address.state')?.invalid && detailsGroup.get('address.state')?.touched">State is required.</span>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Zip/Pincode <span class="req-star">*</span></label>
+              <input type="text" formControlName="zip" placeholder="400001">
+              <span class="error-text" *ngIf="detailsGroup.get('address.zip')?.invalid && detailsGroup.get('address.zip')?.touched">Pincode is required.</span>
+            </div>
+          </div>
+
+          <h2 class="subsection-title move-down mt-32">Accommodation</h2>
+          <div class="counter-card">
+            <div class="counter-row">
+              <div class="counter-label">
+                <div class="label-main">Bedrooms <span class="req-star">*</span></div>
+                <div class="label-sub">Private sleeping areas</div>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="counter-btn" (click)="updateCounter('bedrooms', -1)"><mat-icon>remove</mat-icon></button>
+                <span class="counter-value">{{ detailsGroup.get('bedrooms')?.value }}</span>
+                <button type="button" class="counter-btn" (click)="updateCounter('bedrooms', 1)"><mat-icon>add</mat-icon></button>
+              </div>
+            </div>
+            <div class="divider-thin"></div>
+            <div class="counter-row">
+              <div class="counter-label">
+                <div class="label-main">Bathrooms <span class="req-star">*</span></div>
+                <div class="label-sub">Full or half baths</div>
+              </div>
+              <div class="counter-controls">
+                <button type="button" class="counter-btn" (click)="updateCounter('bathrooms', -1)"><mat-icon>remove</mat-icon></button>
+                <span class="counter-value">{{ detailsGroup.get('bathrooms')?.value }}</span>
+                <button type="button" class="counter-btn" (click)="updateCounter('bathrooms', 1)"><mat-icon>add</mat-icon></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group mt-24">
+            <label class="input-label">Total Size (Sq Ft) <span class="req-star">*</span></label>
+            <input type="number" formControlName="propertySize" placeholder="e.g. 1200">
+            <span class="error-text" *ngIf="detailsGroup.get('propertySize')?.invalid && detailsGroup.get('propertySize')?.touched">Property size is required.</span>
+          </div>
+        </div>
+
+        <div *ngIf="currentStep === 2">
+          <div formGroupName="conditions">
+            <h1 class="section-title">Listing Conditions</h1>
+            <p class="section-subtitle">Who is this room for? Select all that apply (Prayagraj-style tags).</p>
+            <div class="pill-grid">
+              <label class="amenity-pill condition-pill" *ngFor="let item of listingConditions"
+                [class.selected]="conditionsGroup.get(item.formControlName)?.value === true">
+                <input type="checkbox" [formControlName]="item.formControlName" hidden>
+                <mat-icon *ngIf="conditionsGroup.get(item.formControlName)?.value">check_circle</mat-icon>
+                <mat-icon *ngIf="!conditionsGroup.get(item.formControlName)?.value" class="unselected-icon">{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div formGroupName="amenities" class="mt-32">
+          <h1 class="section-title">Amenities & Features</h1>
+          <p class="section-subtitle">What makes your property stand out? Select all that apply.</p>
+
+          <ng-container *ngFor="let group of amenityGroups">
+            <h2 class="subsection-title icon-title mt-32">{{ group.title }}</h2>
+            <div class="pill-grid">
+              <label class="amenity-pill" *ngFor="let item of group.items"
+                [class.selected]="amenitiesGroup.get(item.formControlName)?.value === true">
+                <input type="checkbox" [formControlName]="item.formControlName" hidden>
+                <mat-icon *ngIf="amenitiesGroup.get(item.formControlName)?.value">check_circle</mat-icon>
+                <mat-icon *ngIf="!amenitiesGroup.get(item.formControlName)?.value" class="unselected-icon">{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </label>
+            </div>
+          </ng-container>
+          </div>
+        </div>
+
+        <div *ngIf="currentStep === 3" formGroupName="guidebook">
+          <h1 class="section-title">Rules & Surroundings</h1>
+          <p class="section-subtitle">Set clear expectations and highlight the neighborhood.</p>
+
+          <h2 class="subsection-title">House Rules</h2>
+          <div class="pill-grid">
+            <div class="amenity-pill rule-pill" *ngFor="let rule of commonRules" [class.selected]="isRuleSelected(rule.value)"
+              (click)="toggleRule(rule.value)">
+              <mat-icon *ngIf="isRuleSelected(rule.value)">check_circle</mat-icon>
+              <mat-icon *ngIf="!isRuleSelected(rule.value)" class="unselected-icon">{{rule.icon}}</mat-icon>
+              <span>{{rule.label}}</span>
+            </div>
+          </div>
+
+          <div class="input-group mt-24">
+            <label class="input-label">Additional Rules / Notes</label>
+            <textarea formControlName="customRules" rows="3"
+              placeholder="E.g., Please take out the trash on Tuesdays..."></textarea>
+          </div>
+
+          <div class="divider-line mt-32 mb-32"></div>
+
+          <h2 class="subsection-title">What's Nearby? <span class="req-star">*</span></h2>
+          <p class="input-helper mb-16">Add at least one nearby place (e.g. Metro station, park).</p>
+
+          <div formArrayName="nearby">
+            <div class="nearby-row" *ngFor="let place of nearbyPlaces.controls; let i = index" [formGroupName]="i">
+              <div class="nearby-icon-box"><mat-icon>place</mat-icon></div>
+              <div class="input-col-main">
+                <input type="text" formControlName="name" placeholder="Place Name (e.g. Central Park)">
+                <span class="error-text" *ngIf="place.get('name')?.invalid && place.get('name')?.touched">Required</span>
+              </div>
+              <div class="input-col-side">
+                <input type="text" formControlName="distance" placeholder="Distance (e.g. 5 min)">
+                <span class="error-text" *ngIf="place.get('distance')?.invalid && place.get('distance')?.touched">Required</span>
+              </div>
+              <button type="button" class="btn-icon-danger" (click)="removeNearbyPlace(i)" *ngIf="nearbyPlaces.length > 1">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="btn-dashed mt-16" (click)="addNearbyPlace()">
+            <mat-icon>add</mat-icon> Add Another Place
+          </button>
+        </div>
+
+        <div *ngIf="currentStep === 4" formGroupName="final">
+          
+          <div class="two-column-layout">
+            <div class="main-column">
+              <h1 class="section-title">Final Details</h1>
+              <p class="section-subtitle">Add photos, pricing, and a description to finish up.</p>
+              
+              <div class="input-group">
+                <label class="input-label">Property Title <span class="req-star">*</span></label>
+                <input type="text" formControlName="name" placeholder="E.g., Cozy 2-bedroom apartment in Bandra...">
+                <span class="error-text" *ngIf="finalGroup.get('name')?.invalid && finalGroup.get('name')?.touched">Title is required.</span>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label">Description <span class="req-star">*</span></label>
+                <textarea formControlName="description" rows="4" placeholder="Describe what makes your place special..."></textarea>
+                
+                <span class="input-helper" style="margin-bottom: 0; margin-top: 4px;">
+                  💡 Tip: Press 'Enter' for a new line to automatically create bullet points.
+                </span>
+
+                <span class="error-text" *ngIf="finalGroup.get('description')?.invalid && finalGroup.get('description')?.touched">Description is required.</span>
+              </div>
+
+              <div class="grid-2-col mt-16">
+                <div class="input-group">
+                  <label class="input-label">Monthly Rent (₹) <span class="req-star">*</span></label>
+                  <input type="number" formControlName="rentAmount" placeholder="e.g. 15000">
+                  <span class="error-text" *ngIf="finalGroup.get('rentAmount')?.invalid && finalGroup.get('rentAmount')?.touched">Rent is required.</span>
+                </div>
+                <div class="input-group">
+                  <label class="input-label">Contact Number <span class="req-star">*</span></label>
+                  <input type="text" formControlName="contactNo" placeholder="10-digit mobile number">
+                  <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('required') && finalGroup.get('contactNo')?.touched">Contact is required.</span>
+                  <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('pattern') && finalGroup.get('contactNo')?.touched">Must be exactly 10 digits.</span>
+                </div>
+              </div>
+
+              <h2 class="subsection-title mt-32">Photos <span class="req-star">*</span></h2>
+              <div class="photo-upload-container" (click)="fileInput.click()" [class.map-error]="imagePreviews.length > 0 && imagePreviews.length < 2">
+                <div class="upload-content">
+                  <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                  <p><strong>Click to upload photos</strong></p>
+                  <span class="input-helper">Upload at least 2 clear images of your property.</span>
+                </div>
+                <input #fileInput type="file" multiple accept="image/*" (change)="onFileSelected($event)" hidden>
+              </div>
+              <span class="error-text" *ngIf="imagePreviews.length > 0 && imagePreviews.length < 2">
+                You must upload at least 2 photos before publishing.
+              </span>
+
+              <div class="image-previews" *ngIf="imagePreviews.length > 0">
+                <div class="preview-item" *ngFor="let img of imagePreviews; let i = index">
+                  <img [src]="img">
+                  <button type="button" class="remove-img-btn" (click)="removeImage(i)"><mat-icon>close</mat-icon></button>
+                  <div class="cover-tag" *ngIf="i === 0">Cover</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-column desktop-only">
+              <div class="preview-card-wrapper sticky-sidebar">
+                <h4 class="preview-header">Live Preview</h4>
+                <div class="preview-card">
+                  <div class="preview-image-container">
+                    <img [src]="imagePreviews.length > 0 ? imagePreviews[0] : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'">
+                    <div class="status-badge"><span class="dot"></span> Available</div>
+                  </div>
+                  <div class="preview-content">
+                    <div class="price-row">
+                      <div class="preview-price">₹{{ finalGroup.get('rentAmount')?.value || 0 }}<span>/mo</span></div>
+                    </div>
+                    <h3>{{ detailsGroup.get('bedrooms')?.value }} Bed {{ detailsGroup.get('propertyType')?.value | titlecase }}</h3>
+                    <p class="preview-loc"><mat-icon>location_on</mat-icon> {{ detailsGroup.get('address.city')?.value || 'City' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline back-btn" (click)="prevStep()" [style.visibility]="currentStep === 1 ? 'hidden' : 'visible'">
+            Back
+          </button>
+          
+          <button type="button" class="btn-primary" (click)="nextStep()" *ngIf="currentStep < totalSteps">
+            Next Step <mat-icon>arrow_forward</mat-icon>
+          </button>
+          
+          <button type="button" class="btn-primary finish-btn" (click)="onSubmit()" *ngIf="currentStep === totalSteps" [disabled]="isSubmitting">
+            <mat-icon *ngIf="!isSubmitting">celebration</mat-icon>
+            <mat-icon *ngIf="isSubmitting" class="spinner">sync</mat-icon>
+            {{ isSubmitting ? 'Saving...' : 'Publish Listing' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div> 
+</div>

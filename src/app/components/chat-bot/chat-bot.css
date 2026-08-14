@@ -1,0 +1,437 @@
+/* =========================================
+   FAB Button (Floating Chat Trigger)
+   ========================================= */
+.roomzi-fab {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-hover) 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  animation: chatPulse 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  box-shadow: 
+    0 4px 15px rgba(25, 97, 83, 0.4),
+    0 8px 30px rgba(25, 97, 83, 0.25),
+    0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.roomzi-fab:hover {
+  transform: scale(1.12);
+  box-shadow: 
+    0 6px 20px rgba(25, 97, 83, 0.5),
+    0 12px 40px rgba(25, 97, 83, 0.35),
+    0 0 2px rgba(0, 0, 0, 0.15);
+  animation: none;
+}
+
+.roomzi-fab:active {
+  transform: scale(1.05);
+}
+
+@keyframes chatPulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 15px rgba(25, 97, 83, 0.4),
+      0 8px 30px rgba(25, 97, 83, 0.25),
+      0 0 1px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 4px 20px rgba(25, 97, 83, 0.5),
+      0 10px 35px rgba(25, 97, 83, 0.35),
+      0 0 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.roomzi-icon {
+  display: inline-block;
+  animation: iconFloat 2s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* =========================================
+   Chat Window Container (Mobile Fluid Layout)
+   ========================================= */
+.chat-container {
+  position: fixed;
+  /* Anchor slightly above your bottom navigation bar */
+  bottom: 85px; 
+  right: 16px;
+  /* Fluid width: Full width on mobile minus padding, capped at 380px on desktop */
+  width: calc(100vw - 32px);
+  max-width: 380px;
+  /* Fluid height: Adapts to screen size without hiding behind bottom nav */
+  height: calc(100vh - 120px);
+  max-height: 600px;
+  
+  background: var(--rz-bg-card);
+  border-radius: var(--rz-radius);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  border: 1px solid var(--rz-border);
+}
+
+/* =========================================
+   Header & Action Buttons
+   ========================================= */
+.chat-header {
+  background: var(--rz-primary);
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header .brand {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.chat-header span {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.action-icon-btn.close-btn {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* =========================================
+   Chat Messaging Area & Bubbles
+   ========================================= */
+.chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--rz-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg-bot {
+  align-self: flex-start;
+  max-width: 85%;
+}
+
+.msg-user {
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.msg-bot .bubble {
+  background: white;
+  color: var(--rz-text-main);
+  border: 1px solid var(--rz-border);
+}
+
+.msg-user .bubble {
+  background: var(--rz-primary);
+  color: white;
+}
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  box-shadow: var(--rz-shadow-sm);
+}
+
+/* =========================================
+   Interactive Actions, Inputs, & Suggestions
+   ========================================= */
+.options-grid, .action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chat-btn {
+  background: white;
+  border: 1px solid var(--rz-primary);
+  color: var(--rz-primary);
+  padding: 8px 12px;
+  border-radius: var(--rz-radius-pill);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chat-btn:hover {
+  background: var(--rz-primary);
+  color: white;
+}
+
+.chat-btn.primary {
+  background: var(--rz-primary);
+  color: white;
+}
+
+.chat-btn.primary:hover {
+  background: var(--rz-primary-hover);
+}
+
+.chat-btn.secondary {
+  background: white;
+  border-color: var(--rz-border);
+  color: var(--rz-text-main);
+}
+
+.chat-btn.load-more {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+}
+
+.chat-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius-sm);
+  font-family: var(--font-sans);
+}
+
+.suggestions {
+  background: white;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius-sm);
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.suggestion-item {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--rz-border);
+}
+
+.suggestion-item:hover {
+  background: #f0fdfa;
+}
+
+/* =========================================
+   Property Result Cards
+   ========================================= */
+.chat-property-card {
+  display: flex;
+  background: white;
+  border-radius: var(--rz-radius-sm);
+  overflow: hidden;
+  margin-top: 8px;
+  border: 1px solid var(--rz-border);
+  box-shadow: var(--rz-shadow-sm);
+}
+
+.chat-property-card img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.card-details {
+  padding: 8px;
+  flex: 1;
+}
+
+.card-details h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--rz-primary);
+}
+
+.card-details p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--rz-text-muted);
+}
+
+/* =========================================
+   Custom Confirmation Dialog Overlay
+   ========================================= */
+.confirm-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* Dark overlay with glass blur */
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.confirm-dialog {
+  background: var(--rz-bg-card);
+  padding: 24px;
+  border-radius: var(--rz-radius);
+  width: 85%;
+  text-align: center;
+  box-shadow: var(--rz-shadow-md);
+  border: 1px solid var(--rz-border);
+  animation: scaleUp 0.2s ease-out forwards;
+}
+
+.confirm-dialog h4 {
+  margin: 0 0 8px;
+  color: var(--rz-text-main);
+  font-size: 1.15rem;
+}
+
+.confirm-dialog p {
+  margin: 0 0 24px;
+  color: var(--rz-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirm-actions .chat-btn {
+  flex: 1;
+  padding: 10px;
+}
+
+/* Beautiful destructive button state */
+.chat-btn.danger {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+.chat-btn.danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+/* ... Keep all your existing CSS exactly as it is, and add this at the bottom ... */
+
+/* =========================================
+   Button Loading States & Spinner
+   ========================================= */
+.chat-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px; 
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-bottom-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin { 
+  100% { transform: rotate(360deg); } 
+}
+
+/* =========================================
+   Conversational Typing Indicator
+   ========================================= */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 18px;
+  width: fit-content;
+  background: white;
+  border: 1px solid var(--rz-border);
+  border-radius: 12px;
+  box-shadow: var(--rz-shadow-sm);
+}
+
+.typing-indicator span {
+  display: block;
+  width: 6px; 
+  height: 6px;
+  background-color: var(--rz-primary);
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}

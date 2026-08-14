@@ -1,0 +1,163 @@
+/* ============================================================
+   SEARCH BAR — RoomZo
+============================================================ */
+
+.rz-search-pill {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  background: #ffffff;
+  padding: 6px 6px 6px 20px;
+  border-radius: 56px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  width: 100%;
+  max-width: 860px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.input-group {
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-group input {
+  width: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 0.98rem;
+  color: #111827;
+  background: transparent !important;
+  padding: 13px 8px 13px 34px !important;
+  font-family: 'Outfit', inherit;
+  box-sizing: border-box;
+}
+
+.input-group input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  min-width: 120px;
+}
+
+.custom-mat-select {
+  width: 100%;
+  font-size: 0.95rem;
+  font-family: 'Outfit', inherit;
+}
+
+::ng-deep .custom-mat-select .mat-mdc-select-value { color: #111827; font-weight: 500; }
+::ng-deep .custom-mat-select .mat-mdc-select-placeholder { color: #6b7280; font-weight: 500; }
+::ng-deep .custom-mat-select .mat-mdc-select-trigger { padding: 8px 0; }
+::ng-deep .custom-mat-select .mat-mdc-select-arrow svg { fill: #94a3b8; }
+
+/* ---- Search button — isolated, never inherits btn-primary ---- */
+.search-btn {
+  /* Reset any global button styles */
+  all: unset;
+  /* Now apply our styles */
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  border-radius: 50px !important;
+  padding: 12px 24px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  background: #196153 !important;
+  color: #fff !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-family: 'Outfit', inherit;
+  transition: background 0.18s ease;
+}
+
+.search-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+}
+
+.search-btn:hover { background: #134d42 !important; }
+.search-btn:active { opacity: 0.9; }
+
+/* ============================================================
+   MOBILE (≤ 768px)
+============================================================ */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+
+  .rz-search-pill {
+    border-radius: 14px !important;
+    padding: 6px 6px 6px 14px !important;
+    width: 100% !important;
+    min-height: 54px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.20);
+  }
+
+  .input-group {
+    height: 42px;
+  }
+
+  .search-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+    color: #9ca3af;
+  }
+
+  .input-group input {
+    padding: 0 4px 0 26px !important;
+    font-size: 0.88rem !important;
+    height: 100%;
+  }
+
+  .search-btn {
+    border-radius: 10px !important;
+    padding: 0 18px !important;
+    height: 42px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .search-btn mat-icon {
+    display: none; /* hide icon on mobile, show text only */
+  }
+}

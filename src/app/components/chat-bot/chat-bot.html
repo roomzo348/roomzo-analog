@@ -1,0 +1,77 @@
+<button class="roomzi-fab" (click)="toggleChat()" [class.active]="chatService.isOpen">
+  <span class="roomzi-icon">💬</span>
+</button>
+
+<div class="chat-container" *ngIf="chatService.isOpen">
+  <div class="chat-header">
+    <div class="brand">Patron <span>By Roomzo</span></div>
+    <div class="header-actions">
+      <button class="action-icon-btn clear-btn" (click)="triggerClearChat()" title="Clear Chat">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete_outline</mat-icon>
+      </button>
+      <button class="action-icon-btn close-btn" (click)="toggleChat()">×</button>
+    </div>
+
+    <div class="confirm-overlay" *ngIf="showClearConfirm">
+      <div class="confirm-dialog">
+        <h4>Clear Conversation?</h4>
+        <p>This will permanently remove your current chat history.</p>
+        <div class="confirm-actions">
+          <button class="chat-btn secondary" (click)="cancelClearChat()">Cancel</button>
+          <button class="chat-btn primary danger" (click)="executeClearChat()">Yes, Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-messages" #chatScrollContainer>
+    <div *ngFor="let msg of chatService.messages" 
+         [ngClass]="{'msg-user': msg.sender === 'user', 'msg-bot': msg.sender === 'bot'}">
+      
+      <div class="bubble">{{ msg.text }}</div>
+
+      <div class="options-grid" *ngIf="msg.type === 'options' && msg.options">
+        <button *ngFor="let opt of msg.options" class="chat-btn" (click)="handleOptionClick(msg.id, opt)">
+          {{ opt }}
+        </button>
+      </div>
+
+      <div class="action-box" *ngIf="msg.type === 'location-prompt'">
+        <button class="chat-btn primary" (click)="requestLocation()" [disabled]="isLocating">
+          <span class="spinner" *ngIf="isLocating"></span>
+          {{ isLocating ? 'Locating...' : '📍 Use My Location' }}
+        </button>
+        <button class="chat-btn secondary" (click)="promptTextSearch()">⌨️ Type Area Name</button>
+      </div>
+
+      <div class="action-box search-box" *ngIf="msg.type === 'subarea-search'">
+        <input type="text" [(ngModel)]="searchTerm" (keyup)="onSearchChange($event)" placeholder="E.g. Civil Lines, Katra..." class="chat-input" />
+        <div class="suggestions" *ngIf="searchResults.length > 0">
+          <div *ngFor="let res of searchResults" class="suggestion-item" (click)="selectSubArea(res)">
+            {{ res.name }} <small>({{ res.category }})</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="properties-list" *ngIf="msg.type === 'properties' && msg.properties">
+        <div (click)="viewDetails(prop.id)" class="chat-property-card" *ngFor="let prop of msg.properties">
+          <img [src]="prop.photos?.[0]?.photoUrl || 'assets/placeholder.jpg'" alt="property">
+          <div class="card-details">
+            <h4>₹{{ prop.rentAmount }} /mo</h4>
+            <p>{{ prop.propertyName || prop.propertyType }} in {{ prop.city }}</p>
+          </div>
+        </div>
+        
+        <button class="chat-btn load-more" *ngIf="msg.pageContext?.hasMore" (click)="loadMoreProperties(msg)">
+          Load More
+        </button>
+      </div>
+    </div>
+
+    <div class="msg-bot" *ngIf="isTyping">
+      <div class="bubble typing-indicator">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</div>

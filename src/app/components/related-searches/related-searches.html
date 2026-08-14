@@ -1,0 +1,26 @@
+<aside class="related-searches" [class.compact]="compact" aria-label="Related rental searches">
+  <h2 class="related-title">Related Searches</h2>
+  <p class="related-desc">
+    Popular rental searches on Roomzo
+    <span *ngIf="cityName"> in {{ cityName }}</span>.
+  </p>
+  <nav class="related-links" aria-label="Related search links">
+    <a
+      *ngFor="let q of relatedQueries"
+      [routerLink]="q.routerLink"
+      [queryParams]="q.queryParams || null"
+      class="related-chip"
+    >{{ q.label }}</a>
+  </nav>
+
+  <div class="city-quick-links" *ngIf="!compact">
+    <h3>Browse by city</h3>
+    <nav aria-label="City rental pages">
+      <a
+        *ngFor="let city of activeCities"
+        [routerLink]="cityPath(city)"
+        class="city-chip"
+      >{{ city.name }}</a>
+    </nav>
+  </div>
+</aside>
