@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hmacSha256Hex, verifyCheckoutSignature, verifyWebhookSignature } from './razorpay-signature';
+import { hmacSha256Hex, verifyCheckoutSignature, verifyWebhookSignature, isCapturedRazorpayPayment } from './razorpay-signature';
 
 describe('razorpay signatures', () => {
   it('accepts a valid checkout signature', () => {
@@ -26,5 +26,12 @@ describe('razorpay signatures', () => {
     const webhookSecret = 'whsec_test';
     const signature = hmacSha256Hex(rawBody, webhookSecret);
     expect(verifyWebhookSignature({ rawBody, signature, webhookSecret })).toBe(true);
+  });
+
+  it('only treats captured Razorpay payments as successful', () => {
+    expect(isCapturedRazorpayPayment('captured')).toBe(true);
+    expect(isCapturedRazorpayPayment('authorized')).toBe(false);
+    expect(isCapturedRazorpayPayment('failed')).toBe(false);
+    expect(isCapturedRazorpayPayment('created')).toBe(false);
   });
 });

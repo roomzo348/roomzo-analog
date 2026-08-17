@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS billing_payments (
   amount_paise INT NOT NULL,
   currency VARCHAR(8) NOT NULL DEFAULT 'INR',
   credits_granted INT NOT NULL,
-  status VARCHAR(16) NOT NULL DEFAULT 'created',
+  status VARCHAR(16) NOT NULL DEFAULT 'created', -- created | failed | paid. Credits are applied only when status becomes paid.
   razorpay_order_id VARCHAR(64) NULL,
   razorpay_payment_id VARCHAR(64) NULL,
   razorpay_signature VARCHAR(255) NULL,
