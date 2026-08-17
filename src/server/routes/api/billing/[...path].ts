@@ -97,6 +97,7 @@ export default defineEventHandler(async (event) => {
       amount: order.amount,
       currency: order.currency,
       keyId: cfg.keyId,
+      mode: cfg.mode,
       plan: {
         code: plan.code,
         name: plan.name,
