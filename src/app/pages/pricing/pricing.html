@@ -46,7 +46,10 @@
       Sandbox mode is ready in code. Add Razorpay test keys to start taking test payments.
     </p>
     <p class="sandbox" *ngIf="configured && mode === 'test'">
-      Razorpay is running in test/sandbox mode. Use Razorpay test cards — no real money is charged.
+      Razorpay is in <strong>test mode</strong>. No real money is charged.
+      Do not use <code>4111 1111 1111 1111</code> — Indian accounts reject it as an international card.
+      Use Mastercard <code>5267 3181 8797 5449</code>, any future expiry, any CVV, then tap Success.
+      For UPI, open the UPI tab and enter <code>success@razorpay</code>.
     </p>
   </section>
 </div>

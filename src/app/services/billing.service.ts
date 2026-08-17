@@ -31,7 +31,10 @@ export interface BillingWallet {
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on?: (event: string, handler: (response: any) => void) => void;
+    };
   }
 }
 
@@ -111,18 +114,33 @@ export class BillingService {
         throw new Error('Could not load Razorpay checkout');
       }
       const user = this.auth.getCurrentUser();
+      const contact = this.indianMobile(order.prefill?.contact || user?.phone || '');
       return new Promise((resolve, reject) => {
         const checkout = new window.Razorpay({
           key: order.keyId,
           amount: order.amount,
-          currency: order.currency || 'INR',
+          currency: 'INR',
           name: 'Roomzo',
           description: `${order.plan?.name || 'Plan'} — ${order.plan?.contacts || ''} owner contacts`,
           order_id: order.orderId,
           prefill: {
             name: order.prefill?.name || user?.displayName || user?.name || '',
             email: order.prefill?.email || user?.email || '',
-            contact: order.prefill?.contact || user?.phone || '',
+            contact,
+          },
+          method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            wallet: false,
+            emi: false,
+            paylater: false,
+          },
+          config: {
+            display: {
+              hide: [{ method: 'emi' }, { method: 'paylater' }],
+              preferences: { show_default_blocks: true },
+            },
           },
           notes: { planCode: order.plan?.code || '' },
           theme: { color: '#196153' },
@@ -131,8 +149,18 @@ export class BillingService {
             ondismiss: () => reject(new Error('Payment cancelled')),
           },
         });
+        checkout.on?.('payment.failed', (response: any) => {
+          const description = response?.error?.description || response?.error?.reason || 'Payment failed';
+          reject(new Error(description));
+        });
         checkout.open();
       });
     });
+  }
+
+  private indianMobile(raw: string): string {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (digits.length >= 10) return digits.slice(-10);
+    return '';
   }
 }
