@@ -19,6 +19,7 @@ import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-brea
 import { ContentGuideComponent } from '../../components/content-guide/content-guide';
 import { PropertyMediaCarouselComponent } from '../../components/property-media-carousel/property-media-carousel';
 import { ContactAccessService } from '../../services/contact-access.service';
+import { paymentReturnNotice } from '../../utils/billing-return';
 import { CityGuide, getCityGuide } from '../../content/city-guides';
 import {
   generatePropertyAltText,
@@ -344,6 +345,16 @@ toggleMobileFilters(event: Event): void {
   }
 
   checkReturnFromLogin() {
+    const notice = paymentReturnNotice(this.route.snapshot.queryParamMap.get('payment'));
+    if (notice) {
+      this.toastr[notice.level](notice.message);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { payment: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
     if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
       const pending = localStorage.getItem('pendingAction');
       if (pending) {

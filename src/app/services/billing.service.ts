@@ -4,9 +4,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, from, switchMap, map, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import {
+  BILLING_RETURN_KEY,
+  PaymentReturnStatus,
+  sanitizeBillingReturnUrl,
+  withPaymentStatus,
+} from '../utils/billing-return';
 
 export interface BillingPlan {
-  code: 'plus' | 'pro';
+  code: 'starter' | 'plus' | 'pro';
   name: string;
   tagline: string;
   amountPaise: number;
@@ -48,6 +54,32 @@ export class BillingService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
+  rememberReturnUrl(url?: string | null): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const safe = sanitizeBillingReturnUrl(url);
+    if (!safe || safe === '/pricing' || safe.startsWith('/pricing?')) return;
+    sessionStorage.setItem(BILLING_RETURN_KEY, safe);
+  }
+
+  peekReturnUrl(): string {
+    if (!isPlatformBrowser(this.platformId)) return '';
+    return sanitizeBillingReturnUrl(sessionStorage.getItem(BILLING_RETURN_KEY));
+  }
+
+  clearReturnUrl(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    sessionStorage.removeItem(BILLING_RETURN_KEY);
+  }
+
+  consumeReturnUrl(status?: PaymentReturnStatus, fallback = '/pricing'): string {
+    if (!isPlatformBrowser(this.platformId)) return fallback;
+    const stored = sanitizeBillingReturnUrl(sessionStorage.getItem(BILLING_RETURN_KEY));
+    sessionStorage.removeItem(BILLING_RETURN_KEY);
+    const dest = stored && stored !== '/pricing' && !stored.startsWith('/pricing?') ? stored : fallback;
+    if (!dest) return '';
+    return status ? withPaymentStatus(dest, status) : dest;
+  }
+
   getPlans(): Observable<{ status: number; data: { freeOwnerContacts: number; plans: BillingPlan[] } }> {
     return this.http.get<any>(`${this.baseUrl}/api/billing/plans`);
   }
@@ -85,7 +117,8 @@ export class BillingService {
     });
   }
 
-  checkout(planCode: string): Observable<BillingWallet> {
+  checkout(planCode: string, returnUrl?: string | null): Observable<BillingWallet> {
+    this.rememberReturnUrl(returnUrl);
     return this.createOrder(planCode).pipe(
       switchMap((res) => {
         if (res?.status !== 1 || !res.data?.orderId) {

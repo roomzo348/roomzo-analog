@@ -6,14 +6,15 @@ import { RouteMeta } from '@analogjs/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth.service';
 import { BillingService, BillingPlan, BillingWallet } from '../../services/billing.service';
+import { PaymentReturnStatus, paymentReturnNotice } from '../../utils/billing-return';
 
 export const routeMeta: RouteMeta = {
-  title: 'Roomzo Plans | Plus ₹49 & Pro ₹99',
+  title: 'Roomzo Plans | Starter ₹19, Plus ₹49 & Pro ₹99',
   meta: [
     {
       name: 'description',
       content:
-        'Unlock direct owner contacts on Roomzo. First contact is free. Plus is ₹49/month for 10 contacts. Pro is ₹99/month for 25 contacts. Unlocked properties stay open.',
+        'Unlock direct owner contacts on Roomzo. First contact is free. Starter is ₹19/month for 3 contacts, Plus is ₹49/month for 10, Pro is ₹99/month for 25 with full-time WhatsApp and call support.',
     },
   ],
 };
@@ -56,6 +57,8 @@ export default class PricingPageComponent implements OnInit {
 
     if (!this.isBrowser) return;
 
+    this.billing.rememberReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+
     this.billing.getConfig().subscribe({
       next: (res) => {
         this.configured = Boolean(res?.data?.configured);
@@ -94,15 +97,28 @@ export default class PricingPageComponent implements OnInit {
       next: (wallet) => {
         this.wallet = wallet;
         this.payingCode = null;
-        this.toastr.success('Payment successful. Your contact credits are ready.');
+        this.leavePricing('success');
       },
       error: (err) => {
         this.payingCode = null;
         const message = err?.message || 'Payment was not completed';
-        if (message !== 'Payment cancelled') {
-          this.toastr.error(message);
-        }
+        const cancelled = message === 'Payment cancelled';
+        this.leavePricing(cancelled ? 'cancelled' : 'failed', cancelled ? undefined : message);
       },
     });
+  }
+
+  private leavePricing(status: PaymentReturnStatus, errorMessage?: string): void {
+    const destination = this.billing.consumeReturnUrl(status, '');
+    if (destination) {
+      this.router.navigateByUrl(destination);
+      return;
+    }
+    if (errorMessage) {
+      this.toastr.error(errorMessage);
+      return;
+    }
+    const notice = paymentReturnNotice(status);
+    if (notice) this.toastr[notice.level](notice.message);
   }
 }

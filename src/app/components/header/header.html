@@ -9,7 +9,7 @@
 
     <nav class="nav-desktop">
       <a routerLink="/explore-listing">Rent</a>
-      <a routerLink="/pricing">Plans</a>
+      <a routerLink="/pricing" [queryParams]="pricingReturnQuery">Plans</a>
       <a routerLink="/flatmates">Flatmates</a>
       <a routerLink="/list-property">List Property</a>
       <a routerLink="/about">About</a>

@@ -1,4 +1,4 @@
-export type PlanCode = 'plus' | 'pro';
+export type PlanCode = 'starter' | 'plus' | 'pro';
 
 export interface ContactPlan {
   code: PlanCode;
@@ -13,8 +13,24 @@ export interface ContactPlan {
 }
 
 export const FREE_OWNER_CONTACTS = 1;
+export const PLAN_DURATION_DAYS = 30;
 
 export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
+  starter: {
+    code: 'starter',
+    name: 'Starter',
+    tagline: 'Try a few more owner contacts',
+    amountPaise: 1900,
+    currency: 'INR',
+    contacts: 3,
+    durationDays: PLAN_DURATION_DAYS,
+    popular: false,
+    features: [
+      '3 Property Contacts',
+      'Direct Owner Contact',
+      'No Brokerage',
+    ],
+  },
   plus: {
     code: 'plus',
     name: 'Plus',
@@ -22,7 +38,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     amountPaise: 4900,
     currency: 'INR',
     contacts: 10,
-    durationDays: 30,
+    durationDays: PLAN_DURATION_DAYS,
     popular: false,
     features: [
       '10 Property Contacts',
@@ -39,7 +55,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     amountPaise: 9900,
     currency: 'INR',
     contacts: 25,
-    durationDays: 30,
+    durationDays: PLAN_DURATION_DAYS,
     popular: true,
     features: [
       '25 Property Contacts',
@@ -47,14 +63,14 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
       'Advanced Filters',
       'New Listing Alerts',
       'No Brokerage',
-      'WhatsApp Support',
+      'Full-time WhatsApp & call support',
       'Shortlist & Compare Properties',
     ],
   },
 };
 
 export function listContactPlans(): ContactPlan[] {
-  return [CONTACT_PLANS.plus, CONTACT_PLANS.pro];
+  return [CONTACT_PLANS.starter, CONTACT_PLANS.plus, CONTACT_PLANS.pro];
 }
 
 export function getContactPlan(code: string | null | undefined): ContactPlan | null {

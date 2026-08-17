@@ -80,7 +80,10 @@ export const routeMeta: RouteMeta = {
       <p>
         Browsing listings on Roomzo is free. Every account includes <strong>one free owner contact</strong>
         (phone, WhatsApp, or contact card) for a single property. Additional owner contacts require a paid monthly
-        credit pack: <strong>Plus at ₹49/month (10 contacts)</strong> or <strong>Pro at ₹99/month (25 contacts)</strong>.
+        credit pack: <strong>Starter at ₹19/month (3 contacts)</strong>,
+        <strong>Plus at ₹49/month (10 contacts)</strong>, or
+        <strong>Pro at ₹99/month (25 contacts)</strong>.
+        Pro includes <strong>full-time WhatsApp and call support</strong>; Starter and Plus do not.
         Payments are processed by Razorpay. Unused credits expire at the end of the paid period.
         <strong>A property you already unlocked stays available on your account even after credits run out</strong>,
         because that contact was already paid for.

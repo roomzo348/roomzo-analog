@@ -5,7 +5,7 @@
 }
 
 .pricing-page {
-  max-width: 980px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 96px 20px 72px;
 }
@@ -55,7 +55,7 @@ h1 {
 
 .plan-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -175,7 +175,7 @@ li mat-icon {
   border-radius: 6px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .plan-grid {
     grid-template-columns: 1fr;
   }

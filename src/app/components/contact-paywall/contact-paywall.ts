@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { BillingService, BillingPlan, BillingWallet } from '../../services/billing.service';
 
-export type ContactPaywallResult = 'paid' | 'cancelled';
+export type ContactPaywallResult = 'paid' | 'cancelled' | 'failed';
 
 @Component({
   selector: 'app-contact-paywall',
@@ -19,10 +19,11 @@ export class ContactPaywallComponent {
   plans: BillingPlan[] = [];
   payingCode: string | null = null;
   configured = true;
+  errorMessage = '';
 
   constructor(
     public dialogRef: MatDialogRef<ContactPaywallComponent, ContactPaywallResult>,
-    @Inject(MAT_DIALOG_DATA) public data: Partial<BillingWallet> & { plans?: BillingPlan[] },
+    @Inject(MAT_DIALOG_DATA) public data: Partial<BillingWallet> & { plans?: BillingPlan[]; returnUrl?: string },
     private billing: BillingService,
     private toastr: ToastrService,
     private router: Router
@@ -53,23 +54,31 @@ export class ContactPaywallComponent {
       return;
     }
     this.payingCode = plan.code;
+    this.errorMessage = '';
     this.billing.checkout(plan.code).subscribe({
       next: () => {
         this.toastr.success(`${plan.name} is active. This property will stay unlocked for you.`);
+        this.billing.clearReturnUrl();
         this.dialogRef.close('paid');
       },
       error: (err) => {
         this.payingCode = null;
         const message = err?.message || 'Payment was not completed';
-        if (message !== 'Payment cancelled') {
-          this.toastr.error(message);
+        if (message === 'Payment cancelled') {
+          this.errorMessage = 'Payment was cancelled. Choose a plan to try again.';
+          this.toastr.info(this.errorMessage);
+          return;
         }
+        this.errorMessage = message;
+        this.toastr.error(message);
       },
     });
   }
 
   viewAllPlans(): void {
+    const returnUrl = this.data?.returnUrl || this.router.url;
+    this.billing.rememberReturnUrl(returnUrl);
     this.dialogRef.close('cancelled');
-    this.router.navigate(['/pricing']);
+    this.router.navigate(['/pricing'], { queryParams: { returnUrl } });
   }
 }

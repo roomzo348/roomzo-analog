@@ -70,7 +70,7 @@ export class ContactAccessService {
           return of(res.data as UnlockResult);
         }
         if (res?.code === 'PAYMENT_REQUIRED' || res?.data?.unlocked === false) {
-          return this.openPaywall(res?.data).pipe(
+          return this.openPaywall(res?.data, returnUrl || this.router.url).pipe(
             switchMap((paid) => (paid ? this.unlock(listingId).pipe(map((retry) => retry?.data as UnlockResult)) : of(null)))
           );
         }
@@ -90,14 +90,14 @@ export class ContactAccessService {
     );
   }
 
-  openPaywall(wallet?: Partial<BillingWallet> & { plans?: any[] }): Observable<boolean> {
+  openPaywall(wallet?: Partial<BillingWallet> & { plans?: any[] }, returnUrl?: string): Observable<boolean> {
     const ref = this.dialog.open(ContactPaywallComponent, {
-      width: '640px',
-      maxWidth: '94vw',
+      width: '920px',
+      maxWidth: '96vw',
       maxHeight: '92vh',
       autoFocus: false,
       panelClass: 'roomzo-paywall-panel',
-      data: wallet || {},
+      data: { ...(wallet || {}), returnUrl: returnUrl || this.router.url },
     });
     return ref.afterClosed().pipe(
       map((result: ContactPaywallResult | undefined) => result === 'paid')

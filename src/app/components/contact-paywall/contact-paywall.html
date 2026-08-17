@@ -27,6 +27,8 @@
     </article>
   </div>
 
+  <p class="pay-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
   <p class="sandbox-note" *ngIf="!configured">
     Sandbox checkout needs Razorpay test keys on the server. You can still review plans.
   </p>

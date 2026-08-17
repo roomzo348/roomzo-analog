@@ -40,6 +40,7 @@ export const routeMeta: RouteMeta = {
 // Added Safety Consent Imports (Adjust path if needed based on your folder structure)
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../components/safety-consent/safety-consent';
 import { ContactAccessService } from '../services/contact-access.service';
+import { paymentReturnNotice } from '../utils/billing-return';
 
 interface Listing {
   id: number;
@@ -493,6 +494,16 @@ export default class HomeComponent implements OnInit {
   }
 
   checkReturnFromLogin() {
+    const notice = paymentReturnNotice(this.route.snapshot.queryParamMap.get('payment'));
+    if (notice) {
+      this.toastr[notice.level](notice.message);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { payment: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
     if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
       const pendingFavorite = localStorage.getItem('pendingFavoritePropertyId');
       if (pendingFavorite) {

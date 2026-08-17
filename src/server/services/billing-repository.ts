@@ -173,7 +173,7 @@ export async function fulfillPaidOrder(input: {
     if (credits <= 0) {
       throw new Error('Cannot grant credits for an unknown plan');
     }
-    const durationDays = plan?.durationDays ?? CONTACT_PLANS.plus.durationDays;
+    const durationDays = plan?.durationDays ?? CONTACT_PLANS.starter.durationDays;
     const expiry = nextPlanExpiry(current.planExpiresAt, durationDays);
     const nextCredits = usable + credits;
     const planCode = (plan?.code ?? payment.plan_code) as PlanCode;
