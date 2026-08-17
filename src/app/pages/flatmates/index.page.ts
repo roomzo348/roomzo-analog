@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { FlatmateService } from "../../services/flatmate.service";
 import { AuthService } from "../../services/auth.service"; 
 import { ChatService } from "../../services/chat.service"; 
-import { environment } from "../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { MatIconModule } from "@angular/material/icon";
 import { ToastrService } from 'ngx-toastr';
 
