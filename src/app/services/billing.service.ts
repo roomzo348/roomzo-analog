@@ -115,6 +115,17 @@ export class BillingService {
       }
       const user = this.auth.getCurrentUser();
       const contact = this.indianMobile(order.prefill?.contact || user?.phone || '');
+      const isTest =
+        order.mode === 'test' || String(order.keyId || '').startsWith('rzp_test_');
+      const prefill: Record<string, string> = {
+        name: order.prefill?.name || user?.displayName || user?.name || '',
+        email: order.prefill?.email || user?.email || '',
+        contact,
+      };
+      if (isTest) {
+        // Test-mode UPI Collect VPA. Live checkout never prefills this.
+        prefill['vpa'] = 'success@razorpay';
+      }
       return new Promise((resolve, reject) => {
         const checkout = new window.Razorpay({
           key: order.keyId,
@@ -123,11 +134,7 @@ export class BillingService {
           name: 'Roomzo',
           description: `${order.plan?.name || 'Plan'} — ${order.plan?.contacts || ''} owner contacts`,
           order_id: order.orderId,
-          prefill: {
-            name: order.prefill?.name || user?.displayName || user?.name || '',
-            email: order.prefill?.email || user?.email || '',
-            contact,
-          },
+          prefill,
           method: {
             upi: true,
             card: true,
@@ -138,7 +145,21 @@ export class BillingService {
           },
           config: {
             display: {
+              blocks: {
+                upi: {
+                  name: 'UPI',
+                  instruments: [
+                    {
+                      method: 'upi',
+                      // Collect-only hid UPI after NPCI deprecated VPA entry (Feb 2026).
+                      // Intent/QR show on live mobile; Collect/QR remain for test + iOS/desktop.
+                      flows: ['intent', 'qr', 'collect'],
+                    },
+                  ],
+                },
+              },
               hide: [{ method: 'emi' }, { method: 'paylater' }],
+              sequence: ['block.upi', 'upi', 'card', 'netbanking'],
               preferences: { show_default_blocks: true },
             },
           },

@@ -64,6 +64,21 @@
           Your profile is fully complete
         </p>
       </div>
+
+      <a routerLink="/pricing" class="credits-card" [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
+        <span class="credits-icon" aria-hidden="true">
+          <mat-icon>stars</mat-icon>
+        </span>
+        <div class="credits-copy">
+          <span class="credits-label">Remaining contact points</span>
+          <strong class="credits-value">{{ wallet ? remainingPoints : '—' }}</strong>
+          <span class="credits-meta">{{ creditsMeta }}</span>
+        </div>
+        <span class="credits-cta">
+          {{ wallet?.planCode ? 'Top up' : 'Get points' }}
+          <mat-icon>chevron_right</mat-icon>
+        </span>
+      </a>
     </div>
 
     <div class="action-cards">
@@ -90,7 +105,8 @@
         <span class="menu-icon"><mat-icon>workspace_premium</mat-icon></span>
         <span class="menu-text">
           Contact plan
-          <small class="menu-sub">{{ planSummary }}</small>
+          <small class="menu-sub" *ngIf="wallet">{{ remainingPoints }} point{{ remainingPoints === 1 ? '' : 's' }} left</small>
+          <small class="menu-sub" *ngIf="!wallet">Checking balance…</small>
         </span>
         <mat-icon class="menu-chevron">chevron_right</mat-icon>
       </a>
