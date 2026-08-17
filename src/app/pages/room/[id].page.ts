@@ -21,6 +21,7 @@ import {
 import { slugifyCity } from '../../config/cities.config';
 
 import { PendingAction, SafetyConsentBottomSheetComponent } from '../../components/safety-consent/safety-consent';
+import { ContactAccessService } from '../../services/contact-access.service';
 
 @Component({
   selector: 'app-property-details',
@@ -43,6 +44,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
   isSubmittingReview = false;
   isLoadingReviews = false;
   isLoadingContact = false; 
+  contactHint = '';
+  creditsRemaining: number | null = null;
+  contactUnlocked = false; 
 
   isLoading = true;
   showFullDescription = false;
@@ -111,6 +115,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
     private toastr: ToastrService,
     private authService: AuthService,
     private seo: SeoService,
+    private contactAccess: ContactAccessService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document
@@ -125,6 +130,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
         this.mapUrl = null; 
         this.showContactModal = false;
         this.resetOwnerDetails();
+        this.contactHint = '';
+        this.creditsRemaining = null;
+        this.contactUnlocked = false;
         this.activePhotoIndex = 0; 
         
         if (this.isBrowser) {
@@ -161,6 +169,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
           this.ownerName = response.ownerName || 'Property Owner';
           this.ownerDetails.name = this.ownerName;
           this.syncContactFromProperty();
+          this.contactUnlocked = Boolean(this.property.contactUnlocked);
+          this.loadContactStatus();
           if (this.property.guidebook && Array.isArray(this.property.guidebook.rules)) {
             this.property.guidebook.rules = this.property.guidebook.rules.filter(
               (r: any) => (r && r.ruleText) || (typeof r === 'string' && r.trim() !== '')
@@ -172,7 +182,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
           this.applyPropertySeo(this.property);
           this.checkReturnFromLogin();
           this.checkFocusContact();
-          this.prefetchOwnerDetails();
           if (this.isBrowser) {
             this.loadMapCoordinates(this.property);
             this.loadSuggestions(this.property);
@@ -256,7 +265,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       const actionPayload = { actionType: 'contactOwnerModal' };
       
       this.checkAndExecuteConsent(actionPayload, () => {
-        this.openContactModal();
+        this.unlockThenShowContact();
       });
     } else {
       const returnUrl = `/room/${this.currentId}?showContact=true`;
@@ -277,13 +286,9 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         });
       }
       this.syncContactFromProperty();
-      if (this.hasContactPhone()) {
-        this.executeContactAction(actionType);
-      } else {
-        this.fetchOwnerDetailsForContact(() => {
-          this.executeContactAction(actionType);
-        });
-      }
+      this.checkAndExecuteConsent({ actionType }, () => {
+        this.unlockThenContact(actionType);
+      });
     } else {
       const returnUrl = `/room/${this.currentId}?action=${actionType}`;
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
@@ -292,17 +297,120 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
   private executeContactAction(actionType: 'call' | 'whatsapp') {
     const phoneValue = this.ownerDetails.propertyPhone || this.ownerDetails.ownerPhone;
-    const phone = phoneValue ? String(phoneValue) : null; 
+    const phone = phoneValue ? String(phoneValue) : null;
 
     if (!phone) {
       this.toastr.error('Phone number not available');
       return;
     }
 
-    const actionPayload = { phone, actionType, prop: this.property };
+    this.propertyService.triggerPhoneAndWP(phone, actionType, this.property);
+  }
 
-    this.checkAndExecuteConsent(actionPayload, () => {
-      this.propertyService.triggerPhoneAndWP(phone, actionType, this.property);
+  private unlockThenShowContact(): void {
+    if (!this.property?.id) return;
+    this.isLoadingContact = true;
+    this.showContactModal = true;
+    this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?showContact=true`).subscribe({
+      next: (result) => {
+        this.isLoadingContact = false;
+        if (!result?.unlocked) {
+          this.showContactModal = false;
+          this.cd.detectChanges();
+          return;
+        }
+        this.applyUnlockResult(result);
+        this.showContactModal = true;
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.isLoadingContact = false;
+        this.showContactModal = false;
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  private unlockThenContact(actionType: 'call' | 'whatsapp'): void {
+    if (!this.property?.id) return;
+    this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?action=${actionType}`).subscribe((result) => {
+      if (!result?.unlocked) return;
+      this.applyUnlockResult(result);
+      this.executeContactAction(actionType);
+    });
+  }
+
+  private applyUnlockResult(result: any): void {
+    const contact = result?.contact || {};
+    this.ownerDetails = {
+      name: contact.name || this.ownerName || 'Property Owner',
+      ownerPhone: contact.ownerPhone || '',
+      propertyPhone: contact.propertyPhone || contact.phone || '',
+      email: contact.email || '',
+    };
+    if (this.property) {
+      this.property.contactNo = this.ownerDetails.propertyPhone || this.property.contactNo;
+      this.property.tempContactNo = this.ownerDetails.propertyPhone || this.property.tempContactNo;
+      this.property.contactUnlocked = true;
+    }
+    this.contactUnlocked = true;
+    if (typeof result.creditsRemaining === 'number') {
+      this.creditsRemaining = result.creditsRemaining;
+    }
+    this.contactHint = this.buildContactHint(result);
+  }
+
+  private loadContactStatus(): void {
+    if (!this.isBrowser || !this.property?.id || !(this.isUserLoggedIn() || this.isOwnerLoggedIn())) return;
+    this.contactAccess.getStatus(Number(this.property.id)).subscribe({
+      next: (res) => {
+        const data = res?.data;
+        if (!data) return;
+        this.contactUnlocked = Boolean(data.unlocked || data.isOwner);
+        this.creditsRemaining = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : this.creditsRemaining;
+        this.contactHint = this.buildContactHint(data);
+        this.cd.detectChanges();
+      },
+      error: () => undefined,
+    });
+  }
+
+  private buildContactHint(data: any): string {
+    if (data?.unlocked || data?.isOwner || data?.unlockType === 'owner') {
+      return 'This owner contact is unlocked for you.';
+    }
+    if (data?.freeUnlockAvailable) {
+      return 'Your first owner contact is free.';
+    }
+    if (typeof data?.creditsRemaining === 'number') {
+      return `${data.creditsRemaining} contact credit${data.creditsRemaining === 1 ? '' : 's'} left this month.`;
+    }
+    return '';
+  }
+
+  openContactModal() {
+    this.unlockThenShowContact();
+  }
+
+  private fetchOwnerDetailsForContact(onSuccess: () => void, showLoader = true): void {
+    if (!this.property?.id) {
+      this.toastr.error('Owner information not available');
+      return;
+    }
+    if (showLoader) this.isLoadingContact = true;
+    this.contactAccess.requestOwnerContact(Number(this.property.id)).subscribe({
+      next: (result) => {
+        this.isLoadingContact = false;
+        if (result?.unlocked) {
+          this.applyUnlockResult(result);
+          onSuccess();
+        }
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.isLoadingContact = false;
+        this.cd.detectChanges();
+      },
     });
   }
 
@@ -317,9 +425,9 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
     const proceedWithAction = () => {
       if (action.actionType === 'contactOwnerModal') {
-        this.openContactModal();
+        this.unlockThenShowContact();
       } else {
-        this.propertyService.triggerPhoneAndWP(action.phone, action.actionType, action.prop);
+        this.unlockThenContact(action.actionType);
       }
     };
 
@@ -627,47 +735,6 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     });
   }
 
-  openContactModal() {
-    if (!this.property || !this.property.ownerId) {
-       this.toastr.error('Owner information not available');
-       return;
-    }
-    this.syncContactFromProperty();
-    this.showContactModal = true;
-    const showLoader = !this.hasContactPhone() && !this.hasOwnerEmail();
-    this.fetchOwnerDetailsForContact(() => this.cd.detectChanges(), showLoader);
-    this.cd.detectChanges();
-  }
-
-  private fetchOwnerDetailsForContact(onSuccess: () => void, showLoader = true): void {
-    if (!this.property?.ownerId) {
-      this.toastr.error('Owner information not available');
-      return;
-    }
-    if (showLoader) {
-      this.isLoadingContact = true;
-    }
-    this.authService.getOwnerDetails(this.property.ownerId).subscribe({
-      next: (res: any) => {
-        this.isLoadingContact = false;
-        if (res.status === 1 && res.data) {
-          this.applyOwnerDetails(res.data);
-          onSuccess();
-        } else if (!this.hasContactPhone() && !this.hasOwnerEmail()) {
-          this.toastr.error('Could not fetch owner details');
-        }
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.isLoadingContact = false;
-        if (!this.hasContactPhone() && !this.hasOwnerEmail()) {
-          this.toastr.error('Failed to load contact info');
-        }
-        this.cd.detectChanges();
-      }
-    });
-  }
-
   private resetOwnerDetails(): void {
     this.ownerDetails = {
       name: 'Property Owner',
@@ -706,22 +773,6 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       propertyPhone,
       email: data.email || ''
     };
-  }
-
-  private prefetchOwnerDetails(): void {
-    if (!this.property?.ownerId) return;
-    if (this.hasContactPhone() && this.hasOwnerEmail()) return;
-    if (!(this.isUserLoggedIn() || this.isOwnerLoggedIn())) return;
-
-    this.authService.getOwnerDetails(this.property.ownerId).subscribe({
-      next: (res: any) => {
-        if (res.status === 1 && res.data) {
-          this.applyOwnerDetails(res.data);
-          this.cd.detectChanges();
-        }
-      },
-      error: () => { /* silent prefetch */ }
-    });
   }
 
   closeContactModal() {

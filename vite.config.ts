@@ -48,6 +48,9 @@ export default defineConfig(({ mode }) => {
           onesignalApiKey: env['ONESIGNAL_API_KEY'],
           siteUrl: env['SITE_URL'],
           nearbySearchRadiusKm: env['NEARBY_SEARCH_RADIUS_KM'],
+          razorpayKeyId: env['RAZORPAY_KEY_ID'],
+          razorpayKeySecret: env['RAZORPAY_KEY_SECRET'],
+          razorpayWebhookSecret: env['RAZORPAY_WEBHOOK_SECRET'],
         },
         prerender: {
           routes: ['/sitemap.xml'],

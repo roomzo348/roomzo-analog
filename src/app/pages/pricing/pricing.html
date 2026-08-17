@@ -1,0 +1,52 @@
+<div class="pricing-page">
+  <section class="hero">
+    <p class="eyebrow">Roomzo contact plans</p>
+    <h1>First owner contact is free. After that, pay only for new properties.</h1>
+    <p class="lede">
+      Call, WhatsApp, or view contact details for one listing at no charge.
+      Extra owner contacts use monthly credits. If you already unlocked a property, it stays open for you even after your points run out.
+    </p>
+    <div class="wallet-chip" *ngIf="wallet">
+      <mat-icon>stars</mat-icon>
+      <span *ngIf="wallet.freeUnlockAvailable">1 free owner contact still available</span>
+      <span *ngIf="!wallet.freeUnlockAvailable">
+        {{ wallet.creditsRemaining }} contact{{ wallet.creditsRemaining === 1 ? '' : 's' }} left
+        <ng-container *ngIf="wallet.planCode"> · {{ wallet.planCode | uppercase }}</ng-container>
+      </span>
+    </div>
+  </section>
+
+  <div class="plan-grid" *ngIf="!loading">
+    <article class="plan" *ngFor="let plan of plans" [class.popular]="plan.popular">
+      <div class="badge" *ngIf="plan.popular">Most popular</div>
+      <h2>{{ plan.name }}</h2>
+      <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
+      <p class="tagline">{{ plan.tagline }}</p>
+      <ul>
+        <li *ngFor="let feature of plan.features">
+          <mat-icon>check_circle</mat-icon>
+          {{ feature }}
+        </li>
+      </ul>
+      <button type="button" class="cta" [disabled]="payingCode === plan.code" (click)="startCheckout(plan.code)">
+        {{ payingCode === plan.code ? 'Opening Razorpay…' : 'Subscribe with Razorpay' }}
+      </button>
+    </article>
+  </div>
+
+  <section class="rules">
+    <h3>How credits work</h3>
+    <ul>
+      <li>The first owner contact (phone, WhatsApp, or contact card) is free for every user.</li>
+      <li>Each additional property uses 1 credit from Plus (10) or Pro (25).</li>
+      <li>Call and WhatsApp on the same listing count as one unlock.</li>
+      <li>Once a listing is unlocked, it stays unlocked for your account even if credits later hit zero.</li>
+    </ul>
+    <p class="sandbox" *ngIf="!configured">
+      Sandbox mode is ready in code. Add Razorpay test keys to start taking test payments.
+    </p>
+    <p class="sandbox" *ngIf="configured && mode === 'test'">
+      Razorpay is running in test/sandbox mode. Use Razorpay test cards — no real money is charged.
+    </p>
+  </section>
+</div>

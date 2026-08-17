@@ -15,6 +15,9 @@ export interface ServerRuntime {
   onesignalApiKey: string;
   siteUrl: string;
   nearbySearchRadiusKm: number;
+  razorpayKeyId: string;
+  razorpayKeySecret: string;
+  razorpayWebhookSecret: string;
 }
 
 export function getServerRuntime(): ServerRuntime {
@@ -34,5 +37,8 @@ export function getServerRuntime(): ServerRuntime {
     onesignalApiKey: String(runtime.onesignalApiKey ?? ''),
     siteUrl: String(runtime.siteUrl ?? 'https://www.roomzo.in'),
     nearbySearchRadiusKm: Number(runtime.nearbySearchRadiusKm ?? 25),
+    razorpayKeyId: String(runtime.razorpayKeyId ?? ''),
+    razorpayKeySecret: String(runtime.razorpayKeySecret ?? ''),
+    razorpayWebhookSecret: String(runtime.razorpayWebhookSecret ?? ''),
   };
 }

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { ListingCardComponent } from './listing-card';
 
 describe('ListingCardComponent', () => {
@@ -6,8 +7,10 @@ describe('ListingCardComponent', () => {
   let component: ListingCardComponent;
 
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [ListingCardComponent],
+      providers: [provideHttpClient()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ListingCardComponent);
@@ -19,6 +22,7 @@ describe('ListingCardComponent', () => {
       price: 6500,
       image: 'https://example.com/room.jpg',
       specs: { beds: 1, baths: 1, area: 450 },
+      badge: { text: 'Available', color: 'green' },
       postedDate: '2024-01-01',
       isRented: false,
     };
@@ -29,10 +33,9 @@ describe('ListingCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should reflect favorite state from the listing input', () => {
-    component.listing.isFavorite = true;
-    fixture.detectChanges();
-
+  it('should reflect favorite state from cached ids', () => {
+    localStorage.setItem('roomzo_favorite_ids', JSON.stringify(['1']));
+    component.ngDoCheck();
     expect(component.isSaved).toBe(true);
   });
 });

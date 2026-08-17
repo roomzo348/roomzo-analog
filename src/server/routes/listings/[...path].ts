@@ -22,10 +22,32 @@ import { notifyNewProperty } from '../../services/onesignal.service';
 import { getListingReviews, upsertReview } from '../../services/review-repository';
 import { apiListResponse, apiResponse } from '../../utils/api-response';
 import { getAuthUser, requireAuth } from '../../utils/auth-session';
+import { redactListingContact } from '../../utils/contact-access';
+import { hasUnlockedListing } from '../../services/contact-access-repository';
 
 function parseIntSafe(value: unknown, fallback: number): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function hideListingContacts<T extends Record<string, unknown>>(listings: T[]): Array<T & { contactUnlocked: boolean }> {
+  return listings.map((listing) => redactListingContact(listing, false));
+}
+
+async function listingForViewer(listing: any, user: any | null): Promise<any> {
+  if (!listing) return listing;
+  try {
+    const ownerId = Number(listing.ownerId ?? listing.owner_id);
+    if (user && Number(user.id) === ownerId) {
+      return redactListingContact(listing, true);
+    }
+    if (user && (await hasUnlockedListing(Number(user.id), Number(listing.id)))) {
+      return redactListingContact(listing, true);
+    }
+  } catch {
+    return redactListingContact(listing, false);
+  }
+  return redactListingContact(listing, false);
 }
 
 async function assertListingOwner(listingId: number, userId: number): Promise<void> {
@@ -58,7 +80,7 @@ export default defineEventHandler(async (event) => {
       isRented: query.isRented == null ? undefined : Number(query.isRented),
       sortBy: 'latest',
     });
-    return apiListResponse(result.listings, result);
+    return apiListResponse(hideListingContacts(result.listings), result);
   }
 
   if (segments[0] === 'search' && method === 'GET') {
@@ -74,7 +96,7 @@ export default defineEventHandler(async (event) => {
       bedrooms: query.bedrooms == null ? undefined : Number(query.bedrooms),
       sortBy: 'latest',
     });
-    return apiListResponse(result.listings, result);
+    return apiListResponse(hideListingContacts(result.listings), result);
   }
 
   if (segments[0] === 'allWithFilters' && method === 'GET') {
@@ -88,7 +110,7 @@ export default defineEventHandler(async (event) => {
       bedrooms: query.bedrooms == null ? undefined : Number(query.bedrooms),
       sortBy: String(query.sortBy || 'latest'),
     });
-    return apiListResponse(result.listings, result);
+    return apiListResponse(hideListingContacts(result.listings), result);
   }
 
   if (segments[0] === 'searchWithFilters' && method === 'GET') {
@@ -107,7 +129,7 @@ export default defineEventHandler(async (event) => {
       zone: query.zone ? String(query.zone) : undefined,
       sortBy: String(query.sortBy || 'latest'),
     });
-    return apiListResponse(result.listings, result);
+    return apiListResponse(hideListingContacts(result.listings), result);
   }
 
   if (segments[0] === 'recent' && method === 'GET') {
@@ -116,7 +138,7 @@ export default defineEventHandler(async (event) => {
     return {
       status: 1,
       message: 'Recent listings fetched successfully',
-      listings,
+      listings: hideListingContacts(listings),
       currentPage: 0,
       totalPages: 1,
       totalItems: listings.length,
@@ -129,7 +151,7 @@ export default defineEventHandler(async (event) => {
     return {
       status: 1,
       message: 'Featured listings fetched successfully',
-      listings,
+      listings: hideListingContacts(listings),
       currentPage: 0,
       totalPages: 1,
       totalItems: listings.length,
@@ -146,7 +168,7 @@ export default defineEventHandler(async (event) => {
       propertyType: query.propertyType ? String(query.propertyType) : undefined,
       sortBy: String(query.sortBy || 'latest'),
     });
-    return apiListResponse(result.listings, result);
+    return apiListResponse(hideListingContacts(result.listings), result);
   }
 
   if (segments[0] === 'owner' && segments[1] && method === 'GET') {
@@ -211,12 +233,13 @@ export default defineEventHandler(async (event) => {
     if (!listing) {
       return apiResponse(0, 'Listing not found', null);
     }
+    const viewer = await getAuthUser(event);
     const ownerName = await getOwnerName(listing.owner_id ?? listing.ownerId);
     return {
       status: 1,
       message: 'Property fetched successfully',
       ownerName: ownerName ?? 'Property Owner',
-      data: listing,
+      data: await listingForViewer(listing, viewer),
     };
   }
 

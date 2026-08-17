@@ -39,6 +39,7 @@ export const routeMeta: RouteMeta = {
 
 // Added Safety Consent Imports (Adjust path if needed based on your folder structure)
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../components/safety-consent/safety-consent';
+import { ContactAccessService } from '../services/contact-access.service';
 
 interface Listing {
   id: number;
@@ -103,6 +104,7 @@ export default class HomeComponent implements OnInit {
     private propertyService: PropertyService, 
     private cd: ChangeDetectorRef,
     private toastr: ToastrService, // Added Toastr for feedback
+    private contactAccess: ContactAccessService,
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {
     afterNextRender(() => {
@@ -545,23 +547,14 @@ export default class HomeComponent implements OnInit {
   }
 
   private executeContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
-    const phone = item.contactNo || item.tempContactNo;
-    
-    if (!phone) {
-      // Fetch full object if phone is missing from mapped UI model
-      this.propertyService.getListingById(item.id.toString()).subscribe((res: any) => {
-          const p = res.data;
-          const phoneNum = p.contactNo || p.tempContactNo;
-          if (phoneNum) {
-            this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
-          } else {
-            this.toastr.error('Contact number not available');
-          }
-      });
-      return;
-    }
-    
-    this.propertyService.triggerPhoneAndWP(phone, actionType, item);
+    this.contactAccess.requestOwnerContact(Number(item.id), this.router.url).subscribe((result) => {
+      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+      if (!phone) {
+        if (result) this.toastr.error('Contact number not available');
+        return;
+      }
+      this.propertyService.triggerPhoneAndWP(phone, actionType, item);
+    });
   }
 
   private checkAndExecuteConsent(actionData: any, successCallback: () => void) {

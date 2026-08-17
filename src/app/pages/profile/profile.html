@@ -86,6 +86,15 @@
         <mat-icon class="menu-chevron">chevron_right</mat-icon>
       </a>
 
+      <a routerLink="/pricing" class="menu-row">
+        <span class="menu-icon"><mat-icon>workspace_premium</mat-icon></span>
+        <span class="menu-text">
+          Contact plan
+          <small class="menu-sub">{{ planSummary }}</small>
+        </span>
+        <mat-icon class="menu-chevron">chevron_right</mat-icon>
+      </a>
+
       <button type="button" class="menu-row menu-row--logout" (click)="logout()">
         <span class="menu-icon menu-icon--logout"><mat-icon>logout</mat-icon></span>
         <span class="menu-text">Logout</span>

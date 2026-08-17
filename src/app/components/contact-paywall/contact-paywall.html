@@ -1,0 +1,34 @@
+<div class="paywall">
+  <button class="close-btn" type="button" (click)="close()" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <div class="paywall-hero">
+    <span class="eyebrow">Owner contact</span>
+    <h2>Unlock more owner contacts</h2>
+    <p>
+      Your first owner contact is free. After that, each new property uses one contact credit.
+      Properties you already unlocked stay open even after credits run out.
+    </p>
+  </div>
+
+  <div class="plans">
+    <article class="plan-card" *ngFor="let plan of plans" [class.popular]="plan.popular">
+      <div class="plan-badge" *ngIf="plan.popular">Most popular</div>
+      <h3>{{ plan.name }}</h3>
+      <p class="price">{{ plan.priceLabel }}</p>
+      <p class="contacts">{{ plan.contacts }} property contacts</p>
+      <ul>
+        <li *ngFor="let feature of plan.features">{{ feature }}</li>
+      </ul>
+      <button class="pay-btn" type="button" [disabled]="payingCode === plan.code" (click)="pay(plan)">
+        {{ payingCode === plan.code ? 'Opening Razorpay…' : 'Pay with Razorpay' }}
+      </button>
+    </article>
+  </div>
+
+  <p class="sandbox-note" *ngIf="!configured">
+    Sandbox checkout needs Razorpay test keys on the server. You can still review plans.
+  </p>
+  <button class="text-link" type="button" (click)="viewAllPlans()">Compare all plans</button>
+</div>
