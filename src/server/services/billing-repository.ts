@@ -96,14 +96,13 @@ export async function createPendingPayment(input: {
   await sqlExecute(
     `INSERT INTO billing_payments
       (user_id, plan_code, amount_paise, currency, credits_granted, status, razorpay_order_id)
-     VALUES (?, ?, ?, ?, ?, 'created', ?)
+     VALUES (?, ?, ?, ?, 0, 'created', ?)
      ON DUPLICATE KEY UPDATE plan_code = VALUES(plan_code), amount_paise = VALUES(amount_paise)`,
     [
       input.userId,
       input.plan.code,
       input.plan.amountPaise,
       input.plan.currency,
-      input.plan.contacts,
       input.razorpayOrderId,
     ]
   );
@@ -170,7 +169,10 @@ export async function fulfillPaidOrder(input: {
     );
     const current = mapWallet(wallets[0]);
     const usable = usableCredits(current);
-    const credits = Number(payment.credits_granted || plan?.contacts || 0);
+    const credits = Number(plan?.contacts || 0);
+    if (credits <= 0) {
+      throw new Error('Cannot grant credits for an unknown plan');
+    }
     const durationDays = plan?.durationDays ?? CONTACT_PLANS.plus.durationDays;
     const expiry = nextPlanExpiry(current.planExpiresAt, durationDays);
     const nextCredits = usable + credits;
@@ -186,9 +188,9 @@ export async function fulfillPaidOrder(input: {
     await connExecute(
       conn,
       `UPDATE billing_payments
-       SET status = 'paid', razorpay_payment_id = ?, razorpay_signature = ?, paid_at = NOW()
-       WHERE razorpay_order_id = ?`,
-      [input.paymentId, input.signature ?? null, input.orderId]
+       SET status = 'paid', credits_granted = ?, razorpay_payment_id = ?, razorpay_signature = ?, paid_at = NOW()
+       WHERE razorpay_order_id = ? AND status <> 'paid'`,
+      [credits, input.paymentId, input.signature ?? null, input.orderId]
     );
 
     return {

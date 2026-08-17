@@ -2,10 +2,9 @@ import { createError, defineEventHandler, getHeader, getMethod, getRouterParam, 
 import { listContactPlans, getContactPlan } from '../../../config/plans';
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
-import { verifyCheckoutSignature, verifyWebhookSignature } from '../../../utils/razorpay-signature';
+import { verifyCheckoutSignature, verifyWebhookSignature, isCapturedRazorpayPayment } from '../../../utils/razorpay-signature';
 import {
   createRazorpayOrder,
-  fetchRazorpayOrder,
   fetchRazorpayPayment,
   getRazorpayConfig,
 } from '../../../services/razorpay.service';
@@ -132,19 +131,23 @@ export default defineEventHandler(async (event) => {
       return apiResponse(0, 'Payment signature verification failed');
     }
 
+    let remotePayment: { id: string; status: string; amount: number; currency: string; order_id?: string };
     try {
-      const remotePayment = await fetchRazorpayPayment(paymentId);
-      if (remotePayment.order_id && remotePayment.order_id !== orderId) {
-        return apiResponse(0, 'Payment does not match this order');
-      }
-      if (Number(remotePayment.amount) !== Number(payment.amount_paise)) {
-        return apiResponse(0, 'Payment amount mismatch');
-      }
+      remotePayment = await fetchRazorpayPayment(paymentId);
     } catch {
-      const remoteOrder = await fetchRazorpayOrder(orderId).catch(() => null);
-      if (remoteOrder && Number(remoteOrder.amount) !== Number(payment.amount_paise)) {
-        return apiResponse(0, 'Order amount mismatch');
+      return apiResponse(0, 'Could not confirm payment with Razorpay. Credits were not granted.');
+    }
+    if (remotePayment.order_id && remotePayment.order_id !== orderId) {
+      return apiResponse(0, 'Payment does not match this order');
+    }
+    if (Number(remotePayment.amount) !== Number(payment.amount_paise)) {
+      return apiResponse(0, 'Payment amount mismatch');
+    }
+    if (!isCapturedRazorpayPayment(remotePayment.status)) {
+      if (String(remotePayment.status).toLowerCase() === 'failed') {
+        await markPaymentFailed(orderId, paymentId);
       }
+      return apiResponse(0, 'Payment is not captured yet. Credits were not granted.');
     }
 
     const fulfilled = await fulfillPaidOrder({ orderId, paymentId, signature });
@@ -175,8 +178,26 @@ export default defineEventHandler(async (event) => {
 
     if ((eventName === 'payment.captured' || eventName === 'order.paid') && orderId) {
       const existing = await getPaymentByOrderId(orderId);
-      if (existing) {
-        await fulfillPaidOrder({ orderId, paymentId: paymentId || existing.razorpay_payment_id, signature });
+      if (existing && existing.status !== 'paid') {
+        const capturedId = eventName === 'payment.captured' ? paymentId : existing.razorpay_payment_id;
+        if (capturedId && capturedId !== orderId) {
+          try {
+            const remotePayment = await fetchRazorpayPayment(capturedId);
+            if (!isCapturedRazorpayPayment(remotePayment.status)) {
+              return { status: 'ignored', reason: 'payment not captured' };
+            }
+            if (Number(remotePayment.amount) !== Number(existing.amount_paise)) {
+              return { status: 'ignored', reason: 'amount mismatch' };
+            }
+          } catch {
+            return { status: 'ignored', reason: 'could not confirm payment' };
+          }
+        }
+        await fulfillPaidOrder({
+          orderId,
+          paymentId: capturedId || paymentId,
+          signature,
+        });
       }
     }
     if (eventName === 'payment.failed' && orderId) {

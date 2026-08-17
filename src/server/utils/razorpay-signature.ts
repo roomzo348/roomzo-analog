@@ -29,3 +29,9 @@ export function verifyWebhookSignature(input: {
   const expected = hmacSha256Hex(input.rawBody, input.webhookSecret);
   return safeEqualHex(expected, input.signature);
 }
+
+export function isCapturedRazorpayPayment(status: string | null | undefined): boolean {
+  const value = String(status || '').toLowerCase();
+  return value === 'captured';
+}
+
