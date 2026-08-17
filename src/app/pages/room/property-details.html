@@ -441,8 +441,9 @@
                   *ngIf="isContactAvailable()"
                   [ngClass]="{'pulse-highlight': highlightContact}" 
                   (click)="contactAgent()">
-            Contact Owner
+            {{ contactUnlocked ? 'View Owner Contact' : 'Contact Owner' }}
           </button>
+          <p class="contact-credit-hint" *ngIf="contactHint">{{ contactHint }}</p>
 
           <div class="desktop-contact-actions mt-16" *ngIf="isContactAvailable()">
             <button class="btn-outline dt-call-btn" (click)="handleContactAction('call')">

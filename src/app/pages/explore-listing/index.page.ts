@@ -18,6 +18,7 @@ import { RouteMeta } from '@analogjs/router';
 
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../../components/safety-consent/safety-consent';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
+import { ContactAccessService } from '../../services/contact-access.service';
 import {
   buildGeocodeQueries,
   getKnownZoneCoordinates,
@@ -103,7 +104,8 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object,
     private renderer: Renderer2,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private contactAccess: ContactAccessService
   ) {}
 
   ngOnInit(): void {
@@ -587,17 +589,14 @@ this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'A
   }
 
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
-    const phone = prop.contactNo || prop.tempContactNo;
-    if (!phone) {
-      this.propertyService.getListingById(prop.id).subscribe((res: any) => {
-          const p = res.data;
-          const phoneNum = p.contactNo || p.tempContactNo;
-          if(phoneNum) this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
-          else this.toastr.error('Contact number not available');
-      });
-      return;
-    }
-    this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe((result) => {
+      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+      if (!phone) {
+        if (result) this.toastr.error('Contact number not available');
+        return;
+      }
+      this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    });
   }
 
   private checkAndExecuteConsent(actionData: any, successCallback: () => void) {

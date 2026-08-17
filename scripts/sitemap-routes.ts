@@ -23,6 +23,7 @@ const STATIC_ROUTES: SitemapRoute[] = [
   { route: '/blog', sitemap: { changefreq: 'weekly', priority: '0.7' } },
   { route: '/terms', sitemap: { changefreq: 'yearly', priority: '0.3' } },
   { route: '/privacy-policy', sitemap: { changefreq: 'yearly', priority: '0.3' } },
+  { route: '/pricing', sitemap: { changefreq: 'monthly', priority: '0.6' } },
 ];
 
 export async function buildPrerenderRoutes(): Promise<SitemapRoute[]> {

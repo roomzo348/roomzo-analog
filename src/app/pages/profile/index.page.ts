@@ -10,6 +10,7 @@ import { authGuard } from '../../auth.guard';
 import { UserProfileService, UserProfile } from '../../services/user-profile.service';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
+import { BillingService, BillingWallet } from '../../services/billing.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
 import { environment } from '../../../environments/environment';
@@ -46,6 +47,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   profile: UserProfile | null = null;
   favoriteListings: any[] = [];
   isOwner = false;
+  wallet: BillingWallet | null = null;
 
   profilePhotoUrl: string | null = null;
   profilePhotoPreview: string | null = null;
@@ -57,6 +59,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private profileService: UserProfileService,
     private propertyService: PropertyService,
     private authService: AuthService,
+    private billing: BillingService,
     private router: Router,
     private toastr: ToastrService,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -156,6 +159,28 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     });
 
     this.loadFavorites();
+    this.loadWallet();
+  }
+
+  private loadWallet(): void {
+    this.billing.getWallet().subscribe({
+      next: (res) => {
+        if (Number(res?.status) === 1) {
+          this.wallet = res.data;
+        }
+      },
+      error: () => undefined,
+    });
+  }
+
+  get planSummary(): string {
+    if (!this.wallet) return 'First owner contact is free';
+    if (this.wallet.planCode) {
+      const name = this.wallet.planCode === 'pro' ? 'Pro' : 'Plus';
+      return `${name} · ${this.wallet.creditsRemaining} contact${this.wallet.creditsRemaining === 1 ? '' : 's'} left`;
+    }
+    if (this.wallet.freeUnlockAvailable) return '1 free owner contact remaining';
+    return 'Subscribe to unlock more owner contacts';
   }
 
   loadFavorites(): void {

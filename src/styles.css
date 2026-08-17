@@ -239,6 +239,18 @@ body.profile-sidebar-open {
   align-items: center !important;
 }
 
+.roomzo-paywall-panel .mat-mdc-dialog-container {
+  padding: 12px;
+}
+
+.roomzo-paywall-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  border-radius: 20px;
+  overflow: auto;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
 .roomzo-live-modal-panel .mat-mdc-dialog-container {
   max-height: 90vh;
   padding: 16px;

@@ -18,6 +18,7 @@ import { RelatedSearchesComponent } from '../../components/related-searches/rela
 import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
 import { ContentGuideComponent } from '../../components/content-guide/content-guide';
 import { PropertyMediaCarouselComponent } from '../../components/property-media-carousel/property-media-carousel';
+import { ContactAccessService } from '../../services/contact-access.service';
 import { CityGuide, getCityGuide } from '../../content/city-guides';
 import {
   generatePropertyAltText,
@@ -90,6 +91,7 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private toastr: ToastrService,
     private seo: SeoService,
+    private contactAccess: ContactAccessService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -374,17 +376,14 @@ toggleMobileFilters(event: Event): void {
   }
 
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
-    const phone = prop.contactNo || prop.tempContactNo;
-    if (!phone) {
-      this.propertyService.getListingById(prop.id).subscribe((res: any) => {
-        const p = res.data;
-        const phoneNum = p.contactNo || p.tempContactNo;
-        if (phoneNum) this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
-        else this.toastr.error('Contact number not available');
-      });
-      return;
-    }
-    this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe((result) => {
+      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+      if (!phone) {
+        if (result) this.toastr.error('Contact number not available');
+        return;
+      }
+      this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    });
   }
 
   private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
