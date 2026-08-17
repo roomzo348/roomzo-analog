@@ -8,6 +8,7 @@ describe('MyListingsComponent favorites normalization', () => {
       {} as any,
       {} as any,
       {} as any,
+      {} as any,
       {} as any
     );
 
