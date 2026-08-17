@@ -1,5 +1,3 @@
-import { APP_ID } from "@angular/core";
-
 export const environment = {
   production: false,
   // Analog Nitro backend now serves API on same origin.

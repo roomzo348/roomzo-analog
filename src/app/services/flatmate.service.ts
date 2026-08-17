@@ -12,8 +12,7 @@ import {
   forkJoin
 } from 'rxjs';
 
-import { environment }
-from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface FlatmatePostData {
 
