@@ -12,21 +12,21 @@ export interface ContactPlan {
   features: string[];
 }
 
-export const FREE_OWNER_CONTACTS = 1;
+export const FREE_OWNER_CONTACTS = 0;
 export const PLAN_DURATION_DAYS = 30;
 
 export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
   starter: {
     code: 'starter',
     name: 'Starter',
-    tagline: 'Try a few more owner contacts',
+    tagline: 'Start with 4 owner contacts',
     amountPaise: 1900,
     currency: 'INR',
-    contacts: 3,
+    contacts: 4,
     durationDays: PLAN_DURATION_DAYS,
     popular: false,
     features: [
-      '3 Property Contacts',
+      '4 Property Contacts',
       'Direct Owner Contact',
       'No Brokerage',
     ],

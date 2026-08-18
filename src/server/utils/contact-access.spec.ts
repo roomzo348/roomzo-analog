@@ -32,7 +32,7 @@ describe('contact unlock rules', () => {
     ).toEqual({ action: 'allow', reason: 'already_unlocked' });
   });
 
-  it('gives every user one free owner contact', () => {
+  it('requires a paid credit before the first owner contact', () => {
     expect(
       decideUnlock({
         isOwner: false,
@@ -41,10 +41,10 @@ describe('contact unlock rules', () => {
         creditsRemaining: 0,
         planActive: false,
       })
-    ).toEqual({ action: 'allow', reason: 'free' });
+    ).toEqual({ action: 'paywall' });
   });
 
-  it('spends a plan credit after the free contact is used', () => {
+  it('spends a plan credit to unlock a new property', () => {
     expect(
       decideUnlock({
         isOwner: false,
@@ -56,7 +56,7 @@ describe('contact unlock rules', () => {
     ).toEqual({ action: 'allow', reason: 'credit' });
   });
 
-  it('requires payment when the free contact and credits are gone', () => {
+  it('requires payment when credits are gone', () => {
     expect(
       decideUnlock({
         isOwner: false,
@@ -106,5 +106,18 @@ describe('listing contact redaction', () => {
     const shown = redactListingContact(listing, true);
     expect(shown.contactUnlocked).toBe(true);
     expect(shown.tempContactNo).toBe('8888888888');
+  });
+
+  it('strips email and phone aliases until unlocked', () => {
+    const listing = {
+      id: 3,
+      email: 'owner@example.com',
+      phone: '9999999999',
+      ownerPhone: '8888888888',
+    };
+    const hidden = redactListingContact(listing, false);
+    expect(hidden.email).toBeUndefined();
+    expect(hidden.phone).toBeUndefined();
+    expect(hidden.ownerPhone).toBeUndefined();
   });
 });

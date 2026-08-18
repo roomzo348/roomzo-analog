@@ -112,28 +112,19 @@ export async function unlockListingContact(userId: number, listingId: number): P
       return { kind: 'paywall' as const, walletRow: current };
     }
 
-    const unlockType = decision.reason === 'free' ? 'free' : 'credit';
+    const unlockType = 'credit';
     await connExecute(
       conn,
       `INSERT INTO contact_unlocks (user_id, listing_id, unlock_type) VALUES (?, ?, ?)`,
       [userId, listingId, unlockType]
     );
 
-    if (unlockType === 'free') {
-      await connExecute(
-        conn,
-        `UPDATE user_contact_wallets SET free_unlock_used = 1 WHERE user_id = ?`,
-        [userId]
-      );
-      current.free_unlock_used = 1;
-    } else {
-      await connExecute(
-        conn,
-        `UPDATE user_contact_wallets SET credits_remaining = GREATEST(credits_remaining - 1, 0) WHERE user_id = ?`,
-        [userId]
-      );
-      current.credits_remaining = Math.max(0, Number(current.credits_remaining || 0) - 1);
-    }
+    await connExecute(
+      conn,
+      `UPDATE user_contact_wallets SET credits_remaining = GREATEST(credits_remaining - 1, 0) WHERE user_id = ?`,
+      [userId]
+    );
+    current.credits_remaining = Math.max(0, Number(current.credits_remaining || 0) - 1);
 
     return { kind: 'unlocked' as const, unlockType, walletRow: current };
   });
@@ -153,7 +144,7 @@ export async function unlockListingContact(userId: number, listingId: number): P
     return {
       status: 0,
       code: 'PAYMENT_REQUIRED',
-      message: 'Subscribe to unlock more owner contacts',
+      message: 'Buy a contact plan to view owner phone, WhatsApp, or email',
       data: { unlocked: false, ...walletData },
     };
   }

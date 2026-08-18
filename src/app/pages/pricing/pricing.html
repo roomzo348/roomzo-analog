@@ -1,16 +1,15 @@
 <div class="pricing-page">
   <section class="hero">
     <p class="eyebrow">Roomzo contact plans</p>
-    <h1>First owner contact is free. After that, pay only for new properties.</h1>
+    <h1>Owner contacts stay hidden until you buy credits.</h1>
     <p class="lede">
-      Call, WhatsApp, or view contact details for one listing at no charge.
-      Extra owner contacts use monthly credits. Pro includes full-time WhatsApp and call support.
-      If you already unlocked a property, it stays open for you even after your points run out.
+      Call, WhatsApp, and email are unlocked with monthly credits.
+      Starter is ₹19 for 4 contacts. Pro includes full-time WhatsApp and call support.
+      A property you already unlocked stays open even after your points run out.
     </p>
     <div class="wallet-chip" *ngIf="wallet">
       <mat-icon>stars</mat-icon>
-      <span *ngIf="wallet.freeUnlockAvailable">1 free owner contact still available</span>
-      <span *ngIf="!wallet.freeUnlockAvailable">
+      <span>
         {{ wallet.creditsRemaining }} contact{{ wallet.creditsRemaining === 1 ? '' : 's' }} left
         <ng-container *ngIf="wallet.planCode"> · {{ wallet.planCode | uppercase }}</ng-container>
       </span>
@@ -20,17 +19,22 @@
   <div class="plan-grid" *ngIf="!loading">
     <article class="plan" *ngFor="let plan of plans" [class.popular]="plan.popular">
       <div class="badge" *ngIf="plan.popular">Most popular</div>
-      <h2>{{ plan.name }}</h2>
-      <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
-      <p class="tagline">{{ plan.tagline }}</p>
+      <div class="plan-head">
+        <div>
+          <h2>{{ plan.name }}</h2>
+          <p class="tagline">{{ plan.tagline }}</p>
+        </div>
+        <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
+      </div>
+      <p class="contacts-line">{{ plan.contacts }} owner contacts</p>
       <ul>
         <li *ngFor="let feature of plan.features">
           <mat-icon>check_circle</mat-icon>
           {{ feature }}
         </li>
       </ul>
-      <button type="button" class="cta" [disabled]="payingCode === plan.code" (click)="startCheckout(plan.code)">
-        {{ payingCode === plan.code ? 'Opening Razorpay…' : 'Subscribe with Razorpay' }}
+      <button type="button" class="cta" [disabled]="!!payingCode" (click)="startCheckout(plan.code)">
+        {{ payingCode === plan.code ? 'Opening secure checkout…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
       </button>
     </article>
   </div>
@@ -38,8 +42,8 @@
   <section class="rules">
     <h3>How credits work</h3>
     <ul>
-      <li>The first owner contact (phone, WhatsApp, or contact card) is free for every user.</li>
-      <li>Each additional property uses 1 credit from Starter (3), Plus (10), or Pro (25).</li>
+      <li>Owner phone, WhatsApp, and email are hidden until you buy a plan.</li>
+      <li>Each new property uses 1 credit from Starter (4), Plus (10), or Pro (25).</li>
       <li>Full-time WhatsApp and call support is included only with Pro. Starter and Plus do not include it.</li>
       <li>Call and WhatsApp on the same listing count as one unlock.</li>
       <li>Once a listing is unlocked, it stays unlocked for your account even if credits later hit zero.</li>

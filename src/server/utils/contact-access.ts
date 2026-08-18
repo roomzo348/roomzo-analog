@@ -1,4 +1,4 @@
-export type UnlockReason = 'owner' | 'already_unlocked' | 'free' | 'credit';
+export type UnlockReason = 'owner' | 'already_unlocked' | 'credit';
 export type UnlockDecision =
   | { action: 'allow'; reason: UnlockReason }
   | { action: 'paywall' };
@@ -29,7 +29,6 @@ export function decideUnlock(input: {
 }): UnlockDecision {
   if (input.isOwner) return { action: 'allow', reason: 'owner' };
   if (input.alreadyUnlocked) return { action: 'allow', reason: 'already_unlocked' };
-  if (!input.freeUnlockUsed) return { action: 'allow', reason: 'free' };
   if (input.planActive && input.creditsRemaining > 0) return { action: 'allow', reason: 'credit' };
   return { action: 'paywall' };
 }
@@ -50,6 +49,10 @@ export function redactListingContact<T extends Record<string, unknown>>(
   delete (copy as Record<string, unknown>)['tempContactNo'];
   delete (copy as Record<string, unknown>)['contact_no'];
   delete (copy as Record<string, unknown>)['temp_contact_no'];
+  delete (copy as Record<string, unknown>)['email'];
+  delete (copy as Record<string, unknown>)['ownerEmail'];
+  delete (copy as Record<string, unknown>)['ownerPhone'];
+  delete (copy as Record<string, unknown>)['phone'];
   return copy;
 }
 
