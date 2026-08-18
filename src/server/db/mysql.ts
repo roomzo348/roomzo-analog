@@ -71,3 +71,43 @@ export async function sqlExecute(
     return result as mysql.ResultSetHeader;
   });
 }
+
+export async function connQuery<T = Record<string, unknown>>(
+  conn: mysql.PoolConnection,
+  query: string,
+  params: unknown[] = []
+): Promise<T[]> {
+  const [rows] = await conn.query(query, params);
+  return rows as T[];
+}
+
+export async function connExecute(
+  conn: mysql.PoolConnection,
+  query: string,
+  params: unknown[] = []
+): Promise<mysql.ResultSetHeader> {
+  const [result] = await conn.execute(query, params);
+  return result as mysql.ResultSetHeader;
+}
+
+export async function withTransaction<T>(
+  fn: (conn: mysql.PoolConnection) => Promise<T>
+): Promise<T> {
+  const db = getMysqlPool();
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    const result = await fn(conn);
+    await conn.commit();
+    return result;
+  } catch (error) {
+    try {
+      await conn.rollback();
+    } catch {
+      // ignore rollback errors so the original failure surfaces
+    }
+    throw error;
+  } finally {
+    conn.release();
+  }
+}

@@ -91,8 +91,13 @@ export default defineEventHandler(async (event) => {
   }
 
   if (segments[0] === 'owner-info' && segments[1] && method === 'GET') {
+    const viewer = await getAuthUser(event);
     const data = await getOwnerInfo(Number(segments[1]));
-    return apiResponse(data ? 1 : 0, data ? 'Owner info fetched successfully' : 'Owner not found', data);
+    if (!data) return apiResponse(0, 'Owner not found', data);
+    const isSelf = viewer && Number(viewer.id) === Number(segments[1]);
+    return apiResponse(1, 'Owner info fetched successfully', isSelf
+      ? data
+      : { name: data.name, email: null, phone: null });
   }
 
   if (segments[0] === 'forgot-password-init' && method === 'POST') {

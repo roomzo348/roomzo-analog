@@ -20,7 +20,7 @@ export const routeMeta: RouteMeta = {
   template: `
     <div class="legal-container">
       <h1>Terms &amp; Conditions</h1>
-      <p><strong>Last Updated:</strong> July 2026</p>
+      <p><strong>Last Updated:</strong> August 2026</p>
       <p>
         These Terms &amp; Conditions (“Terms”) govern your use of <strong>Roomzo</strong> at
         <a href="https://www.roomzo.in">www.roomzo.in</a> and related services. By accessing or using Roomzo, you
@@ -76,11 +76,21 @@ export const routeMeta: RouteMeta = {
         Roomzo liable for user conduct.
       </p>
 
-      <h2>7. Fees</h2>
+      <h2>7. Fees &amp; owner-contact credits</h2>
       <p>
-        Browsing and contacting owners through Roomzo is generally free for seekers unless we clearly state otherwise
-        for a specific paid feature. Optional paid promotions for owners, if introduced, will be described at the point
-        of purchase. Third-party payment, telecom, or device charges are your responsibility.
+        Browsing listings on Roomzo is free. Owner phone, WhatsApp, and email stay hidden until you buy a
+        monthly credit pack: <strong>Starter at ₹19/month (4 contacts)</strong>,
+        <strong>Plus at ₹49/month (10 contacts)</strong>, or
+        <strong>Pro at ₹99/month (25 contacts)</strong>.
+        Pro includes <strong>full-time WhatsApp and call support</strong>; Starter and Plus do not.
+        Payments are processed by Razorpay. Unused credits expire at the end of the paid period.
+        <strong>A property you already unlocked stays available on your account even after credits run out</strong>,
+        because that contact was already paid for.
+      </p>
+      <p>
+        Optional paid promotions for owners, if introduced, will be described at the point of purchase.
+        Third-party payment, telecom, or device charges are your responsibility. Refunds for unused credits are
+        handled case by case — email <a href="mailto:support&#64;roomzo.in">support&#64;roomzo.in</a>.
       </p>
 
       <h2>8. Intellectual property</h2>

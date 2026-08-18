@@ -1,7 +1,7 @@
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouteMeta } from '@analogjs/router';
@@ -10,9 +10,11 @@ import { authGuard } from '../../auth.guard';
 import { UserProfileService, UserProfile } from '../../services/user-profile.service';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
+import { BillingService, BillingWallet } from '../../services/billing.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
 import { environment } from '../../../environments/environment';
+import { planDisplayName, paymentReturnNotice } from '../../utils/billing-return';
 
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
@@ -46,6 +48,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   profile: UserProfile | null = null;
   favoriteListings: any[] = [];
   isOwner = false;
+  wallet: BillingWallet | null = null;
 
   profilePhotoUrl: string | null = null;
   profilePhotoPreview: string | null = null;
@@ -57,7 +60,9 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private profileService: UserProfileService,
     private propertyService: PropertyService,
     private authService: AuthService,
+    private billing: BillingService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastr: ToastrService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -81,6 +86,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     this.applyProfileData(stored);
     this.isLoading = false;
     this.loadAll();
+    this.notePaymentReturn();
   }
 
   ngOnDestroy(): void {
@@ -156,6 +162,61 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     });
 
     this.loadFavorites();
+    this.loadWallet();
+  }
+
+  private loadWallet(): void {
+    this.billing.getWallet().subscribe({
+      next: (res) => {
+        if (Number(res?.status) === 1) {
+          this.wallet = res.data;
+        }
+      },
+      error: () => undefined,
+    });
+  }
+
+  private notePaymentReturn(): void {
+    const notice = paymentReturnNotice(this.route.snapshot.queryParamMap.get('payment'));
+    if (!notice) return;
+    this.toastr[notice.level](notice.message);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { payment: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  get remainingPoints(): number {
+    if (!this.wallet) return 0;
+    return Number(this.wallet.creditsRemaining || 0);
+  }
+
+  get creditsMeta(): string {
+    if (!this.wallet) return 'Loading your contact balance…';
+    if (this.wallet.planCode) {
+      const name = planDisplayName(this.wallet.planCode);
+      if (this.wallet.planExpiresAt) {
+        const expiry = new Date(this.wallet.planExpiresAt).toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        });
+        return `${name} plan · ${this.wallet.creditsRemaining} paid point${this.wallet.creditsRemaining === 1 ? '' : 's'} · till ${expiry}`;
+      }
+      return `${name} plan · ${this.wallet.creditsRemaining} paid point${this.wallet.creditsRemaining === 1 ? '' : 's'}`;
+    }
+    return 'Buy a plan to view owner contacts.';
+  }
+
+  get planSummary(): string {
+    if (!this.wallet) return 'Buy a plan to view owner contacts';
+    if (this.wallet.planCode) {
+      const name = planDisplayName(this.wallet.planCode);
+      return `${name} · ${this.remainingPoints} point${this.remainingPoints === 1 ? '' : 's'} left`;
+    }
+    return 'Buy a plan to view owner contacts';
   }
 
   loadFavorites(): void {

@@ -441,8 +441,9 @@
                   *ngIf="isContactAvailable()"
                   [ngClass]="{'pulse-highlight': highlightContact}" 
                   (click)="contactAgent()">
-            Contact Owner
+            {{ contactUnlocked ? 'View Owner Contact' : 'Contact Owner' }}
           </button>
+          <p class="contact-credit-hint" *ngIf="contactHint">{{ contactHint }}</p>
 
           <div class="desktop-contact-actions mt-16" *ngIf="isContactAvailable()">
             <button class="btn-outline dt-call-btn" (click)="handleContactAction('call')">
@@ -537,7 +538,7 @@
         <p class="verified-badge"><mat-icon>verified</mat-icon> Verified Owner</p>
       </div>
       
-      <div class="contact-info-box">
+      <div class="contact-info-box" *ngIf="contactUnlocked">
         <div class="info-row" *ngIf="ownerDetails.propertyPhone || ownerDetails.ownerPhone">
           <mat-icon>phone</mat-icon>
           <div class="info-row-text">
