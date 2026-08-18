@@ -22,6 +22,7 @@ import { slugifyCity } from '../../config/cities.config';
 
 import { PendingAction, SafetyConsentBottomSheetComponent } from '../../components/safety-consent/safety-consent';
 import { ContactAccessService } from '../../services/contact-access.service';
+import { paymentReturnNotice } from '../../utils/billing-return';
 
 @Component({
   selector: 'app-property-details',
@@ -714,6 +715,9 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   
   checkReturnFromLogin() {
     const params = this.route.snapshot.queryParams;
+    const notice = paymentReturnNotice(params['payment']);
+    if (notice) this.toastr[notice.level](notice.message);
+
     if (params['showContact'] === 'true' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
       this.openContactModal();
       this.clearQueryParams();
@@ -723,13 +727,15 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     } else if ((params['action'] === 'call' || params['action'] === 'whatsapp') && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
       this.handleContactAction(params['action'] as 'call' | 'whatsapp');
       this.clearQueryParams();
+    } else if (notice) {
+      this.clearQueryParams();
     }
   }
 
   private clearQueryParams() {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { showContact: null, action: null },
+      queryParams: { showContact: null, action: null, payment: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });

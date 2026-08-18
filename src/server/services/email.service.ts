@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { getServerRuntime } from '../utils/runtime-config';
 
 export async function sendMail(options: {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text?: string;

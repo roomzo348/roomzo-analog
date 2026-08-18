@@ -38,7 +38,7 @@ export const routeMeta: RouteMeta = {
       <p>We may collect:</p>
       <ul>
         <li><strong>Account data</strong> — name, email, phone number, and profile details you submit during registration or login (including OTP verification).</li>
-        <li><strong>Payment data</strong> — when you buy Plus or Pro, Razorpay processes the card/UPI payment. Roomzo stores order identifiers, plan, amount, and credit balance — not your full card number.</li>
+        <li><strong>Payment data</strong> — when you buy Starter, Plus, or Pro, Razorpay processes the card/UPI payment. Roomzo stores order identifiers, plan, amount, and credit balance — not your full card number.</li>
         <li><strong>Listing data</strong> — property descriptions, photos, rent, location, amenities, and contact numbers owners upload.</li>
         <li><strong>Communications</strong> — messages you send via contact forms, reports, support emails, or in-product consent records.</li>
         <li><strong>Usage data</strong> — pages viewed, search filters, device/browser type, approximate location if you share it, IP address, and cookies or similar technologies.</li>

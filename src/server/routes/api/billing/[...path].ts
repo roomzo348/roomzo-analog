@@ -17,6 +17,7 @@ import {
   serializeWallet,
 } from '../../../services/billing-repository';
 import { getUnlockedListingIds } from '../../../services/contact-access-repository';
+import { notifyPaidSubscription } from '../../../services/subscription-alert';
 
 function publicPlans() {
   return listContactPlans().map((plan) => ({
@@ -74,7 +75,7 @@ export default defineEventHandler(async (event) => {
     }
     const body = await readBody(event);
     const plan = getContactPlan(String(body?.planCode || body?.plan || ''));
-    if (!plan) return apiResponse(0, 'Choose Plus or Pro to continue');
+    if (!plan) return apiResponse(0, 'Choose Starter, Plus, or Pro to continue');
 
     const receipt = `rz${plan.code}${user.id}${Date.now()}`.slice(0, 40);
     const order = await createRazorpayOrder({
@@ -152,6 +153,18 @@ export default defineEventHandler(async (event) => {
     }
 
     const fulfilled = await fulfillPaidOrder({ orderId, paymentId, signature });
+    await notifyPaidSubscription({
+      alreadyPaid: fulfilled.alreadyPaid,
+      userId: Number(payment.user_id),
+      planName: fulfilled.plan?.name,
+      planCode: fulfilled.plan?.code || payment.plan_code,
+      contacts: fulfilled.plan?.contacts,
+      amountPaise: payment.amount_paise,
+      creditsRemaining: fulfilled.wallet.creditsRemaining,
+      razorpayOrderId: orderId,
+      razorpayPaymentId: paymentId,
+      userHint: { name: user.displayName || user.name, email: user.email, phone: user.phone },
+    });
     return apiResponse(1, fulfilled.alreadyPaid ? 'Payment already captured' : 'Payment successful', {
       ...serializeWallet(fulfilled.wallet),
       plan: fulfilled.plan
@@ -194,10 +207,21 @@ export default defineEventHandler(async (event) => {
             return { status: 'ignored', reason: 'could not confirm payment' };
           }
         }
-        await fulfillPaidOrder({
+        const fulfilled = await fulfillPaidOrder({
           orderId,
           paymentId: capturedId || paymentId,
           signature,
+        });
+        await notifyPaidSubscription({
+          alreadyPaid: fulfilled.alreadyPaid,
+          userId: Number(existing.user_id),
+          planName: fulfilled.plan?.name,
+          planCode: fulfilled.plan?.code || existing.plan_code,
+          contacts: fulfilled.plan?.contacts,
+          amountPaise: existing.amount_paise,
+          creditsRemaining: fulfilled.wallet.creditsRemaining,
+          razorpayOrderId: orderId,
+          razorpayPaymentId: capturedId || paymentId,
         });
       }
     }

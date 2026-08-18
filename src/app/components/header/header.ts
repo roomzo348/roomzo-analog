@@ -43,6 +43,12 @@ hasUnreadMessages = false;
     });
   }
 
+  get pricingReturnQuery(): { returnUrl?: string } {
+    const url = this.router.url || '';
+    if (!url || url.startsWith('/pricing') || url.startsWith('/owner-auth')) return {};
+    return { returnUrl: url };
+  }
+
   @HostListener('window:scroll', [])
   onWindowScroll() {
     if (isPlatformBrowser(this.platformId)) {

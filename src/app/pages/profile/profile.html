@@ -65,7 +65,7 @@
         </p>
       </div>
 
-      <a routerLink="/pricing" class="credits-card" [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
+      <a routerLink="/pricing" class="credits-card" [queryParams]="{ returnUrl: '/profile' }" [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
         <span class="credits-icon" aria-hidden="true">
           <mat-icon>stars</mat-icon>
         </span>
@@ -101,14 +101,6 @@
         <mat-icon class="menu-chevron">chevron_right</mat-icon>
       </a>
 
-      <a routerLink="/pricing" class="menu-row">
-        <span class="menu-icon"><mat-icon>workspace_premium</mat-icon></span>
-        <span class="menu-text">
-          Contact plan
-          <small class="menu-sub" *ngIf="wallet">{{ remainingPoints }} point{{ remainingPoints === 1 ? '' : 's' }} left</small>
-          <small class="menu-sub" *ngIf="!wallet">Checking balance…</small>
-        </span>
-        <mat-icon class="menu-chevron">chevron_right</mat-icon>
       </a>
 
       <button type="button" class="menu-row menu-row--logout" (click)="logout()">

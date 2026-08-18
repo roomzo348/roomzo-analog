@@ -1,7 +1,7 @@
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouteMeta } from '@analogjs/router';
@@ -14,6 +14,7 @@ import { BillingService, BillingWallet } from '../../services/billing.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
 import { environment } from '../../../environments/environment';
+import { planDisplayName, paymentReturnNotice } from '../../utils/billing-return';
 
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
@@ -61,6 +62,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private billing: BillingService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastr: ToastrService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -84,6 +86,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     this.applyProfileData(stored);
     this.isLoading = false;
     this.loadAll();
+    this.notePaymentReturn();
   }
 
   ngOnDestroy(): void {
@@ -173,6 +176,18 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private notePaymentReturn(): void {
+    const notice = paymentReturnNotice(this.route.snapshot.queryParamMap.get('payment'));
+    if (!notice) return;
+    this.toastr[notice.level](notice.message);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { payment: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   get remainingPoints(): number {
     if (!this.wallet) return 0;
     const paid = Number(this.wallet.creditsRemaining || 0);
@@ -183,7 +198,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   get creditsMeta(): string {
     if (!this.wallet) return 'Loading your contact balance…';
     if (this.wallet.planCode) {
-      const name = this.wallet.planCode === 'pro' ? 'Pro' : 'Plus';
+      const name = planDisplayName(this.wallet.planCode);
       if (this.wallet.planExpiresAt) {
         const expiry = new Date(this.wallet.planExpiresAt).toLocaleDateString('en-IN', {
           day: 'numeric',
@@ -201,7 +216,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   get planSummary(): string {
     if (!this.wallet) return 'First owner contact is free';
     if (this.wallet.planCode) {
-      const name = this.wallet.planCode === 'pro' ? 'Pro' : 'Plus';
+      const name = planDisplayName(this.wallet.planCode);
       return `${name} · ${this.remainingPoints} point${this.remainingPoints === 1 ? '' : 's'} left`;
     }
     if (this.wallet.freeUnlockAvailable) return '1 free owner contact remaining';
