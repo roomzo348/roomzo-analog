@@ -1,28 +1,36 @@
 <div class="paywall">
+  <div class="sheet-handle" aria-hidden="true"></div>
   <button class="close-btn" type="button" (click)="close()" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 
   <div class="paywall-hero">
-    <span class="eyebrow">Owner contact</span>
-    <h2>Unlock more owner contacts</h2>
+    <span class="lock-badge" aria-hidden="true">
+      <mat-icon>lock</mat-icon>
+    </span>
+    <span class="eyebrow">Owner contact is locked</span>
+    <h2>Buy credits to call or WhatsApp</h2>
     <p>
-      Your first owner contact is free. After that, each new property uses one contact credit.
-      Properties you already unlocked stay open even after credits run out.
+      Phone, WhatsApp, and email stay hidden until you buy a plan.
+      Starter is ₹19 for 4 owner contacts. Unlocked listings stay open for you.
     </p>
   </div>
 
   <div class="plans">
     <article class="plan-card" *ngFor="let plan of plans" [class.popular]="plan.popular">
       <div class="plan-badge" *ngIf="plan.popular">Most popular</div>
-      <h3>{{ plan.name }}</h3>
-      <p class="price">{{ plan.priceLabel }}</p>
-      <p class="contacts">{{ plan.contacts }} property contacts</p>
+      <div class="plan-main">
+        <div class="plan-copy">
+          <h3>{{ plan.name }}</h3>
+          <p class="contacts">{{ plan.contacts }} owner contacts</p>
+        </div>
+        <p class="price">{{ plan.amountRupees ? '₹' + plan.amountRupees : plan.priceLabel }}</p>
+      </div>
       <ul>
         <li *ngFor="let feature of plan.features">{{ feature }}</li>
       </ul>
-      <button class="pay-btn" type="button" [disabled]="payingCode === plan.code" (click)="pay(plan)">
-        {{ payingCode === plan.code ? 'Opening Razorpay…' : 'Pay with Razorpay' }}
+      <button class="pay-btn" type="button" [disabled]="!!payingCode" (click)="pay(plan)">
+        {{ payingCode === plan.code ? 'Opening secure checkout…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
       </button>
     </article>
   </div>
@@ -32,5 +40,5 @@
   <p class="sandbox-note" *ngIf="!configured">
     Sandbox checkout needs Razorpay test keys on the server. You can still review plans.
   </p>
-  <button class="text-link" type="button" (click)="viewAllPlans()">Compare all plans</button>
+  <button class="text-link" type="button" (click)="viewAllPlans()">See full plan comparison</button>
 </div>

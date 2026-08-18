@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, getHeader, getMethod, getRouterParam, readBody, readRawBody } from 'h3';
-import { listContactPlans, getContactPlan } from '../../../config/plans';
+import { listContactPlans, getContactPlan, FREE_OWNER_CONTACTS } from '../../../config/plans';
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
 import { verifyCheckoutSignature, verifyWebhookSignature, isCapturedRazorpayPayment } from '../../../utils/razorpay-signature';
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
 
   if (segments[0] === 'plans' && method === 'GET') {
     return apiResponse(1, 'Plans fetched', {
-      freeOwnerContacts: 1,
+      freeOwnerContacts: FREE_OWNER_CONTACTS,
       plans: publicPlans(),
     });
   }

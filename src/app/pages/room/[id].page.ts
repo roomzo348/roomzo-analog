@@ -286,7 +286,6 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
           ownerId: this.property.ownerId
         });
       }
-      this.syncContactFromProperty();
       this.checkAndExecuteConsent({ actionType }, () => {
         this.unlockThenContact(actionType);
       });
@@ -380,13 +379,10 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     if (data?.unlocked || data?.isOwner || data?.unlockType === 'owner') {
       return 'This owner contact is unlocked for you.';
     }
-    if (data?.freeUnlockAvailable) {
-      return 'Your first owner contact is free.';
-    }
-    if (typeof data?.creditsRemaining === 'number') {
+    if (typeof data?.creditsRemaining === 'number' && data.creditsRemaining > 0) {
       return `${data.creditsRemaining} contact credit${data.creditsRemaining === 1 ? '' : 's'} left this month.`;
     }
-    return '';
+    return 'Buy a plan to view owner phone, WhatsApp, or email.';
   }
 
   openContactModal() {
@@ -751,7 +747,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   }
 
   private syncContactFromProperty(): void {
-    if (!this.property) return;
+    if (!this.property || !this.contactUnlocked) return;
     const phone = this.property.contactNo ?? this.property.tempContactNo;
     if (phone != null && String(phone).trim() !== '') {
       this.ownerDetails.propertyPhone = String(phone);
@@ -768,7 +764,18 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   }
 
   private applyOwnerDetails(data: any): void {
-    const listingPhone = this.property?.contactNo ?? this.property?.tempContactNo;
+    if (!this.contactUnlocked && !data?.unlocked) {
+      this.ownerDetails = {
+        name: data.name || this.ownerName || 'Property Owner',
+        ownerPhone: '',
+        propertyPhone: '',
+        email: '',
+      };
+      return;
+    }
+    const listingPhone = this.contactUnlocked
+      ? (this.property?.contactNo ?? this.property?.tempContactNo)
+      : null;
     const propertyPhone = listingPhone != null && String(listingPhone).trim() !== ''
       ? String(listingPhone)
       : (data.phone ? String(data.phone) : '');

@@ -209,7 +209,7 @@ export async function fulfillPaidOrder(input: {
 export function serializeWallet(wallet: WalletSnapshot) {
   return {
     creditsRemaining: usableCredits(wallet),
-    freeUnlockAvailable: !wallet.freeUnlockUsed,
+    freeUnlockAvailable: false,
     planCode: wallet.planCode,
     planExpiresAt: wallet.planExpiresAt ? wallet.planExpiresAt.toISOString() : null,
     planActive: usableCredits(wallet) > 0 || Boolean(wallet.planCode && wallet.planExpiresAt && wallet.planExpiresAt.getTime() > Date.now()),

@@ -1,7 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, switchMap, map, throwError } from 'rxjs';
+import { Observable, from, switchMap, map, throwError, finalize } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import {
@@ -47,6 +47,7 @@ declare global {
 @Injectable({ providedIn: 'root' })
 export class BillingService {
   private baseUrl = environment.apiUrl;
+  private checkoutLock = false;
 
   constructor(
     private http: HttpClient,
@@ -118,6 +119,10 @@ export class BillingService {
   }
 
   checkout(planCode: string, returnUrl?: string | null): Observable<BillingWallet> {
+    if (this.checkoutLock) {
+      return throwError(() => new Error('Payment already in progress'));
+    }
+    this.checkoutLock = true;
     this.rememberReturnUrl(returnUrl);
     return this.createOrder(planCode).pipe(
       switchMap((res) => {
@@ -133,6 +138,9 @@ export class BillingService {
             return verifyRes.data as BillingWallet;
           })
         );
+      }),
+      finalize(() => {
+        this.checkoutLock = false;
       })
     );
   }
@@ -159,6 +167,28 @@ export class BillingService {
         // Test-mode UPI Collect VPA. Live checkout never prefills this.
         prefill['vpa'] = 'success@razorpay';
       }
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      const display = isMobile
+        ? {
+            hide: [{ method: 'emi' }, { method: 'paylater' }, { method: 'wallet' }],
+            preferences: { show_default_blocks: true },
+          }
+        : {
+            blocks: {
+              upi: {
+                name: 'UPI',
+                instruments: [
+                  {
+                    method: 'upi',
+                    flows: ['intent', 'qr', 'collect'],
+                  },
+                ],
+              },
+            },
+            hide: [{ method: 'emi' }, { method: 'paylater' }],
+            sequence: ['block.upi', 'upi', 'card', 'netbanking'],
+            preferences: { show_default_blocks: true },
+          };
       return new Promise((resolve, reject) => {
         const checkout = new window.Razorpay({
           key: order.keyId,
@@ -176,26 +206,7 @@ export class BillingService {
             emi: false,
             paylater: false,
           },
-          config: {
-            display: {
-              blocks: {
-                upi: {
-                  name: 'UPI',
-                  instruments: [
-                    {
-                      method: 'upi',
-                      // Collect-only hid UPI after NPCI deprecated VPA entry (Feb 2026).
-                      // Intent/QR show on live mobile; Collect/QR remain for test + iOS/desktop.
-                      flows: ['intent', 'qr', 'collect'],
-                    },
-                  ],
-                },
-              },
-              hide: [{ method: 'emi' }, { method: 'paylater' }],
-              sequence: ['block.upi', 'upi', 'card', 'netbanking'],
-              preferences: { show_default_blocks: true },
-            },
-          },
+          config: { display },
           notes: { planCode: order.plan?.code || '' },
           theme: { color: '#196153' },
           handler: (response: any) => resolve(response),

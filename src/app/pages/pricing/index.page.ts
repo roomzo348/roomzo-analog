@@ -14,7 +14,7 @@ export const routeMeta: RouteMeta = {
     {
       name: 'description',
       content:
-        'Unlock direct owner contacts on Roomzo. First contact is free. Starter is ₹19/month for 3 contacts, Plus is ₹49/month for 10, Pro is ₹99/month for 25 with full-time WhatsApp and call support.',
+        'Unlock owner contacts on Roomzo. Starter is ₹19/month for 4 contacts, Plus is ₹49/month for 10, Pro is ₹99/month for 25 with full-time WhatsApp and call support. Phone numbers stay hidden until you buy credits.',
     },
   ],
 };
@@ -82,6 +82,7 @@ export default class PricingPageComponent implements OnInit {
 
   startCheckout(planCode: string): void {
     if (!this.isBrowser) return;
+    if (this.payingCode) return;
     if (!this.auth.getCurrentUser()?.id) {
       this.router.navigate(['/owner-auth'], {
         queryParams: { returnUrl: `/pricing?plan=${planCode}` },
@@ -102,6 +103,7 @@ export default class PricingPageComponent implements OnInit {
       error: (err) => {
         this.payingCode = null;
         const message = err?.message || 'Payment was not completed';
+        if (message === 'Payment already in progress') return;
         const cancelled = message === 'Payment cancelled';
         this.leavePricing(cancelled ? 'cancelled' : 'failed', cancelled ? undefined : message);
       },

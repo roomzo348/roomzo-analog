@@ -64,9 +64,9 @@ export class ContactPaywallComponent {
       error: (err) => {
         this.payingCode = null;
         const message = err?.message || 'Payment was not completed';
+        if (message === 'Payment already in progress') return;
         if (message === 'Payment cancelled') {
           this.errorMessage = 'Payment was cancelled. Choose a plan to try again.';
-          this.toastr.info(this.errorMessage);
           return;
         }
         this.errorMessage = message;

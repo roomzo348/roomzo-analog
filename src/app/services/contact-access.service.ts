@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, switchMap, catchError, map } from 'rxjs';
+import { Observable, of, switchMap, catchError, map, finalize } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
@@ -33,6 +33,7 @@ export interface UnlockResult {
 @Injectable({ providedIn: 'root' })
 export class ContactAccessService {
   private baseUrl = environment.apiUrl;
+  private paywallOpen = false;
 
   constructor(
     private http: HttpClient,
@@ -91,15 +92,24 @@ export class ContactAccessService {
   }
 
   openPaywall(wallet?: Partial<BillingWallet> & { plans?: any[] }, returnUrl?: string): Observable<boolean> {
+    if (this.paywallOpen) {
+      return of(false);
+    }
+    this.paywallOpen = true;
+    const mobile = isPlatformBrowser(this.platformId) && window.innerWidth < 720;
     const ref = this.dialog.open(ContactPaywallComponent, {
-      width: '920px',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
+      width: mobile ? '100%' : '920px',
+      maxWidth: mobile ? '100vw' : '96vw',
+      maxHeight: mobile ? '94vh' : '92vh',
       autoFocus: false,
-      panelClass: 'roomzo-paywall-panel',
+      panelClass: mobile ? ['roomzo-paywall-panel', 'roomzo-paywall-sheet'] : 'roomzo-paywall-panel',
+      position: mobile ? { bottom: '0px' } : undefined,
       data: { ...(wallet || {}), returnUrl: returnUrl || this.router.url },
     });
     return ref.afterClosed().pipe(
+      finalize(() => {
+        this.paywallOpen = false;
+      }),
       map((result: ContactPaywallResult | undefined) => result === 'paid')
     );
   }

@@ -190,9 +190,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
   get remainingPoints(): number {
     if (!this.wallet) return 0;
-    const paid = Number(this.wallet.creditsRemaining || 0);
-    const free = this.wallet.freeUnlockAvailable ? 1 : 0;
-    return paid + free;
+    return Number(this.wallet.creditsRemaining || 0);
   }
 
   get creditsMeta(): string {
@@ -209,18 +207,16 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
       }
       return `${name} plan · ${this.wallet.creditsRemaining} paid point${this.wallet.creditsRemaining === 1 ? '' : 's'}`;
     }
-    if (this.wallet.freeUnlockAvailable) return 'Includes 1 free owner contact. Subscribe for more.';
-    return 'Free contact used. Subscribe to unlock more owners.';
+    return 'Buy a plan to view owner contacts.';
   }
 
   get planSummary(): string {
-    if (!this.wallet) return 'First owner contact is free';
+    if (!this.wallet) return 'Buy a plan to view owner contacts';
     if (this.wallet.planCode) {
       const name = planDisplayName(this.wallet.planCode);
       return `${name} · ${this.remainingPoints} point${this.remainingPoints === 1 ? '' : 's'} left`;
     }
-    if (this.wallet.freeUnlockAvailable) return '1 free owner contact remaining';
-    return 'Subscribe to unlock more owner contacts';
+    return 'Buy a plan to view owner contacts';
   }
 
   loadFavorites(): void {
