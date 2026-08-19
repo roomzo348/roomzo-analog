@@ -8,6 +8,14 @@ import { buildPrerenderRoutes } from './scripts/sitemap-routes';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+
+  // Disable TLS cert verification in dev on Windows (Node can't verify
+  // Razorpay's intermediate cert without the system CA bundle).
+  // This is set at the process level so Nitro's server-side fetch picks it up.
+  if (mode !== 'production') {
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  }
+
   return ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   define: {},
