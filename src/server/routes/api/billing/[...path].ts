@@ -2,7 +2,12 @@ import { createError, defineEventHandler, getHeader, getMethod, getRouterParam, 
 import { listContactPlans, getContactPlan, FREE_OWNER_CONTACTS } from '../../../config/plans';
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
-import { verifyCheckoutSignature, verifyWebhookSignature, isCapturedRazorpayPayment } from '../../../utils/razorpay-signature';
+import {
+  verifyCheckoutSignature,
+  verifyWebhookSignature,
+  isCapturedRazorpayPayment,
+  isFailedRazorpayPayment,
+} from '../../../utils/razorpay-signature';
 import {
   createRazorpayOrder,
   fetchRazorpayPayment,
@@ -14,6 +19,7 @@ import {
   getPaymentByOrderId,
   getWallet,
   markPaymentFailed,
+  reconcilePendingPaymentsForUser,
   serializeWallet,
 } from '../../../services/billing-repository';
 import { getUnlockedListingIds } from '../../../services/contact-access-repository';
@@ -58,8 +64,11 @@ export default defineEventHandler(async (event) => {
 
   if (segments[0] === 'me' && method === 'GET') {
     const user = await requireAuth(event);
-    const wallet = await getWallet(Number(user.id));
-    const unlockedListingIds = await getUnlockedListingIds(Number(user.id));
+    const userId = Number(user.id);
+    // Recover credits when verify failed but Razorpay already captured payment.
+    await reconcilePendingPaymentsForUser(userId).catch(() => undefined);
+    const wallet = await getWallet(userId);
+    const unlockedListingIds = await getUnlockedListingIds(userId);
     return apiResponse(1, 'Wallet fetched', {
       ...serializeWallet(wallet),
       unlockedListingIds,
@@ -133,23 +142,38 @@ export default defineEventHandler(async (event) => {
       return apiResponse(0, 'Payment signature verification failed');
     }
 
-    let remotePayment: { id: string; status: string; amount: number; currency: string; order_id?: string };
+    // The signature above is an HMAC over "orderId|paymentId" with our key
+    // secret, so a valid one is proof from Razorpay that this payment happened
+    // for this order. The live lookup is a secondary guard that may *reject* a
+    // payment; being unable to reach Razorpay must never discard money the user
+    // has already paid, because there is no other chance to grant the credits
+    // unless a webhook secret is configured.
+    let remotePayment: {
+      id: string;
+      status: string;
+      amount: number;
+      currency: string;
+      order_id?: string;
+    } | null = null;
     try {
       remotePayment = await fetchRazorpayPayment(paymentId);
     } catch {
-      return apiResponse(0, 'Could not confirm payment with Razorpay. Credits were not granted.');
+      remotePayment = null;
     }
-    if (remotePayment.order_id && remotePayment.order_id !== orderId) {
-      return apiResponse(0, 'Payment does not match this order');
-    }
-    if (Number(remotePayment.amount) !== Number(payment.amount_paise)) {
-      return apiResponse(0, 'Payment amount mismatch');
-    }
-    if (!isCapturedRazorpayPayment(remotePayment.status)) {
-      if (String(remotePayment.status).toLowerCase() === 'failed') {
-        await markPaymentFailed(orderId, paymentId);
+
+    if (remotePayment) {
+      if (remotePayment.order_id && remotePayment.order_id !== orderId) {
+        return apiResponse(0, 'Payment does not match this order');
       }
-      return apiResponse(0, 'Payment is not captured yet. Credits were not granted.');
+      if (Number(remotePayment.amount) !== Number(payment.amount_paise)) {
+        return apiResponse(0, 'Payment amount mismatch');
+      }
+      if (isFailedRazorpayPayment(remotePayment.status)) {
+        await markPaymentFailed(orderId, paymentId);
+        return apiResponse(0, 'Payment failed. No credits were added.');
+      }
+      // Signature is already valid — do not reject while Razorpay is still
+      // settling (e.g. status `created` right after checkout in test mode).
     }
 
     const fulfilled = await fulfillPaidOrder({ orderId, paymentId, signature });

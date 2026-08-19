@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatIconModule } from '@angular/material/icon';
@@ -51,11 +51,17 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     private router: Router, 
     private http: HttpClient,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
-    this.typeEffect();
+    // The placeholder animation ticks every ~30ms. Kept outside Angular so it
+    // never schedules an app-wide change detection pass, and browser-only so it
+    // cannot keep the SSR render alive.
+    if (isPlatformBrowser(this.platformId)) {
+      this.ngZone.runOutsideAngular(() => this.typeEffect());
+    }
     this.setupAutocomplete();
   }
 
@@ -102,18 +108,21 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- Optimised Typewriter Logic with ChangeDetectorRef ---
+  // --- Typewriter placeholder, rendered without app-wide change detection ---
+  private renderPlaceholder() {
+    if (this.isDestroyed) return;
+    this.cdr.detectChanges();
+  }
+
   private typeEffect() {
     if (this.isDestroyed) return;
 
     const currentWord = this.placeholders[this.placeholderIndex];
-    
+
     if (this.charIndex < currentWord.length) {
-      this.ngZone.run(() => {
-        this.currentPlaceholder += currentWord.charAt(this.charIndex);
-        this.cdr.markForCheck();   // Immediate UI update
-      });
+      this.currentPlaceholder += currentWord.charAt(this.charIndex);
       this.charIndex++;
+      this.renderPlaceholder();
       this.typingTimeout = setTimeout(() => this.typeEffect(), 40);
     } else {
       this.typingTimeout = setTimeout(() => this.eraseEffect(), 1800);
@@ -124,11 +133,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (this.isDestroyed) return;
 
     if (this.charIndex > 0) {
-      this.ngZone.run(() => {
-        this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
-        this.cdr.markForCheck();   // Immediate UI update
-      });
+      this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
       this.charIndex--;
+      this.renderPlaceholder();
       this.typingTimeout = setTimeout(() => this.eraseEffect(), 25);
     } else {
       this.placeholderIndex = (this.placeholderIndex + 1) % this.placeholders.length;

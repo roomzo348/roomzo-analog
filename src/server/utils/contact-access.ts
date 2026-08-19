@@ -10,13 +10,17 @@ export interface WalletSnapshot {
   planExpiresAt: Date | null;
 }
 
+/**
+ * Whether a plan window is still open. Retained for reporting only: contact
+ * points do not expire, so this must not gate spending or contact reveals.
+ */
 export function isPlanActive(planExpiresAt: Date | null | undefined, now = new Date()): boolean {
   if (!planExpiresAt) return false;
   return planExpiresAt.getTime() > now.getTime();
 }
 
-export function usableCredits(wallet: WalletSnapshot, now = new Date()): number {
-  if (!isPlanActive(wallet.planExpiresAt, now)) return 0;
+/** Purchased points never expire, so every remaining point stays spendable. */
+export function usableCredits(wallet: WalletSnapshot): number {
   return Math.max(0, Number(wallet.creditsRemaining || 0));
 }
 
@@ -25,12 +29,13 @@ export function decideUnlock(input: {
   alreadyUnlocked: boolean;
   freeUnlockUsed: boolean;
   creditsRemaining: number;
-  planActive: boolean;
 }): UnlockDecision {
   if (input.isOwner) return { action: 'allow', reason: 'owner' };
+  // Viewing any owner contact always requires at least one credit in the wallet.
+  // A listing unlocked before does not cost again, but credits must remain > 0.
+  if (input.creditsRemaining <= 0) return { action: 'paywall' };
   if (input.alreadyUnlocked) return { action: 'allow', reason: 'already_unlocked' };
-  if (input.planActive && input.creditsRemaining > 0) return { action: 'allow', reason: 'credit' };
-  return { action: 'paywall' };
+  return { action: 'allow', reason: 'credit' };
 }
 
 export function nextPlanExpiry(currentExpiry: Date | null | undefined, durationDays: number, now = new Date()): Date {
@@ -53,6 +58,8 @@ export function redactListingContact<T extends Record<string, unknown>>(
   delete (copy as Record<string, unknown>)['ownerEmail'];
   delete (copy as Record<string, unknown>)['ownerPhone'];
   delete (copy as Record<string, unknown>)['phone'];
+  delete (copy as Record<string, unknown>)['whatsapp'];
+  delete (copy as Record<string, unknown>)['mobile'];
   return copy;
 }
 

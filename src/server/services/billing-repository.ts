@@ -1,6 +1,8 @@
 import { sqlExecute, sqlQuery, connQuery, connExecute, withTransaction } from '../db/mysql';
 import { CONTACT_PLANS, getContactPlan, type ContactPlan, type PlanCode } from '../config/plans';
 import { nextPlanExpiry, usableCredits, type WalletSnapshot } from '../utils/contact-access';
+import { fetchRazorpayOrderPayments, getRazorpayConfig } from './razorpay.service';
+import { isFailedRazorpayPayment, isPaidRazorpayPayment } from '../utils/razorpay-signature';
 
 let tablesReady = false;
 
@@ -76,15 +78,10 @@ export async function getWallet(userId: number): Promise<WalletSnapshot> {
     [userId]
   );
   const wallet = mapWallet(rows[0]);
-  const usable = usableCredits(wallet);
-  if (wallet.creditsRemaining !== usable) {
-    await sqlExecute(
-      `UPDATE user_contact_wallets SET credits_remaining = ? WHERE user_id = ?`,
-      [usable, userId]
-    );
-    wallet.creditsRemaining = usable;
-  }
-  return wallet;
+  // Report only what is spendable right now, but never write that back: a plain
+  // read must not destroy a balance the user paid for. Access is gated by
+  // usableCredits() at every spend point, so the stored number stays intact.
+  return { ...wallet, creditsRemaining: usableCredits(wallet) };
 }
 
 export async function createPendingPayment(input: {
@@ -115,6 +112,16 @@ export async function getPaymentByOrderId(orderId: string): Promise<any | null> 
     [orderId]
   );
   return rows[0] ?? null;
+}
+
+export async function listPendingPaymentsForUser(userId: number): Promise<any[]> {
+  await ensureBillingTables();
+  return sqlQuery<any>(
+    `SELECT * FROM billing_payments
+     WHERE user_id = ? AND status = 'created' AND razorpay_order_id IS NOT NULL
+     ORDER BY id ASC`,
+    [userId]
+  );
 }
 
 export async function markPaymentFailed(orderId: string, paymentId?: string): Promise<void> {
@@ -212,6 +219,44 @@ export function serializeWallet(wallet: WalletSnapshot) {
     freeUnlockAvailable: false,
     planCode: wallet.planCode,
     planExpiresAt: wallet.planExpiresAt ? wallet.planExpiresAt.toISOString() : null,
-    planActive: usableCredits(wallet) > 0 || Boolean(wallet.planCode && wallet.planExpiresAt && wallet.planExpiresAt.getTime() > Date.now()),
+    // Points never expire, so "active" simply means there is something to spend.
+    planActive: usableCredits(wallet) > 0,
   };
+}
+
+/**
+ * Credits can stay at zero when Razorpay captured the payment but /verify rejected
+ * it (for example while the payment was still in `created` status). Look up any
+ * still-open orders server-side and fulfil the ones Razorpay shows as paid.
+ */
+export async function reconcilePendingPaymentsForUser(userId: number): Promise<WalletSnapshot | null> {
+  if (!getRazorpayConfig().configured) return null;
+
+  const pending = await listPendingPaymentsForUser(userId);
+  if (!pending.length) return null;
+
+  let latestWallet: WalletSnapshot | null = null;
+  for (const payment of pending) {
+    const orderId = String(payment.razorpay_order_id || '');
+    if (!orderId) continue;
+    try {
+      const { items = [] } = await fetchRazorpayOrderPayments(orderId);
+      const match = items.find(
+        (item) =>
+          Number(item.amount) === Number(payment.amount_paise) &&
+          !isFailedRazorpayPayment(item.status) &&
+          isPaidRazorpayPayment(item.status)
+      );
+      if (!match) continue;
+      const fulfilled = await fulfillPaidOrder({
+        orderId,
+        paymentId: match.id,
+        signature: null,
+      });
+      latestWallet = fulfilled.wallet;
+    } catch {
+      // Keep trying older pending orders.
+    }
+  }
+  return latestWallet;
 }

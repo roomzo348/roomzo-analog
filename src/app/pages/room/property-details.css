@@ -87,6 +87,13 @@ a { text-decoration: none; color: inherit; }
 }
 .desktop-contact-actions .dt-whatsapp-btn svg { flex-shrink: 0; }
 
+/* Busy state while the unlock check decides between contact and paywall */
+.is-busy {
+  opacity: 0.65;
+  cursor: progress;
+  transition: opacity 160ms ease;
+}
+
 /* --- 3. Desktop Gallery Grid --- */
 .gallery-section { border-radius: var(--rz-radius, 16px); overflow: hidden; height: 480px; }
 .gallery-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; height: 100%; }

@@ -1,44 +1,117 @@
-<div class="paywall">
-  <div class="sheet-handle" aria-hidden="true"></div>
-  <button class="close-btn" type="button" (click)="close()" aria-label="Close">
+<div class="rz-paywall">
+  <button class="paywall-close" type="button" (click)="close()" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 
-  <div class="paywall-hero">
-    <span class="lock-badge" aria-hidden="true">
-      <mat-icon>lock</mat-icon>
-    </span>
-    <span class="eyebrow">Owner contact is locked</span>
-    <h2>Buy credits to call or WhatsApp</h2>
-    <p>
-      Phone, WhatsApp, and email stay hidden until you buy a plan.
-      Starter is ₹19 for 4 owner contacts. Unlocked listings stay open for you.
+  <aside class="paywall-aside">
+    <div class="aside-brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-name">Roomzo</span>
+    </div>
+
+    <h2 class="aside-title">Talk to owners directly. Zero brokerage.</h2>
+    <p class="aside-sub">
+      Get the phone number, WhatsApp and email of verified property owners the moment you pay.
     </p>
-  </div>
 
-  <div class="plans">
-    <article class="plan-card" *ngFor="let plan of plans" [class.popular]="plan.popular">
-      <div class="plan-badge" *ngIf="plan.popular">Most popular</div>
-      <div class="plan-main">
-        <div class="plan-copy">
-          <h3>{{ plan.name }}</h3>
-          <p class="contacts">{{ plan.contacts }} owner contacts</p>
+    <ul class="aside-benefits">
+      <li>
+        <mat-icon>verified_user</mat-icon>
+        <div>
+          <strong>Verified owners only</strong>
+          <span>Every listing is checked before it goes live</span>
         </div>
-        <p class="price">{{ plan.amountRupees ? '₹' + plan.amountRupees : plan.priceLabel }}</p>
-      </div>
-      <ul>
-        <li *ngFor="let feature of plan.features">{{ feature }}</li>
-      </ul>
-      <button class="pay-btn" type="button" [disabled]="!!payingCode" (click)="pay(plan)">
-        {{ payingCode === plan.code ? 'Opening secure checkout…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
+      </li>
+      <li>
+        <mat-icon>savings</mat-icon>
+        <div>
+          <strong>No broker, no commission</strong>
+          <span>You pay for contacts, never a month's rent</span>
+        </div>
+      </li>
+      <li>
+        <mat-icon>bolt</mat-icon>
+        <div>
+          <strong>Instant unlock</strong>
+          <span>Contacts appear right after payment</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="aside-trust">
+      <mat-icon>lock</mat-icon>
+      <span>Payments secured by Razorpay</span>
+    </div>
+  </aside>
+
+  <section class="paywall-main">
+    <div class="sheet-handle" aria-hidden="true"></div>
+
+    <header class="main-head">
+      <p class="eyebrow">Contact credits</p>
+      <h3>Choose your plan</h3>
+      <p class="main-sub">Use credits on any listing, anytime.</p>
+    </header>
+
+    <div class="trust-strip">
+      <span><mat-icon>verified_user</mat-icon> Verified owners</span>
+      <span><mat-icon>savings</mat-icon> No brokerage</span>
+      <span><mat-icon>lock</mat-icon> Secure payment</span>
+    </div>
+
+    <div class="plan-list" role="radiogroup" aria-label="Contact plans">
+      <button
+        class="plan-row"
+        type="button"
+        role="radio"
+        *ngFor="let plan of displayPlans"
+        [class.selected]="isSelected(plan)"
+        [attr.aria-checked]="isSelected(plan)"
+        [disabled]="!!payingCode"
+        (click)="select(plan, $event)"
+      >
+        <span class="plan-radio" aria-hidden="true"><span class="dot"></span></span>
+
+        <span class="plan-info">
+          <span class="plan-name">
+            {{ plan.name }}
+            <span class="plan-badge" *ngIf="plan.popular">Best value</span>
+          </span>
+          <span class="plan-meta">
+            {{ plan.contacts }} owner contacts · ₹{{ perContact(plan) }} each
+          </span>
+        </span>
+
+        <span class="plan-price">
+          <strong>₹{{ plan.amountRupees }}</strong>
+          <small>/month</small>
+        </span>
       </button>
-    </article>
-  </div>
+    </div>
 
-  <p class="pay-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <div class="plan-includes" *ngIf="selectedPlan">
+      <p class="includes-title">Included in {{ selectedPlan.name }}</p>
+      <ul>
+        <li *ngFor="let feature of selectedPlan.features">
+          <mat-icon>check</mat-icon>
+          <span>{{ feature }}</span>
+        </li>
+      </ul>
+    </div>
 
-  <p class="sandbox-note" *ngIf="!configured">
-    Sandbox checkout needs Razorpay test keys on the server. You can still review plans.
-  </p>
-  <button class="text-link" type="button" (click)="viewAllPlans()">See full plan comparison</button>
+    <p class="paywall-alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <footer class="main-foot">
+      <button
+        class="pay-cta"
+        type="button"
+        [disabled]="!!payingCode || !selectedPlan"
+        (click)="paySelected($event)"
+      >
+        <mat-icon *ngIf="!payingCode">lock</mat-icon>
+        <span>{{ ctaLabel() }}</span>
+      </button>
+      <p class="foot-note">UPI · Cards · Netbanking · Wallets</p>
+    </footer>
+  </section>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, Inject, NgZone, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormArray, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -108,6 +108,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     private toastr: ToastrService,
     private http: HttpClient,
     private router: Router, // <-- Add this line
+    private zone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -216,15 +217,26 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   }
 
   loadMapSafely(): void {
-    if (isPlatformBrowser(this.platformId)) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Polled outside the Angular zone so waiting for the map container never
+    // triggers change detection, and capped so a missing container cannot leave
+    // a timer running for the life of the page.
+    this.zone.runOutsideAngular(() => {
+      let attempts = 0;
       const checkExist = setInterval(() => {
+        attempts++;
         const mapElement = document.getElementById('propertyMap');
         if (mapElement) {
-          clearInterval(checkExist); 
-          this.initMap();            
+          clearInterval(checkExist);
+          this.zone.run(() => this.initMap());
+          return;
+        }
+        if (attempts >= 50) {
+          clearInterval(checkExist);
         }
       }, 100);
-    }
+    });
   }
 
   get detailsGroup(): FormGroup { return this.listingForm.get('details') as FormGroup; }

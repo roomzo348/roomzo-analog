@@ -87,3 +87,15 @@ export async function fetchRazorpayPayment(paymentId: string): Promise<{
 }> {
   return razorpayRequest(`/payments/${paymentId}`);
 }
+
+export async function fetchRazorpayOrderPayments(orderId: string): Promise<{
+  items: Array<{
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+    order_id?: string;
+  }>;
+}> {
+  return razorpayRequest(`/orders/${orderId}/payments`);
+}

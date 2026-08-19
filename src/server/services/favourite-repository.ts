@@ -1,5 +1,7 @@
 import { sqlExecute, sqlQuery } from '../db/mysql';
 import { getListingsByIds } from './listing-repository';
+import { getRevealableListingIds } from './contact-access-repository';
+import { redactListingContact } from '../utils/contact-access';
 
 export async function addFavourite(userId: number, propertyId: number): Promise<void> {
   await sqlExecute(
@@ -37,15 +39,20 @@ export async function getFavouritesByUser(userId: number): Promise<any[]> {
   const propertyIds = favRows.map((row) => Number(row.propertyId));
   const listings = await getListingsByIds(propertyIds);
   const listingById = new Map(listings.map((listing) => [Number(listing.id), listing]));
+  // Saving a listing must never reveal the owner's contact. Only a paid
+  // unlock on an active plan (or owning the listing) does.
+  const revealable = await getRevealableListingIds(userId);
 
   return favRows
     .map((fav) => {
       const property = listingById.get(Number(fav.propertyId));
       if (!property || Number(property.isRented) === 2) return null;
+      const listingId = Number(property.id);
+      const isOwner = Number(property.ownerId ?? property.owner_id) === Number(userId);
       return {
         favouriteId: fav.favouriteId,
         savedOn: fav.savedOn,
-        property,
+        property: redactListingContact(property, isOwner || revealable.has(listingId)),
       };
     })
     .filter((item): item is NonNullable<typeof item> => item != null);

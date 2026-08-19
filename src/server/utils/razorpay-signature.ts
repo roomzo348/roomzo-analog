@@ -35,3 +35,17 @@ export function isCapturedRazorpayPayment(status: string | null | undefined): bo
   return value === 'captured';
 }
 
+/**
+ * Money is secured for both 'captured' and 'authorized'. Orders are created with
+ * payment_capture: 1, so an authorized payment is auto-captured moments later —
+ * reading it back too early must not cost the buyer their credits.
+ */
+export function isPaidRazorpayPayment(status: string | null | undefined): boolean {
+  const value = String(status || '').toLowerCase();
+  return value === 'captured' || value === 'authorized';
+}
+
+export function isFailedRazorpayPayment(status: string | null | undefined): boolean {
+  return String(status || '').toLowerCase() === 'failed';
+}
+

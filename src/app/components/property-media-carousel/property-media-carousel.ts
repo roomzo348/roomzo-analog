@@ -1,8 +1,11 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   Inject,
   Input,
+  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -15,6 +18,7 @@ import { getListingPhotoUrls, ListingPhotoInput, optimizeImageUrl } from '../../
   selector: 'app-property-media-carousel',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="media-carousel"
@@ -185,8 +189,13 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
   activeIndex = 0;
   private timer?: ReturnType<typeof setInterval>;
   private isBrowser: boolean;
+  private isDestroyed = false;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private zone: NgZone,
+    private cd: ChangeDetectorRef
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
@@ -204,6 +213,7 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
     this.clearTimer();
   }
 
@@ -215,6 +225,7 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
     event?.stopPropagation();
     if (index < 0 || index >= this.photoUrls.length) return;
     this.activeIndex = index;
+    this.cd.markForCheck();
     this.restartAutoPlay();
   }
 
@@ -223,6 +234,7 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
     if (this.photoUrls.length <= 1) return;
     this.activeIndex =
       (this.activeIndex - 1 + this.photoUrls.length) % this.photoUrls.length;
+    this.cd.markForCheck();
     this.restartAutoPlay();
   }
 
@@ -230,6 +242,7 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
     event?.stopPropagation();
     if (this.photoUrls.length <= 1) return;
     this.activeIndex = (this.activeIndex + 1) % this.photoUrls.length;
+    this.cd.markForCheck();
     this.restartAutoPlay();
   }
 
@@ -262,9 +275,16 @@ export class PropertyMediaCarouselComponent implements OnInit, OnChanges, OnDest
     this.clearTimer();
     if (!this.isBrowser || this.photoUrls.length <= 1) return;
 
-    this.timer = setInterval(() => {
-      this.activeIndex = (this.activeIndex + 1) % this.photoUrls.length;
-    }, this.autoPlayMs);
+    // Stay outside the Angular zone and refresh only this view. Re-entering the
+    // zone would run an app-wide change detection pass on every slide and could
+    // land mid-pass, which is what produced NG0100 here.
+    this.zone.runOutsideAngular(() => {
+      this.timer = setInterval(() => {
+        if (this.isDestroyed) return;
+        this.activeIndex = (this.activeIndex + 1) % this.photoUrls.length;
+        this.cd.detectChanges();
+      }, this.autoPlayMs);
+    });
   }
 
   private restartAutoPlay(): void {

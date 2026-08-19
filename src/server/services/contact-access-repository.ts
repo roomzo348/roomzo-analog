@@ -7,15 +7,22 @@ import {
   getWallet,
   serializeWallet,
 } from './billing-repository';
-import { decideUnlock, isPlanActive, usableCredits } from '../utils/contact-access';
+import { decideUnlock, usableCredits } from '../utils/contact-access';
 
 export async function hasUnlockedListing(userId: number, listingId: number): Promise<boolean> {
   await ensureBillingTables();
-  const rows = await sqlQuery<{ id: number }>(
-    `SELECT id FROM contact_unlocks WHERE user_id = ? AND listing_id = ? LIMIT 1`,
+  const rows = await sqlQuery<{ id: number; unlock_type?: string }>(
+    `SELECT id, unlock_type FROM contact_unlocks WHERE user_id = ? AND listing_id = ? LIMIT 1`,
     [userId, listingId]
   );
-  return Boolean(rows[0]);
+  const type = String(rows[0]?.unlock_type || '');
+  return Boolean(rows[0]) && type !== 'free';
+}
+
+export async function canRevealContact(userId: number, listingId: number): Promise<boolean> {
+  if (!(await hasUnlockedListing(userId, listingId))) return false;
+  const wallet = await getWallet(userId);
+  return usableCredits(wallet) > 0;
 }
 
 export async function getUnlockedListingIds(userId: number): Promise<number[]> {
@@ -25,6 +32,21 @@ export async function getUnlockedListingIds(userId: number): Promise<number[]> {
     [userId]
   );
   return rows.map((row) => Number(row.listing_id));
+}
+
+/**
+ * Listing ids whose owner contact this user may see. Batched alternative to
+ * calling canRevealContact() per listing. Legacy 'free' unlocks never qualify.
+ */
+export async function getRevealableListingIds(userId: number): Promise<Set<number>> {
+  await ensureBillingTables();
+  const wallet = await getWallet(userId);
+  if (usableCredits(wallet) <= 0) return new Set();
+  const rows = await sqlQuery<{ listing_id: number }>(
+    `SELECT listing_id FROM contact_unlocks WHERE user_id = ? AND unlock_type <> 'free'`,
+    [userId]
+  );
+  return new Set(rows.map((row) => Number(row.listing_id)));
 }
 
 function listingContact(listing: any, owner: any) {
@@ -66,10 +88,25 @@ export async function unlockListingContact(userId: number, listingId: number): P
 
   const existing = await hasUnlockedListing(userId, listingId);
   if (existing) {
+    if (usableCredits(wallet) <= 0) {
+      return {
+        status: 0,
+        code: 'PAYMENT_REQUIRED',
+        message: 'Buy a contact plan to view owner phone, WhatsApp, or email',
+        data: { unlocked: false, ...serialized },
+      };
+    }
+    const walletAfter = await getWallet(userId);
     return {
       status: 1,
       message: 'Contact already unlocked',
-      data: { unlocked: true, unlockType: 'already', contact, ...serialized },
+      data: {
+        unlocked: true,
+        unlockType: 'already',
+        creditsSpent: 0,
+        contact,
+        ...serializeWallet(walletAfter),
+      },
     };
   }
 
@@ -92,20 +129,20 @@ export async function unlockListingContact(userId: number, listingId: number): P
       `SELECT id, unlock_type FROM contact_unlocks WHERE user_id = ? AND listing_id = ? LIMIT 1 FOR UPDATE`,
       [userId, listingId]
     );
-    if (unlockedRows[0]) {
+    const freeUsed = Boolean(Number(current?.free_unlock_used ?? 0));
+    const credits = Math.max(0, Number(current?.credits_remaining ?? 0));
+
+    if (unlockedRows[0] && String(unlockedRows[0].unlock_type) !== 'free') {
+      if (credits <= 0) {
+        return { kind: 'paywall' as const, walletRow: current };
+      }
       return { kind: 'already' as const, unlockType: unlockedRows[0].unlock_type, walletRow: current };
     }
-
-    const freeUsed = Boolean(Number(current?.free_unlock_used ?? 0));
-    const planExpiresAt = current?.plan_expires_at ? new Date(current.plan_expires_at) : null;
-    const planActive = isPlanActive(planExpiresAt);
-    const credits = planActive ? Number(current?.credits_remaining ?? 0) : 0;
     const decision = decideUnlock({
       isOwner: false,
       alreadyUnlocked: false,
       freeUnlockUsed: freeUsed,
       creditsRemaining: credits,
-      planActive,
     });
 
     if (decision.action === 'paywall') {
@@ -113,11 +150,19 @@ export async function unlockListingContact(userId: number, listingId: number): P
     }
 
     const unlockType = 'credit';
-    await connExecute(
-      conn,
-      `INSERT INTO contact_unlocks (user_id, listing_id, unlock_type) VALUES (?, ?, ?)`,
-      [userId, listingId, unlockType]
-    );
+    if (unlockedRows[0]) {
+      await connExecute(
+        conn,
+        `UPDATE contact_unlocks SET unlock_type = ? WHERE user_id = ? AND listing_id = ?`,
+        [unlockType, userId, listingId]
+      );
+    } else {
+      await connExecute(
+        conn,
+        `INSERT INTO contact_unlocks (user_id, listing_id, unlock_type) VALUES (?, ?, ?)`,
+        [userId, listingId, unlockType]
+      );
+    }
 
     await connExecute(
       conn,
@@ -129,16 +174,8 @@ export async function unlockListingContact(userId: number, listingId: number): P
     return { kind: 'unlocked' as const, unlockType, walletRow: current };
   });
 
-  const freshWallet = {
-    creditsRemaining: Number(result.walletRow?.credits_remaining ?? 0),
-    freeUnlockUsed: Boolean(Number(result.walletRow?.free_unlock_used ?? 0)),
-    planCode: result.walletRow?.plan_code ?? wallet.planCode,
-    planExpiresAt: result.walletRow?.plan_expires_at ? new Date(result.walletRow.plan_expires_at) : wallet.planExpiresAt,
-  };
-  const walletData = serializeWallet({
-    ...freshWallet,
-    creditsRemaining: usableCredits(freshWallet),
-  });
+  const walletAfterUnlock = await getWallet(userId);
+  const walletData = serializeWallet(walletAfterUnlock);
 
   if (result.kind === 'paywall') {
     return {
@@ -155,6 +192,7 @@ export async function unlockListingContact(userId: number, listingId: number): P
     data: {
       unlocked: true,
       unlockType: result.unlockType,
+      creditsSpent: result.kind === 'unlocked' ? 1 : 0,
       contact,
       ...walletData,
     },

@@ -601,6 +601,7 @@ this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'A
 
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
     this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe((result) => {
+      if (!result?.unlocked) return;
       const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
       if (!phone) {
         if (result) this.toastr.error('Contact number not available');

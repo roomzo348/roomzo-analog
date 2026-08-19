@@ -1,12 +1,6 @@
 <div class="pricing-page">
   <section class="hero">
-    <p class="eyebrow">Roomzo contact plans</p>
-    <h1>Owner contacts stay hidden until you buy credits.</h1>
-    <p class="lede">
-      Call, WhatsApp, and email are unlocked with monthly credits.
-      Starter is ₹19 for 4 contacts. Pro includes full-time WhatsApp and call support.
-      A property you already unlocked stays open even after your points run out.
-    </p>
+    <h1>Choose a plan</h1>
     <div class="wallet-chip" *ngIf="wallet">
       <mat-icon>stars</mat-icon>
       <span>
@@ -20,45 +14,13 @@
     <article class="plan" *ngFor="let plan of plans" [class.popular]="plan.popular">
       <div class="badge" *ngIf="plan.popular">Most popular</div>
       <div class="plan-head">
-        <div>
-          <h2>{{ plan.name }}</h2>
-          <p class="tagline">{{ plan.tagline }}</p>
-        </div>
+        <h2>{{ plan.name }}</h2>
         <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
       </div>
       <p class="contacts-line">{{ plan.contacts }} owner contacts</p>
-      <ul>
-        <li *ngFor="let feature of plan.features">
-          <mat-icon>check_circle</mat-icon>
-          {{ feature }}
-        </li>
-      </ul>
       <button type="button" class="cta" [disabled]="!!payingCode" (click)="startCheckout(plan.code)">
-        {{ payingCode === plan.code ? 'Opening secure checkout…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
+        {{ payingCode === plan.code ? 'Opening…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
       </button>
     </article>
   </div>
-
-  <section class="rules">
-    <h3>How credits work</h3>
-    <ul>
-      <li>Owner phone, WhatsApp, and email are hidden until you buy a plan.</li>
-      <li>Each new property uses 1 credit from Starter (4), Plus (10), or Pro (25).</li>
-      <li>Full-time WhatsApp and call support is included only with Pro. Starter and Plus do not include it.</li>
-      <li>Call and WhatsApp on the same listing count as one unlock.</li>
-      <li>Once a listing is unlocked, it stays unlocked for your account even if credits later hit zero.</li>
-    </ul>
-    <p class="sandbox" *ngIf="!configured">
-      Sandbox mode is ready in code. Add Razorpay test keys to start taking test payments.
-    </p>
-    <p class="sandbox" *ngIf="configured && mode === 'test'">
-      Razorpay is in <strong>test mode</strong>. No real money is charged.
-      Google Pay / PhonePe app buttons (UPI Intent) appear only in <strong>live</strong> mode on a real phone.
-      In test checkout look for <strong>UPI</strong> (UPI ID or QR), not those app logos. The UPI ID is prefilled as
-      <code>success@razorpay</code> — tap Pay. Use <code>failure@razorpay</code> to simulate a decline.
-      If UPI is missing, enable it in Razorpay Dashboard → Account &amp; Settings → Payment Methods, then retry.
-      Cards: do not use <code>4111 1111 1111 1111</code> (Indian accounts reject it as international).
-      Use Mastercard <code>5267 3181 8797 5449</code>, any future expiry, any CVV, then tap Success.
-    </p>
-  </section>
 </div>

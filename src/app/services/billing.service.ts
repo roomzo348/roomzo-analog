@@ -1,7 +1,17 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, switchMap, map, throwError, finalize } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  BehaviorSubject,
+  from,
+  switchMap,
+  map,
+  throwError,
+  finalize,
+  catchError,
+} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import {
@@ -48,6 +58,14 @@ declare global {
 export class BillingService {
   private baseUrl = environment.apiUrl;
   private checkoutLock = false;
+  private scriptPromise: Promise<boolean> | null = null;
+
+  /** Emits once the Razorpay sheet is about to appear on screen. */
+  readonly checkoutOpened$ = new Subject<void>();
+
+  private readonly walletSubject = new BehaviorSubject<BillingWallet | null>(null);
+  /** Live wallet balance — updated after unlock, payment, or refreshWallet(). */
+  readonly wallet$ = this.walletSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -93,6 +111,34 @@ export class BillingService {
     return this.http.get<any>(`${this.baseUrl}/api/billing/me`);
   }
 
+  /** Push a wallet snapshot to every subscriber (profile, pricing, etc.). */
+  publishWallet(wallet: Partial<BillingWallet>): void {
+    const current = this.walletSubject.value;
+    this.walletSubject.next({
+      creditsRemaining: wallet.creditsRemaining ?? current?.creditsRemaining ?? 0,
+      freeUnlockAvailable: wallet.freeUnlockAvailable ?? current?.freeUnlockAvailable ?? false,
+      planCode: wallet.planCode !== undefined ? wallet.planCode : (current?.planCode ?? null),
+      planExpiresAt:
+        wallet.planExpiresAt !== undefined ? wallet.planExpiresAt : (current?.planExpiresAt ?? null),
+      planActive: wallet.planActive ?? (Number(wallet.creditsRemaining ?? current?.creditsRemaining ?? 0) > 0),
+      unlockedListingIds: wallet.unlockedListingIds ?? current?.unlockedListingIds,
+      plans: wallet.plans ?? current?.plans,
+    });
+  }
+
+  /** Fetch the latest balance from the server and broadcast it. */
+  refreshWallet(): Observable<BillingWallet | null> {
+    return this.getWallet().pipe(
+      map((res) => {
+        if (Number(res?.status) === 1 && res.data) {
+          this.walletSubject.next(res.data);
+          return res.data;
+        }
+        return null;
+      })
+    );
+  }
+
   createOrder(planCode: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/api/billing/orders`, { planCode });
   }
@@ -105,17 +151,28 @@ export class BillingService {
     return this.http.post<any>(`${this.baseUrl}/api/billing/verify`, payload);
   }
 
+  /**
+   * Loads the Razorpay checkout script once. Memoised so preloading (on paywall
+   * open) and the actual Pay click share a single request instead of injecting
+   * duplicate script tags.
+   */
   loadCheckoutScript(): Promise<boolean> {
     if (!isPlatformBrowser(this.platformId)) return Promise.resolve(false);
     if (window.Razorpay) return Promise.resolve(true);
-    return new Promise((resolve) => {
+    if (this.scriptPromise) return this.scriptPromise;
+
+    this.scriptPromise = new Promise<boolean>((resolve) => {
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.async = true;
       script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
+      script.onerror = () => {
+        this.scriptPromise = null;
+        resolve(false);
+      };
       document.body.appendChild(script);
     });
+    return this.scriptPromise;
   }
 
   checkout(planCode: string, returnUrl?: string | null): Observable<BillingWallet> {
@@ -135,9 +192,26 @@ export class BillingService {
             if (verifyRes?.status !== 1) {
               throw new Error(verifyRes?.message || 'Payment verification failed');
             }
-            return verifyRes.data as BillingWallet;
+            const wallet = verifyRes.data as BillingWallet;
+            this.walletSubject.next(wallet);
+            return wallet;
           })
         );
+      }),
+      catchError((err) => {
+        let message: string =
+          err?.error?.message ||
+          (err instanceof Error ? err.message : '') ||
+          'Could not start payment';
+        if (
+          message.includes('UNABLE_TO_VERIFY') ||
+          message.includes('certificate') ||
+          message.includes('ECONNREFUSED') ||
+          message.includes('ENOTFOUND')
+        ) {
+          message = 'Could not reach payment gateway. Please check your connection and try again.';
+        }
+        return throwError(() => new Error(message));
       }),
       finalize(() => {
         this.checkoutLock = false;
@@ -151,7 +225,8 @@ export class BillingService {
     razorpay_signature: string;
   }> {
     return this.loadCheckoutScript().then((ok) => {
-      if (!ok || !window.Razorpay) {
+      const RazorpayCheckout = window.Razorpay;
+      if (!ok || !RazorpayCheckout) {
         throw new Error('Could not load Razorpay checkout');
       }
       const user = this.auth.getCurrentUser();
@@ -168,29 +243,22 @@ export class BillingService {
         prefill['vpa'] = 'success@razorpay';
       }
       const isMobile = window.matchMedia('(max-width: 768px)').matches;
-      const display = isMobile
-        ? {
-            hide: [{ method: 'emi' }, { method: 'paylater' }, { method: 'wallet' }],
-            preferences: { show_default_blocks: true },
-          }
-        : {
-            blocks: {
-              upi: {
-                name: 'UPI',
-                instruments: [
-                  {
-                    method: 'upi',
-                    flows: ['intent', 'qr', 'collect'],
-                  },
-                ],
-              },
-            },
-            hide: [{ method: 'emi' }, { method: 'paylater' }],
-            sequence: ['block.upi', 'upi', 'card', 'netbanking'],
-            preferences: { show_default_blocks: true },
-          };
+      // Same UPI block on mobile and desktop — mobile previously used default
+      // blocks only, which often hid UPI in Razorpay test checkout.
+      const upiFlows = isMobile ? (['intent', 'collect'] as const) : (['intent', 'qr', 'collect'] as const);
+      const display = {
+        blocks: {
+          upi: {
+            name: 'UPI',
+            instruments: [{ method: 'upi', flows: [...upiFlows] }],
+          },
+        },
+        hide: [{ method: 'emi' }, { method: 'paylater' }, { method: 'wallet' }],
+        sequence: ['block.upi', 'upi', 'card', 'netbanking'],
+        preferences: { show_default_blocks: true },
+      };
       return new Promise((resolve, reject) => {
-        const checkout = new window.Razorpay({
+        const checkout = new RazorpayCheckout({
           key: order.keyId,
           amount: order.amount,
           currency: 'INR',
@@ -209,6 +277,9 @@ export class BillingService {
           config: { display },
           notes: { planCode: order.plan?.code || '' },
           theme: { color: '#196153' },
+          // These settle outside Angular's zone on purpose. Subscribers
+          // re-enter the zone themselves, which keeps state updates out of
+          // an in-flight change detection pass (NG0100).
           handler: (response: any) => resolve(response),
           modal: {
             ondismiss: () => reject(new Error('Payment cancelled')),
@@ -218,6 +289,7 @@ export class BillingService {
           const description = response?.error?.description || response?.error?.reason || 'Payment failed';
           reject(new Error(description));
         });
+        this.checkoutOpened$.next();
         checkout.open();
       });
     });

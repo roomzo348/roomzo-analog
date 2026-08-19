@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { RouteMeta } from '@analogjs/router';
 import { ToastrService } from 'ngx-toastr';
@@ -22,7 +22,7 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-pricing',
   standalone: true,
-  imports: [CommonModule, MatIconModule, RouterLink],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './pricing.html',
   styleUrls: ['./pricing.css'],
 })
@@ -57,7 +57,9 @@ export default class PricingPageComponent implements OnInit {
 
     if (!this.isBrowser) return;
 
-    this.billing.rememberReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+    this.billing.rememberReturnUrl(
+      this.route.snapshot.queryParamMap.get('returnUrl') || this.previousInAppUrl()
+    );
 
     this.billing.getConfig().subscribe({
       next: (res) => {
@@ -108,6 +110,15 @@ export default class PricingPageComponent implements OnInit {
         this.leavePricing(cancelled ? 'cancelled' : 'failed', cancelled ? undefined : message);
       },
     });
+  }
+
+  /**
+   * Where the user was before landing on pricing, so checkout can send them back
+   * even when they arrived without an explicit returnUrl.
+   */
+  private previousInAppUrl(): string {
+    const previous = this.router.lastSuccessfulNavigation?.previousNavigation?.finalUrl;
+    return previous ? this.router.serializeUrl(previous) : '';
   }
 
   private leavePricing(status: PaymentReturnStatus, errorMessage?: string): void {

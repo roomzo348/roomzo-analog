@@ -65,7 +65,12 @@
         </p>
       </div>
 
-      <a routerLink="/pricing" class="credits-card" [queryParams]="{ returnUrl: '/profile' }" [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
+      <button
+        type="button"
+        class="credits-card"
+        (click)="openPointsPaywall($event)"
+        [disabled]="openingPaywall"
+        [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
         <span class="credits-icon" aria-hidden="true">
           <mat-icon>stars</mat-icon>
         </span>
@@ -75,10 +80,10 @@
           <span class="credits-meta">{{ creditsMeta }}</span>
         </div>
         <span class="credits-cta">
-          {{ wallet?.planCode ? 'Top up' : 'Get points' }}
+          {{ openingPaywall ? 'Opening…' : (wallet?.planCode ? 'Top up' : 'Get points') }}
           <mat-icon>chevron_right</mat-icon>
         </span>
-      </a>
+      </button>
     </div>
 
     <div class="action-cards">
@@ -99,8 +104,6 @@
         <span class="menu-icon"><mat-icon>list_alt</mat-icon></span>
         <span class="menu-text">Manage Listings</span>
         <mat-icon class="menu-chevron">chevron_right</mat-icon>
-      </a>
-
       </a>
 
       <button type="button" class="menu-row menu-row--logout" (click)="logout()">

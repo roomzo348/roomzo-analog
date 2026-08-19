@@ -142,4 +142,9 @@ export class AuthService {
       return null;
     }
   }
+
+  hasStoredSession(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    return localStorage.getItem('userVerifiedWithOtp') === 'true' && Boolean(this.getCurrentUser()?.id);
+  }
 }

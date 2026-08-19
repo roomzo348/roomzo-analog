@@ -47,7 +47,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
   isLoadingContact = false; 
   contactHint = '';
   creditsRemaining: number | null = null;
-  contactUnlocked = false; 
+  contactUnlocked = false;
+  private contactStatusListingId: number | null = null; 
 
   isLoading = true;
   showFullDescription = false;
@@ -134,6 +135,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
         this.contactHint = '';
         this.creditsRemaining = null;
         this.contactUnlocked = false;
+        this.contactStatusListingId = null;
         this.activePhotoIndex = 0; 
         
         if (this.isBrowser) {
@@ -169,8 +171,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
 
           this.ownerName = response.ownerName || 'Property Owner';
           this.ownerDetails.name = this.ownerName;
-          this.syncContactFromProperty();
           this.contactUnlocked = Boolean(this.property.contactUnlocked);
+          this.syncContactFromProperty();
           this.loadContactStatus();
           if (this.property.guidebook && Array.isArray(this.property.guidebook.rules)) {
             this.property.guidebook.rules = this.property.guidebook.rules.filter(
@@ -310,11 +312,11 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   private unlockThenShowContact(): void {
     if (!this.property?.id) return;
     this.isLoadingContact = true;
-    this.showContactModal = true;
     this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?showContact=true`).subscribe({
       next: (result) => {
         this.isLoadingContact = false;
         if (!result?.unlocked) {
+          this.clearUnlockedContactState();
           this.showContactModal = false;
           this.cd.detectChanges();
           return;
@@ -333,14 +335,34 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
   private unlockThenContact(actionType: 'call' | 'whatsapp'): void {
     if (!this.property?.id) return;
-    this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?action=${actionType}`).subscribe((result) => {
-      if (!result?.unlocked) return;
-      this.applyUnlockResult(result);
-      this.executeContactAction(actionType);
+    // The unlock round-trip decides whether the paywall opens, so show the
+    // button spinner meanwhile instead of leaving the tap unacknowledged.
+    this.isLoadingContact = true;
+    this.cd.detectChanges();
+    this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?action=${actionType}`).subscribe({
+      next: (result) => {
+        this.isLoadingContact = false;
+        if (!result?.unlocked) {
+          this.clearUnlockedContactState();
+          this.cd.detectChanges();
+          return;
+        }
+        this.applyUnlockResult(result);
+        this.executeContactAction(actionType);
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.isLoadingContact = false;
+        this.cd.detectChanges();
+      },
     });
   }
 
   private applyUnlockResult(result: any): void {
+    if (!result?.unlocked) {
+      this.clearUnlockedContactState();
+      return;
+    }
     const contact = result?.contact || {};
     this.ownerDetails = {
       name: contact.name || this.ownerName || 'Property Owner',
@@ -349,8 +371,8 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       email: contact.email || '',
     };
     if (this.property) {
-      this.property.contactNo = this.ownerDetails.propertyPhone || this.property.contactNo;
-      this.property.tempContactNo = this.ownerDetails.propertyPhone || this.property.tempContactNo;
+      this.property.contactNo = this.ownerDetails.propertyPhone || undefined;
+      this.property.tempContactNo = this.ownerDetails.propertyPhone || undefined;
       this.property.contactUnlocked = true;
     }
     this.contactUnlocked = true;
@@ -360,15 +382,36 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     this.contactHint = this.buildContactHint(result);
   }
 
+  private clearUnlockedContactState(): void {
+    this.contactUnlocked = false;
+    this.resetOwnerDetails();
+    this.ownerDetails.name = this.ownerName || 'Property Owner';
+    if (this.property) {
+      delete this.property.contactNo;
+      delete this.property.tempContactNo;
+      this.property.contactUnlocked = false;
+    }
+  }
+
   private loadContactStatus(): void {
     if (!this.isBrowser || !this.property?.id || !(this.isUserLoggedIn() || this.isOwnerLoggedIn())) return;
-    this.contactAccess.getStatus(Number(this.property.id)).subscribe({
+    const listingId = Number(this.property.id);
+    this.contactStatusListingId = listingId;
+    this.contactAccess.getStatus(listingId).subscribe({
       next: (res) => {
+        if (this.contactStatusListingId !== listingId || Number(this.property?.id) !== listingId) return;
         const data = res?.data;
         if (!data) return;
-        this.contactUnlocked = Boolean(data.unlocked || data.isOwner);
+        const unlocked = Boolean(data.unlocked || data.isOwner);
         this.creditsRemaining = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : this.creditsRemaining;
-        this.contactHint = this.buildContactHint(data);
+        if (unlocked) {
+          this.contactUnlocked = true;
+          this.contactHint = this.buildContactHint(data);
+          this.syncContactFromProperty();
+        } else {
+          this.clearUnlockedContactState();
+          this.contactHint = this.buildContactHint(data);
+        }
         this.cd.detectChanges();
       },
       error: () => undefined,
@@ -380,7 +423,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       return 'This owner contact is unlocked for you.';
     }
     if (typeof data?.creditsRemaining === 'number' && data.creditsRemaining > 0) {
-      return `${data.creditsRemaining} contact credit${data.creditsRemaining === 1 ? '' : 's'} left this month.`;
+      return `${data.creditsRemaining} contact credit${data.creditsRemaining === 1 ? '' : 's'} left. Credits never expire.`;
     }
     return 'Buy a plan to view owner phone, WhatsApp, or email.';
   }
@@ -711,19 +754,27 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   
   checkReturnFromLogin() {
     const params = this.route.snapshot.queryParams;
-    const notice = paymentReturnNotice(params['payment']);
+    const paymentStatus = params['payment'];
+    const notice = paymentReturnNotice(paymentStatus);
     if (notice) this.toastr[notice.level](notice.message);
 
-    if (params['showContact'] === 'true' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
+    const loggedIn = this.isUserLoggedIn() || this.isOwnerLoggedIn();
+    // Returning from a payment that did not go through must not replay the
+    // action that opened the paywall, otherwise the plan sheet pops straight
+    // back up on a page the user was trying to get back to.
+    const paymentBlocked = paymentStatus === 'failed' || paymentStatus === 'cancelled';
+    const canResumeContact = loggedIn && !paymentBlocked;
+
+    if (params['showContact'] === 'true' && canResumeContact) {
       this.openContactModal();
       this.clearQueryParams();
-    } else if (params['action'] === 'report' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
+    } else if (params['action'] === 'report' && loggedIn) {
       this.openReportModal(); 
       this.clearQueryParams();
-    } else if ((params['action'] === 'call' || params['action'] === 'whatsapp') && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+    } else if ((params['action'] === 'call' || params['action'] === 'whatsapp') && canResumeContact) {
       this.handleContactAction(params['action'] as 'call' | 'whatsapp');
       this.clearQueryParams();
-    } else if (notice) {
+    } else if (notice || params['showContact'] || params['action']) {
       this.clearQueryParams();
     }
   }

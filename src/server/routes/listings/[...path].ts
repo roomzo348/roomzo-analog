@@ -23,7 +23,7 @@ import { getListingReviews, upsertReview } from '../../services/review-repositor
 import { apiListResponse, apiResponse } from '../../utils/api-response';
 import { getAuthUser, requireAuth } from '../../utils/auth-session';
 import { redactListingContact } from '../../utils/contact-access';
-import { hasUnlockedListing } from '../../services/contact-access-repository';
+import { canRevealContact } from '../../services/contact-access-repository';
 
 function parseIntSafe(value: unknown, fallback: number): number {
   const n = Number(value);
@@ -41,7 +41,7 @@ async function listingForViewer(listing: any, user: any | null): Promise<any> {
     if (user && Number(user.id) === ownerId) {
       return redactListingContact(listing, true);
     }
-    if (user && (await hasUnlockedListing(Number(user.id), Number(listing.id)))) {
+    if (user && (await canRevealContact(Number(user.id), Number(listing.id)))) {
       return redactListingContact(listing, true);
     }
   } catch {

@@ -15,19 +15,28 @@ describe('contact unlock rules', () => {
         alreadyUnlocked: false,
         freeUnlockUsed: true,
         creditsRemaining: 0,
-        planActive: false,
       })
     ).toEqual({ action: 'allow', reason: 'owner' });
   });
 
-  it('keeps an already unlocked property open after credits run out', () => {
+  it('blocks contact when credits are exhausted even if the listing was unlocked before', () => {
     expect(
       decideUnlock({
         isOwner: false,
         alreadyUnlocked: true,
         freeUnlockUsed: true,
         creditsRemaining: 0,
-        planActive: false,
+      })
+    ).toEqual({ action: 'paywall' });
+  });
+
+  it('reopens a previously unlocked listing without spending another credit when credits remain', () => {
+    expect(
+      decideUnlock({
+        isOwner: false,
+        alreadyUnlocked: true,
+        freeUnlockUsed: true,
+        creditsRemaining: 2,
       })
     ).toEqual({ action: 'allow', reason: 'already_unlocked' });
   });
@@ -39,19 +48,17 @@ describe('contact unlock rules', () => {
         alreadyUnlocked: false,
         freeUnlockUsed: false,
         creditsRemaining: 0,
-        planActive: false,
       })
     ).toEqual({ action: 'paywall' });
   });
 
-  it('spends a plan credit to unlock a new property', () => {
+  it('spends a credit to unlock a new property', () => {
     expect(
       decideUnlock({
         isOwner: false,
         alreadyUnlocked: false,
         freeUnlockUsed: true,
         creditsRemaining: 7,
-        planActive: true,
       })
     ).toEqual({ action: 'allow', reason: 'credit' });
   });
@@ -63,14 +70,13 @@ describe('contact unlock rules', () => {
         alreadyUnlocked: false,
         freeUnlockUsed: true,
         creditsRemaining: 0,
-        planActive: true,
       })
     ).toEqual({ action: 'paywall' });
   });
 });
 
 describe('wallet helpers', () => {
-  it('treats expired plans as zero usable credits', () => {
+  it('keeps credits spendable after the plan window has passed', () => {
     const expired = new Date(Date.now() - 60_000);
     expect(isPlanActive(expired)).toBe(false);
     expect(
@@ -79,6 +85,17 @@ describe('wallet helpers', () => {
         freeUnlockUsed: true,
         planCode: 'plus',
         planExpiresAt: expired,
+      })
+    ).toBe(10);
+  });
+
+  it('never reports a negative balance', () => {
+    expect(
+      usableCredits({
+        creditsRemaining: -3,
+        freeUnlockUsed: false,
+        planCode: null,
+        planExpiresAt: null,
       })
     ).toBe(0);
   });

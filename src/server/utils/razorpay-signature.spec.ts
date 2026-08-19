@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { hmacSha256Hex, verifyCheckoutSignature, verifyWebhookSignature, isCapturedRazorpayPayment } from './razorpay-signature';
+import {
+  hmacSha256Hex,
+  verifyCheckoutSignature,
+  verifyWebhookSignature,
+  isCapturedRazorpayPayment,
+  isFailedRazorpayPayment,
+  isPaidRazorpayPayment,
+} from './razorpay-signature';
 
 describe('razorpay signatures', () => {
   it('accepts a valid checkout signature', () => {
@@ -33,5 +40,20 @@ describe('razorpay signatures', () => {
     expect(isCapturedRazorpayPayment('authorized')).toBe(false);
     expect(isCapturedRazorpayPayment('failed')).toBe(false);
     expect(isCapturedRazorpayPayment('created')).toBe(false);
+  });
+
+  it('credits authorized payments too, since orders auto-capture', () => {
+    expect(isPaidRazorpayPayment('captured')).toBe(true);
+    expect(isPaidRazorpayPayment('authorized')).toBe(true);
+    expect(isPaidRazorpayPayment('created')).toBe(false);
+    expect(isPaidRazorpayPayment('failed')).toBe(false);
+    expect(isPaidRazorpayPayment(null)).toBe(false);
+  });
+
+  it('identifies failed payments for rejection', () => {
+    expect(isFailedRazorpayPayment('failed')).toBe(true);
+    expect(isFailedRazorpayPayment('FAILED')).toBe(true);
+    expect(isFailedRazorpayPayment('captured')).toBe(false);
+    expect(isFailedRazorpayPayment(undefined)).toBe(false);
   });
 });

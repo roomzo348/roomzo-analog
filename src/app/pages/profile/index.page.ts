@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,11 +6,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouteMeta } from '@analogjs/router';
 import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { authGuard } from '../../auth.guard';
 import { UserProfileService, UserProfile } from '../../services/user-profile.service';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
 import { BillingService, BillingWallet } from '../../services/billing.service';
+import { ContactAccessService } from '../../services/contact-access.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
 import { environment } from '../../../environments/environment';
@@ -49,6 +51,8 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   favoriteListings: any[] = [];
   isOwner = false;
   wallet: BillingWallet | null = null;
+  openingPaywall = false;
+  private walletSub?: Subscription;
 
   profilePhotoUrl: string | null = null;
   profilePhotoPreview: string | null = null;
@@ -61,9 +65,11 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private propertyService: PropertyService,
     private authService: AuthService,
     private billing: BillingService,
+    private contactAccess: ContactAccessService,
     private router: Router,
     private route: ActivatedRoute,
     private toastr: ToastrService,
+    private cd: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -87,9 +93,19 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     this.isLoading = false;
     this.loadAll();
     this.notePaymentReturn();
+    this.walletSub = this.billing.wallet$.subscribe((wallet) => {
+      if (wallet) this.wallet = wallet;
+      this.cd.detectChanges();
+    });
+    // Wallet is reconciled server-side on /billing/me; reload after returning
+    // from checkout so the profile card does not keep showing 0.
+    if (this.route.snapshot.queryParamMap.get('payment') === 'success') {
+      setTimeout(() => this.loadWallet(), 400);
+    }
   }
 
   ngOnDestroy(): void {
+    this.walletSub?.unsubscribe();
     if (isPlatformBrowser(this.platformId)) {
       document.body.classList.remove('profile-sidebar-open');
     }
@@ -154,10 +170,12 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
             res?.message ||
             'Could not sync profile from server. You can still edit and try saving.';
         }
+        this.cd.detectChanges();
       },
       error: () => {
         this.profileLoadWarning =
           'Profile API unavailable. If you recently deployed, run user_profile_migration.sql on the database, then restart the backend.';
+        this.cd.detectChanges();
       },
     });
 
@@ -166,13 +184,31 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   }
 
   private loadWallet(): void {
-    this.billing.getWallet().subscribe({
-      next: (res) => {
-        if (Number(res?.status) === 1) {
-          this.wallet = res.data;
-        }
+    this.billing.refreshWallet().subscribe({
+      next: (wallet) => {
+        if (wallet) this.wallet = wallet;
+        this.cd.detectChanges();
       },
-      error: () => undefined,
+      error: () => {
+        this.toastr.error('Could not load your contact balance. Refresh the page.');
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  openPointsPaywall(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (!isPlatformBrowser(this.platformId) || this.openingPaywall) return;
+
+    this.openingPaywall = true;
+    this.contactAccess.openPaywall(this.wallet ?? undefined, '/profile').subscribe({
+      next: (paid) => {
+        if (paid) this.loadWallet();
+      },
+      complete: () => {
+        this.openingPaywall = false;
+      },
     });
   }
 
@@ -197,15 +233,8 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     if (!this.wallet) return 'Loading your contact balance…';
     if (this.wallet.planCode) {
       const name = planDisplayName(this.wallet.planCode);
-      if (this.wallet.planExpiresAt) {
-        const expiry = new Date(this.wallet.planExpiresAt).toLocaleDateString('en-IN', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        });
-        return `${name} plan · ${this.wallet.creditsRemaining} paid point${this.wallet.creditsRemaining === 1 ? '' : 's'} · till ${expiry}`;
-      }
-      return `${name} plan · ${this.wallet.creditsRemaining} paid point${this.wallet.creditsRemaining === 1 ? '' : 's'}`;
+      const points = this.remainingPoints;
+      return `${name} plan · ${points} paid point${points === 1 ? '' : 's'} · never expires`;
     }
     return 'Buy a plan to view owner contacts.';
   }
@@ -245,6 +274,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
           .filter((p: any) => p?.id);
 
         this.favoriteListings = mapBackendListingsToUi(normalized);
+        this.cd.detectChanges();
       },
     });
   }

@@ -3,11 +3,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, switchMap, catchError, map, finalize } from 'rxjs';
+import { Observable, of, switchMap, catchError, map, finalize, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
-import { BillingWallet } from './billing.service';
+import { BillingService, BillingWallet } from './billing.service';
 import { ContactPaywallComponent, ContactPaywallResult } from '../components/contact-paywall/contact-paywall';
 
 export interface OwnerContact {
@@ -21,6 +21,7 @@ export interface OwnerContact {
 export interface UnlockResult {
   unlocked: boolean;
   unlockType?: string;
+  creditsSpent?: number;
   contact?: OwnerContact;
   creditsRemaining?: number;
   freeUnlockAvailable?: boolean;
@@ -38,6 +39,7 @@ export class ContactAccessService {
   constructor(
     private http: HttpClient,
     private auth: AuthService,
+    private billing: BillingService,
     private dialog: MatDialog,
     private router: Router,
     private toastr: ToastrService,
@@ -67,17 +69,26 @@ export class ContactAccessService {
 
     return this.unlock(listingId).pipe(
       switchMap((res) => {
-        if (res?.status === 1 && res.data?.unlocked) {
+        if (res?.status === 1 && res.data?.unlocked && res.data?.contact) {
           return of(res.data as UnlockResult);
         }
         if (res?.code === 'PAYMENT_REQUIRED' || res?.data?.unlocked === false) {
           return this.openPaywall(res?.data, returnUrl || this.router.url).pipe(
-            switchMap((paid) => (paid ? this.unlock(listingId).pipe(map((retry) => retry?.data as UnlockResult)) : of(null)))
+            switchMap((paid) =>
+              paid
+                ? this.unlock(listingId).pipe(
+                    map((retry) =>
+                      retry?.status === 1 && retry?.data?.unlocked ? (retry.data as UnlockResult) : null
+                    )
+                  )
+                : of(null)
+            )
           );
         }
         this.toastr.error(res?.message || 'Could not unlock owner contact');
         return of(null);
       }),
+      tap((result) => this.noteUnlockOutcome(result)),
       catchError((err) => {
         if (err?.status === 401) {
           this.router.navigate(['/owner-auth'], {
@@ -91,17 +102,41 @@ export class ContactAccessService {
     );
   }
 
+  private noteUnlockOutcome(result: UnlockResult | null): void {
+    if (!result?.unlocked || typeof result.creditsRemaining !== 'number') return;
+
+    this.billing.publishWallet({
+      creditsRemaining: result.creditsRemaining,
+      planCode: result.planCode ?? null,
+      planActive: result.creditsRemaining > 0,
+    });
+
+    const left = result.creditsRemaining;
+    const leftLabel = `${left} credit${left === 1 ? '' : 's'} left`;
+
+    if (result.unlockType === 'credit' || result.creditsSpent === 1) {
+      this.toastr.success(`1 credit used · ${leftLabel}`);
+      return;
+    }
+    if (result.unlockType === 'already') {
+      this.toastr.info(`Already unlocked · ${leftLabel} (no charge)`);
+    }
+  }
+
   openPaywall(wallet?: Partial<BillingWallet> & { plans?: any[] }, returnUrl?: string): Observable<boolean> {
     if (this.paywallOpen) {
       return of(false);
     }
     this.paywallOpen = true;
-    const mobile = isPlatformBrowser(this.platformId) && window.innerWidth < 720;
+    const mobile = isPlatformBrowser(this.platformId) && window.innerWidth < 860;
     const ref = this.dialog.open(ContactPaywallComponent, {
-      width: mobile ? '100%' : '920px',
-      maxWidth: mobile ? '100vw' : '96vw',
-      maxHeight: mobile ? '94vh' : '92vh',
+      width: mobile ? '100%' : '880px',
+      maxWidth: mobile ? '100vw' : '94vw',
+      maxHeight: mobile ? '88vh' : 'none',
       autoFocus: false,
+      restoreFocus: false,
+      hasBackdrop: true,
+      disableClose: false,
       panelClass: mobile ? ['roomzo-paywall-panel', 'roomzo-paywall-sheet'] : 'roomzo-paywall-panel',
       position: mobile ? { bottom: '0px' } : undefined,
       data: { ...(wallet || {}), returnUrl: returnUrl || this.router.url },

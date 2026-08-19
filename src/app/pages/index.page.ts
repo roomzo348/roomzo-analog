@@ -559,6 +559,7 @@ export default class HomeComponent implements OnInit {
 
   private executeContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
     this.contactAccess.requestOwnerContact(Number(item.id), this.router.url).subscribe((result) => {
+      if (!result?.unlocked) return;
       const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
       if (!phone) {
         if (result) this.toastr.error('Contact number not available');
