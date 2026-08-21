@@ -10,8 +10,8 @@ export interface SubscriptionAlertInput {
   amountPaise: number;
   contacts: number;
   creditsRemaining: number;
-  razorpayOrderId: string;
-  razorpayPaymentId: string;
+  orderId: string;
+  paymentId: string;
 }
 
 function escapeHtml(value: string | null | undefined): string {
@@ -48,8 +48,8 @@ export function buildSubscriptionAlert(input: SubscriptionAlertInput): {
         <tr><td><strong>User</strong></td><td>${escapeHtml(name)} (id ${Number(input.userId)})</td></tr>
         <tr><td><strong>Email</strong></td><td>${escapeHtml(email)}</td></tr>
         <tr><td><strong>Phone</strong></td><td>${escapeHtml(phone)}</td></tr>
-        <tr><td><strong>Razorpay order</strong></td><td>${escapeHtml(input.razorpayOrderId)}</td></tr>
-        <tr><td><strong>Razorpay payment</strong></td><td>${escapeHtml(input.razorpayPaymentId)}</td></tr>
+        <tr><td><strong>Cashfree order</strong></td><td>${escapeHtml(input.orderId)}</td></tr>
+        <tr><td><strong>Cashfree payment</strong></td><td>${escapeHtml(input.paymentId)}</td></tr>
       </table>
     `,
     text: [
@@ -61,8 +61,8 @@ export function buildSubscriptionAlert(input: SubscriptionAlertInput): {
       `User: ${name} (id ${Number(input.userId)})`,
       `Email: ${email}`,
       `Phone: ${phone}`,
-      `Razorpay order: ${input.razorpayOrderId}`,
-      `Razorpay payment: ${input.razorpayPaymentId}`,
+      `Cashfree order: ${input.orderId}`,
+      `Cashfree payment: ${input.paymentId}`,
     ].join('\n'),
   };
 }

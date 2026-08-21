@@ -13,8 +13,8 @@ describe('subscription purchase alerts', () => {
       amountPaise: 9900,
       contacts: 25,
       creditsRemaining: 25,
-      razorpayOrderId: 'order_abc',
-      razorpayPaymentId: 'pay_xyz',
+      orderId: 'order_abc',
+      paymentId: 'pay_xyz',
     });
 
     expect(mail.to).toBe('ankyshukla19@gmail.com, roomzo348@gmail.com');
@@ -23,6 +23,6 @@ describe('subscription purchase alerts', () => {
     expect(mail.html).toContain('Ankit &lt;test&gt;');
     expect(mail.html).toContain('buyer@example.com');
     expect(mail.html).toContain('₹99');
-    expect(mail.text).toContain('Razorpay payment: pay_xyz');
+    expect(mail.text).toContain('Cashfree payment: pay_xyz');
   });
 });

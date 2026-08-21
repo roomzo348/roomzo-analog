@@ -19,7 +19,7 @@ describe('contact unlock rules', () => {
     ).toEqual({ action: 'allow', reason: 'owner' });
   });
 
-  it('blocks contact when credits are exhausted even if the listing was unlocked before', () => {
+  it('keeps a paid unlock available forever, even with no credits left', () => {
     expect(
       decideUnlock({
         isOwner: false,
@@ -27,10 +27,10 @@ describe('contact unlock rules', () => {
         freeUnlockUsed: true,
         creditsRemaining: 0,
       })
-    ).toEqual({ action: 'paywall' });
+    ).toEqual({ action: 'allow', reason: 'already_unlocked' });
   });
 
-  it('reopens a previously unlocked listing without spending another credit when credits remain', () => {
+  it('reopens a previously unlocked listing without spending another credit', () => {
     expect(
       decideUnlock({
         isOwner: false,

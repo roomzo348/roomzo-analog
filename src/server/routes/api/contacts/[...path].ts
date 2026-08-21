@@ -7,7 +7,6 @@ import {
   hasUnlockedListing,
   unlockListingContact,
 } from '../../../services/contact-access-repository';
-import { usableCredits } from '../../../utils/contact-access';
 import { getListingById } from '../../../services/listing-repository';
 
 export default defineEventHandler(async (event) => {
@@ -56,10 +55,7 @@ export default defineEventHandler(async (event) => {
     }
     const listing = await getListingById(listingId);
     const isOwner = listing && Number(listing.ownerId ?? listing.owner_id) === Number(user.id);
-    const credits = usableCredits(wallet);
-    const unlocked =
-      isOwner ||
-      (credits > 0 && (await hasUnlockedListing(Number(user.id), listingId)));
+    const unlocked = isOwner || (await hasUnlockedListing(Number(user.id), listingId));
     return apiResponse(1, 'Contact status', {
       ...wallet,
       listingId,

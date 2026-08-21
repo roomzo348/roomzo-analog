@@ -97,7 +97,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.togglePageChrome(true);
     this.ensureSelection();
-    // Warm the Razorpay script while the user reads the plans so tapping Pay
+    // Warm the Cashfree script while the user reads the plans so tapping Pay
     // opens checkout immediately instead of stalling on a script download.
     void this.billing.loadCheckoutScript();
   }
@@ -113,14 +113,14 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
     document.body.classList.toggle('roomzo-paywall-open', open);
   }
 
-  /** Hides this dialog while the Razorpay checkout sheet is on screen. */
+  /** Hides this dialog while the Cashfree checkout sheet is on screen. */
   private toggleCheckoutMode(open: boolean): void {
     if (typeof document === 'undefined') return;
     document.body.classList.toggle('roomzo-checkout-open', open);
   }
 
   /**
-   * Razorpay callbacks can land while Angular is mid-check. Deferring to a
+   * Cashfree callbacks can land while Angular is mid-check. Deferring to a
    * microtask inside the zone keeps updates out of that pass, which would
    * otherwise trip NG0100 and loop change detection.
    */
@@ -207,7 +207,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
     if (this.payingCode) return;
     this.payingCode = plan.code;
     this.errorMessage = '';
-    // Keep the button loader visible until Razorpay is actually on screen,
+    // Keep the button loader visible until Cashfree is actually on screen,
     // then step this dialog aside so the payment sheet is usable.
     this.checkoutOpenedSub?.unsubscribe();
     this.checkoutOpenedSub = this.billing.checkoutOpened$
@@ -229,7 +229,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.applyAfterCheck(() => {
           const message = err?.error?.message || err?.message || 'Payment was not completed';
-          // Razorpay never opened, so keep the dialog and let the user retry.
+          // Cashfree never opened, so keep the dialog and let the user retry.
           if (message === 'Payment already in progress') {
             this.payingCode = null;
             this.toggleCheckoutMode(false);
@@ -258,7 +258,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
     this.payingCode = null;
     this.checkoutOpenedSub?.unsubscribe();
     // Checkout mode stays on until ngOnDestroy so the dialog cannot flash back
-    // between Razorpay closing and this dialog finishing its close animation.
+    // between Cashfree closing and this dialog finishing its close animation.
     this.toastr[level](message);
     this.dialogRef.close(result);
   }

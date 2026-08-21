@@ -8,32 +8,47 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const userId = Number(process.argv[2] || 3);
-const keyId = String(process.env.RAZORPAY_KEY_ID || '').trim();
-const keySecret = String(process.env.RAZORPAY_KEY_SECRET || '').trim();
-if (!keyId || !keySecret) {
-  console.error('Missing Razorpay keys in .env');
+const appId = String(process.env.CASHFREE_APP_ID || process.env.CASHFREE_CLIENT_ID || '').trim();
+const secretKey = String(
+  process.env.CASHFREE_SECRET_KEY || process.env.CASHFREE_CLIENT_SECRET || ''
+).trim();
+const env = String(process.env.CASHFREE_ENV || 'sandbox').toLowerCase();
+const apiBase =
+  env === 'production' || env === 'live'
+    ? 'https://api.cashfree.com/pg'
+    : 'https://sandbox.cashfree.com/pg';
+
+if (!appId || !secretKey) {
+  console.error('Missing Cashfree keys in .env (CASHFREE_APP_ID / CASHFREE_SECRET_KEY)');
   process.exit(1);
 }
 
-const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-
-async function orderPayments(orderId) {
-  const res = await fetch(`https://api.razorpay.com/v1/orders/${orderId}/payments`, {
-    headers: { Authorization: `Basic ${auth}` },
+async function fetchOrder(orderId) {
+  const res = await fetch(`${apiBase}/orders/${encodeURIComponent(orderId)}`, {
+    headers: {
+      Accept: 'application/json',
+      'x-api-version': '2023-08-01',
+      'x-client-id': appId,
+      'x-client-secret': secretKey,
+    },
   });
   if (!res.ok) {
-    throw new Error(`Razorpay ${res.status}`);
+    throw new Error(`Cashfree ${res.status}`);
   }
   return res.json();
 }
 
-function isFailed(status) {
-  return String(status || '').toLowerCase() === 'failed';
-}
-
-function isPaid(status) {
-  const value = String(status || '').toLowerCase();
-  return value === 'captured' || value === 'authorized' || value === 'created';
+async function fetchPayments(orderId) {
+  const res = await fetch(`${apiBase}/orders/${encodeURIComponent(orderId)}/payments`, {
+    headers: {
+      Accept: 'application/json',
+      'x-api-version': '2023-08-01',
+      'x-client-id': appId,
+      'x-client-secret': secretKey,
+    },
+  });
+  if (!res.ok) return { payments: [] };
+  return res.json();
 }
 
 const conn = await mysql.createConnection({
@@ -53,20 +68,27 @@ const [pending] = await conn.query(
 
 console.log(`Pending orders for user ${userId}:`, pending.length);
 
+const planCredits = { starter: 4, plus: 10, pro: 25 };
+
 for (const payment of pending) {
   const orderId = payment.razorpay_order_id;
   try {
-    const data = await orderPayments(orderId);
-    const items = data.items || [];
-    console.log(orderId, items.map((i) => `${i.id}:${i.status}:${i.amount}`).join(' | ') || 'no payments');
+    const order = await fetchOrder(orderId);
+    console.log(orderId, order.order_status, order.order_amount);
+    if (String(order.order_status || '').toUpperCase() !== 'PAID') continue;
 
-    const match = items.find(
-      (item) =>
-        Number(item.amount) === Number(payment.amount_paise) &&
-        !isFailed(item.status) &&
-        isPaid(item.status)
-    );
-    if (!match) continue;
+    const expected = Number(payment.amount_paise) / 100;
+    if (Math.abs(Number(order.order_amount) - expected) > 0.01) {
+      console.log('amount mismatch, skip');
+      continue;
+    }
+
+    const payData = await fetchPayments(orderId);
+    const payments = payData.payments || [];
+    const success = payments.find((p) => String(p.payment_status || '').toUpperCase() === 'SUCCESS');
+    const paymentId = String(success?.cf_payment_id || `cf_${orderId}`);
+    const credits = planCredits[payment.plan_code] || 0;
+    if (!credits) continue;
 
     await conn.beginTransaction();
     const [wallets] = await conn.query(
@@ -80,37 +102,38 @@ for (const payment of pending) {
         [userId]
       );
     }
-    const [walletRows] = await conn.query(
-      `SELECT credits_remaining, free_unlock_used, plan_code, plan_expires_at
-       FROM user_contact_wallets WHERE user_id = ? LIMIT 1 FOR UPDATE`,
+    const [fresh] = await conn.query(
+      `SELECT credits_remaining FROM user_contact_wallets WHERE user_id = ? LIMIT 1 FOR UPDATE`,
       [userId]
     );
-    const current = walletRows[0] || { credits_remaining: 0, plan_code: null, plan_expires_at: null };
-    const planCredits = { starter: 4, plus: 10, pro: 25 }[payment.plan_code] || 0;
-    const nextCredits = Number(current.credits_remaining || 0) + planCredits;
-    const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
+    const next = Number(fresh[0]?.credits_remaining || 0) + credits;
     await conn.query(
-      `UPDATE user_contact_wallets SET credits_remaining = ?, plan_code = ?, plan_expires_at = ? WHERE user_id = ?`,
-      [nextCredits, payment.plan_code, expiry, userId]
+      `UPDATE user_contact_wallets
+       SET credits_remaining = ?, plan_code = ?, plan_expires_at = DATE_ADD(NOW(), INTERVAL 30 DAY)
+       WHERE user_id = ?`,
+      [next, payment.plan_code, userId]
     );
     await conn.query(
       `UPDATE billing_payments
        SET status = 'paid', credits_granted = ?, razorpay_payment_id = ?, paid_at = NOW()
-       WHERE id = ? AND status <> 'paid'`,
-      [planCredits, match.id, payment.id]
+       WHERE razorpay_order_id = ? AND status <> 'paid'`,
+      [credits, paymentId, orderId]
     );
     await conn.commit();
-    console.log(`Fulfilled ${orderId} -> +${planCredits} credits (total ${nextCredits})`);
+    console.log('fulfilled', orderId, 'credits now', next);
   } catch (err) {
-    await conn.rollback().catch(() => undefined);
-    console.error('Failed', orderId, err.message);
+    try {
+      await conn.rollback();
+    } catch {
+      // ignore
+    }
+    console.error(orderId, err.message || err);
   }
 }
 
 const [wallet] = await conn.query(
-  `SELECT credits_remaining, plan_code FROM user_contact_wallets WHERE user_id = ?`,
+  `SELECT * FROM user_contact_wallets WHERE user_id = ?`,
   [userId]
 );
-console.log('Final wallet:', wallet[0] || { credits_remaining: 0 });
+console.log('wallet', wallet);
 await conn.end();

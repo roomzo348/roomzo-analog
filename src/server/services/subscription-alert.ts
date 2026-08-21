@@ -19,8 +19,8 @@ export async function notifyPaidSubscription(input: {
   contacts?: number;
   amountPaise?: number;
   creditsRemaining?: number;
-  razorpayOrderId?: string;
-  razorpayPaymentId?: string;
+  orderId?: string;
+  paymentId?: string;
   userHint?: { name?: string | null; email?: string | null; phone?: string | null };
 }): Promise<void> {
   if (input.alreadyPaid) return;
@@ -35,7 +35,7 @@ export async function notifyPaidSubscription(input: {
     amountPaise: Number(input.amountPaise || 0),
     contacts: Number(input.contacts || 0),
     creditsRemaining: Number(input.creditsRemaining || 0),
-    razorpayOrderId: input.razorpayOrderId || '',
-    razorpayPaymentId: input.razorpayPaymentId || '',
+    orderId: input.orderId || '',
+    paymentId: input.paymentId || '',
   });
 }

@@ -2,17 +2,19 @@ import { createError, defineEventHandler, getHeader, getMethod, getRouterParam, 
 import { listContactPlans, getContactPlan, FREE_OWNER_CONTACTS } from '../../../config/plans';
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
+import { getServerRuntime } from '../../../utils/runtime-config';
 import {
-  verifyCheckoutSignature,
-  verifyWebhookSignature,
-  isCapturedRazorpayPayment,
-  isFailedRazorpayPayment,
-} from '../../../utils/razorpay-signature';
+  isFailedCashfreePaymentStatus,
+  isPaidCashfreeOrderStatus,
+  verifyCashfreeWebhookSignature,
+} from '../../../utils/cashfree-signature';
 import {
-  createRazorpayOrder,
-  fetchRazorpayPayment,
-  getRazorpayConfig,
-} from '../../../services/razorpay.service';
+  createCashfreeOrder,
+  fetchCashfreeOrder,
+  getCashfreeConfig,
+  isPaidCashfreeOrder,
+  resolveCashfreePaymentId,
+} from '../../../services/cashfree.service';
 import {
   createPendingPayment,
   fulfillPaidOrder,
@@ -41,6 +43,10 @@ function publicPlans() {
   }));
 }
 
+function siteOrigin(): string {
+  return String(getServerRuntime().siteUrl || 'https://www.roomzo.in').replace(/\/$/, '');
+}
+
 export default defineEventHandler(async (event) => {
   const method = getMethod(event).toUpperCase();
   const path = String(getRouterParam(event, 'path') || '');
@@ -54,18 +60,18 @@ export default defineEventHandler(async (event) => {
   }
 
   if (segments[0] === 'config' && method === 'GET') {
-    const cfg = getRazorpayConfig();
+    const cfg = getCashfreeConfig();
     return apiResponse(1, 'Billing config', {
-      keyId: cfg.keyId,
       configured: cfg.configured,
-      mode: cfg.mode,
+      mode: cfg.mode === 'unset' ? 'unset' : cfg.mode === 'production' ? 'production' : 'sandbox',
+      provider: 'cashfree',
     });
   }
 
   if (segments[0] === 'me' && method === 'GET') {
     const user = await requireAuth(event);
     const userId = Number(user.id);
-    // Recover credits when verify failed but Razorpay already captured payment.
+    // Recover credits when verify failed but Cashfree already marked the order PAID.
     await reconcilePendingPaymentsForUser(userId).catch(() => undefined);
     const wallet = await getWallet(userId);
     const unlockedListingIds = await getUnlockedListingIds(userId);
@@ -78,36 +84,53 @@ export default defineEventHandler(async (event) => {
 
   if (segments[0] === 'orders' && method === 'POST') {
     const user = await requireAuth(event);
-    const cfg = getRazorpayConfig();
+    const cfg = getCashfreeConfig();
     if (!cfg.configured) {
-      return apiResponse(0, 'Razorpay sandbox keys are not configured yet. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+      return apiResponse(
+        0,
+        'Cashfree keys are not configured yet. Add CASHFREE_APP_ID and CASHFREE_SECRET_KEY.'
+      );
     }
     const body = await readBody(event);
     const plan = getContactPlan(String(body?.planCode || body?.plan || ''));
     if (!plan) return apiResponse(0, 'Choose Starter, Plus, or Pro to continue');
 
-    const receipt = `rz${plan.code}${user.id}${Date.now()}`.slice(0, 40);
-    const order = await createRazorpayOrder({
-      amountPaise: plan.amountPaise,
+    const orderId = `rz${plan.code}${user.id}${Date.now()}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+    const origin = siteOrigin();
+    const returnUrl = `${origin}/pricing?payment=success&order_id={order_id}`;
+    const notifyUrl = `${origin}/api/billing/webhook`;
+
+    const order = await createCashfreeOrder({
+      orderId,
+      amountRupees: Math.round(plan.amountPaise / 100),
       currency: plan.currency,
-      receipt,
-      notes: {
-        userId: String(user.id),
-        planCode: plan.code,
-        contacts: String(plan.contacts),
-      },
+      customerId: `user_${user.id}`,
+      customerName: user.displayName || user.name || 'Roomzo User',
+      customerEmail: user.email || undefined,
+      customerPhone: user.phone || undefined,
+      orderNote: `${plan.code}:${plan.contacts}`,
+      returnUrl,
+      notifyUrl,
     });
+
+    if (!order.payment_session_id) {
+      return apiResponse(0, 'Cashfree did not return a payment session. Try again.');
+    }
+
     await createPendingPayment({
       userId: Number(user.id),
       plan,
-      razorpayOrderId: order.id,
+      orderId: order.order_id || orderId,
     });
+
     return apiResponse(1, 'Order created', {
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: cfg.keyId,
-      mode: cfg.mode,
+      orderId: order.order_id || orderId,
+      paymentSessionId: order.payment_session_id,
+      amount: plan.amountPaise,
+      amountRupees: Math.round(plan.amountPaise / 100),
+      currency: plan.currency,
+      mode: cfg.mode === 'production' ? 'production' : 'sandbox',
+      provider: 'cashfree',
       plan: {
         code: plan.code,
         name: plan.name,
@@ -124,59 +147,53 @@ export default defineEventHandler(async (event) => {
 
   if (segments[0] === 'verify' && method === 'POST') {
     const user = await requireAuth(event);
-    const cfg = getRazorpayConfig();
-    if (!cfg.configured) return apiResponse(0, 'Razorpay is not configured');
+    const cfg = getCashfreeConfig();
+    if (!cfg.configured) return apiResponse(0, 'Cashfree is not configured');
     const body = await readBody(event);
-    const orderId = String(body?.razorpay_order_id || body?.orderId || '');
-    const paymentId = String(body?.razorpay_payment_id || body?.paymentId || '');
-    const signature = String(body?.razorpay_signature || body?.signature || '');
-    if (!orderId || !paymentId || !signature) {
-      return apiResponse(0, 'Missing Razorpay payment details');
+    const orderId = String(body?.orderId || body?.order_id || '');
+    if (!orderId) {
+      return apiResponse(0, 'Missing Cashfree order id');
     }
 
     const payment = await getPaymentByOrderId(orderId);
     if (!payment || Number(payment.user_id) !== Number(user.id)) {
       return apiResponse(0, 'Order not found for this account');
     }
-    if (!verifyCheckoutSignature({ orderId, paymentId, signature, keySecret: cfg.keySecret })) {
-      return apiResponse(0, 'Payment signature verification failed');
-    }
 
-    // The signature above is an HMAC over "orderId|paymentId" with our key
-    // secret, so a valid one is proof from Razorpay that this payment happened
-    // for this order. The live lookup is a secondary guard that may *reject* a
-    // payment; being unable to reach Razorpay must never discard money the user
-    // has already paid, because there is no other chance to grant the credits
-    // unless a webhook secret is configured.
-    let remotePayment: {
-      id: string;
-      status: string;
-      amount: number;
-      currency: string;
-      order_id?: string;
-    } | null = null;
+    let remoteOrder: Awaited<ReturnType<typeof fetchCashfreeOrder>> | null = null;
     try {
-      remotePayment = await fetchRazorpayPayment(paymentId);
+      remoteOrder = await fetchCashfreeOrder(orderId);
     } catch {
-      remotePayment = null;
+      remoteOrder = null;
     }
 
-    if (remotePayment) {
-      if (remotePayment.order_id && remotePayment.order_id !== orderId) {
-        return apiResponse(0, 'Payment does not match this order');
-      }
-      if (Number(remotePayment.amount) !== Number(payment.amount_paise)) {
-        return apiResponse(0, 'Payment amount mismatch');
-      }
-      if (isFailedRazorpayPayment(remotePayment.status)) {
-        await markPaymentFailed(orderId, paymentId);
+    if (!remoteOrder) {
+      return apiResponse(0, 'Could not confirm payment with Cashfree. Credits were not granted.');
+    }
+
+    const expectedRupees = Number(payment.amount_paise) / 100;
+    if (
+      Number.isFinite(remoteOrder.order_amount) &&
+      Math.abs(Number(remoteOrder.order_amount) - expectedRupees) > 0.01
+    ) {
+      return apiResponse(0, 'Payment amount mismatch');
+    }
+
+    if (!isPaidCashfreeOrder(remoteOrder.order_status)) {
+      const status = String(remoteOrder.order_status || '').toUpperCase();
+      if (status === 'EXPIRED' || status === 'TERMINATED') {
+        await markPaymentFailed(orderId);
         return apiResponse(0, 'Payment failed. No credits were added.');
       }
-      // Signature is already valid — do not reject while Razorpay is still
-      // settling (e.g. status `created` right after checkout in test mode).
+      return apiResponse(0, 'Payment is not complete yet. If money was deducted, refresh your profile in a minute.');
     }
 
-    const fulfilled = await fulfillPaidOrder({ orderId, paymentId, signature });
+    const paymentId =
+      String(body?.paymentId || body?.cf_payment_id || '') ||
+      (await resolveCashfreePaymentId(orderId)) ||
+      `cf_${orderId}`;
+
+    const fulfilled = await fulfillPaidOrder({ orderId, paymentId, signature: null });
     await notifyPaidSubscription({
       alreadyPaid: fulfilled.alreadyPaid,
       userId: Number(payment.user_id),
@@ -185,8 +202,8 @@ export default defineEventHandler(async (event) => {
       contacts: fulfilled.plan?.contacts,
       amountPaise: payment.amount_paise,
       creditsRemaining: fulfilled.wallet.creditsRemaining,
-      razorpayOrderId: orderId,
-      razorpayPaymentId: paymentId,
+      orderId,
+      paymentId,
       userHint: { name: user.displayName || user.name, email: user.email, phone: user.phone },
     });
     return apiResponse(1, fulfilled.alreadyPaid ? 'Payment already captured' : 'Payment successful', {
@@ -198,42 +215,75 @@ export default defineEventHandler(async (event) => {
   }
 
   if (segments[0] === 'webhook' && method === 'POST') {
-    const cfg = getRazorpayConfig();
+    const cfg = getCashfreeConfig();
     const rawBody = (await readRawBody(event)) || '';
-    const signature = String(getHeader(event, 'x-razorpay-signature') || '');
-    if (cfg.webhookSecret) {
-      if (!verifyWebhookSignature({ rawBody: String(rawBody), signature, webhookSecret: cfg.webhookSecret })) {
-        throw createError({ statusCode: 401, statusMessage: 'Invalid webhook signature' });
-      }
-    } else {
-      return { status: 'ignored', reason: 'RAZORPAY_WEBHOOK_SECRET is not set' };
-    }
-    const payload = rawBody ? JSON.parse(String(rawBody)) : await readBody(event);
-    const eventName = String(payload?.event || '');
-    const entity = payload?.payload?.payment?.entity || payload?.payload?.order?.entity || {};
-    const orderId = String(entity?.order_id || entity?.id || '');
-    const paymentId = String(entity?.id || '');
+    const signature = String(getHeader(event, 'x-webhook-signature') || '');
+    const timestamp = String(getHeader(event, 'x-webhook-timestamp') || '');
 
-    if ((eventName === 'payment.captured' || eventName === 'order.paid') && orderId) {
+    if (!cfg.configured) {
+      return { status: 'ignored', reason: 'Cashfree is not configured' };
+    }
+    if (
+      !verifyCashfreeWebhookSignature({
+        rawBody: String(rawBody),
+        signature,
+        timestamp,
+        secretKey: cfg.secretKey,
+      })
+    ) {
+      throw createError({ statusCode: 401, statusMessage: 'Invalid webhook signature' });
+    }
+
+    const payload = rawBody ? JSON.parse(String(rawBody)) : await readBody(event);
+    const eventType = String(payload?.type || payload?.event || '').toUpperCase();
+    const data = payload?.data || {};
+    const order = data?.order || {};
+    const paymentEntity = data?.payment || {};
+    const orderId = String(order?.order_id || data?.order_id || '');
+    const paymentId = String(
+      paymentEntity?.cf_payment_id || paymentEntity?.payment_id || data?.cf_payment_id || ''
+    );
+    const paymentStatus = String(paymentEntity?.payment_status || data?.payment_status || '');
+    const orderStatus = String(order?.order_status || data?.order_status || '');
+
+    if (!orderId) {
+      return { status: 'ignored', reason: 'missing order id' };
+    }
+
+    const successEvent =
+      eventType.includes('PAYMENT_SUCCESS') ||
+      eventType.includes('ORDER_PAID') ||
+      isPaidCashfreeOrderStatus(orderStatus) ||
+      paymentStatus.toUpperCase() === 'SUCCESS';
+
+    const failedEvent =
+      eventType.includes('PAYMENT_FAILED') ||
+      eventType.includes('PAYMENT_USER_DROPPED') ||
+      isFailedCashfreePaymentStatus(paymentStatus);
+
+    if (successEvent) {
       const existing = await getPaymentByOrderId(orderId);
       if (existing && existing.status !== 'paid') {
-        const capturedId = eventName === 'payment.captured' ? paymentId : existing.razorpay_payment_id;
-        if (capturedId && capturedId !== orderId) {
-          try {
-            const remotePayment = await fetchRazorpayPayment(capturedId);
-            if (!isCapturedRazorpayPayment(remotePayment.status)) {
-              return { status: 'ignored', reason: 'payment not captured' };
-            }
-            if (Number(remotePayment.amount) !== Number(existing.amount_paise)) {
-              return { status: 'ignored', reason: 'amount mismatch' };
-            }
-          } catch {
-            return { status: 'ignored', reason: 'could not confirm payment' };
+        try {
+          const remote = await fetchCashfreeOrder(orderId);
+          if (!isPaidCashfreeOrder(remote.order_status)) {
+            return { status: 'ignored', reason: 'order not paid yet' };
           }
+          const expectedRupees = Number(existing.amount_paise) / 100;
+          if (
+            Number.isFinite(remote.order_amount) &&
+            Math.abs(Number(remote.order_amount) - expectedRupees) > 0.01
+          ) {
+            return { status: 'ignored', reason: 'amount mismatch' };
+          }
+        } catch {
+          return { status: 'ignored', reason: 'could not confirm payment' };
         }
+
+        const capturedId = paymentId || (await resolveCashfreePaymentId(orderId)) || `cf_${orderId}`;
         const fulfilled = await fulfillPaidOrder({
           orderId,
-          paymentId: capturedId || paymentId,
+          paymentId: capturedId,
           signature,
         });
         await notifyPaidSubscription({
@@ -244,14 +294,16 @@ export default defineEventHandler(async (event) => {
           contacts: fulfilled.plan?.contacts,
           amountPaise: existing.amount_paise,
           creditsRemaining: fulfilled.wallet.creditsRemaining,
-          razorpayOrderId: orderId,
-          razorpayPaymentId: capturedId || paymentId,
+          orderId,
+          paymentId: capturedId,
         });
       }
     }
-    if (eventName === 'payment.failed' && orderId) {
-      await markPaymentFailed(orderId, paymentId);
+
+    if (failedEvent) {
+      await markPaymentFailed(orderId, paymentId || undefined);
     }
+
     return { status: 'ok' };
   }
 

@@ -76,8 +76,33 @@ export default class PricingPageComponent implements OnInit {
       });
     }
 
+    const orderId = this.route.snapshot.queryParamMap.get('order_id');
+    const paymentStatus = this.route.snapshot.queryParamMap.get('payment');
+    if (orderId && this.auth.getCurrentUser()?.id) {
+      this.billing.verifyPayment({ orderId }).subscribe({
+        next: (res) => {
+          if (Number(res?.status) === 1 && res.data) {
+            this.wallet = res.data;
+            this.leavePricing('success');
+          } else {
+            this.leavePricing('failed', res?.message || 'Payment could not be confirmed');
+          }
+        },
+        error: () => this.leavePricing('failed', 'Payment could not be confirmed'),
+      });
+    } else if (paymentStatus) {
+      const notice = paymentReturnNotice(paymentStatus);
+      if (notice) this.toastr[notice.level](notice.message);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { payment: null, order_id: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+
     const plan = this.route.snapshot.queryParamMap.get('plan');
-    if (plan && this.auth.getCurrentUser()?.id) {
+    if (plan && this.auth.getCurrentUser()?.id && !orderId) {
       setTimeout(() => this.startCheckout(plan), 400);
     }
   }
@@ -92,7 +117,7 @@ export default class PricingPageComponent implements OnInit {
       return;
     }
     if (!this.configured) {
-      this.toastr.info('Add Razorpay test Key ID and Key Secret to enable sandbox checkout.');
+      this.toastr.info('Add Cashfree App ID and Secret Key to enable sandbox checkout.');
       return;
     }
     this.payingCode = planCode;

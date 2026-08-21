@@ -20,9 +20,8 @@ export async function hasUnlockedListing(userId: number, listingId: number): Pro
 }
 
 export async function canRevealContact(userId: number, listingId: number): Promise<boolean> {
-  if (!(await hasUnlockedListing(userId, listingId))) return false;
-  const wallet = await getWallet(userId);
-  return usableCredits(wallet) > 0;
+  // Once paid-unlocked, the listing stays visible forever for that user.
+  return hasUnlockedListing(userId, listingId);
 }
 
 export async function getUnlockedListingIds(userId: number): Promise<number[]> {
@@ -40,8 +39,6 @@ export async function getUnlockedListingIds(userId: number): Promise<number[]> {
  */
 export async function getRevealableListingIds(userId: number): Promise<Set<number>> {
   await ensureBillingTables();
-  const wallet = await getWallet(userId);
-  if (usableCredits(wallet) <= 0) return new Set();
   const rows = await sqlQuery<{ listing_id: number }>(
     `SELECT listing_id FROM contact_unlocks WHERE user_id = ? AND unlock_type <> 'free'`,
     [userId]
@@ -82,21 +79,13 @@ export async function unlockListingContact(userId: number, listingId: number): P
     return {
       status: 1,
       message: 'Owner access',
-      data: { unlocked: true, unlockType: 'owner', contact, ...serialized },
+      data: { unlocked: true, unlockType: 'owner', creditsSpent: 0, contact, ...serialized },
     };
   }
 
+  // Fast path: already unlocked → never charge again.
   const existing = await hasUnlockedListing(userId, listingId);
   if (existing) {
-    if (usableCredits(wallet) <= 0) {
-      return {
-        status: 0,
-        code: 'PAYMENT_REQUIRED',
-        message: 'Buy a contact plan to view owner phone, WhatsApp, or email',
-        data: { unlocked: false, ...serialized },
-      };
-    }
-    const walletAfter = await getWallet(userId);
     return {
       status: 1,
       message: 'Contact already unlocked',
@@ -105,7 +94,7 @@ export async function unlockListingContact(userId: number, listingId: number): P
         unlockType: 'already',
         creditsSpent: 0,
         contact,
-        ...serializeWallet(walletAfter),
+        ...serializeWallet(await getWallet(userId)),
       },
     };
   }
@@ -129,15 +118,14 @@ export async function unlockListingContact(userId: number, listingId: number): P
       `SELECT id, unlock_type FROM contact_unlocks WHERE user_id = ? AND listing_id = ? LIMIT 1 FOR UPDATE`,
       [userId, listingId]
     );
-    const freeUsed = Boolean(Number(current?.free_unlock_used ?? 0));
-    const credits = Math.max(0, Number(current?.credits_remaining ?? 0));
 
+    // Another request unlocked this listing while we waited for the lock.
     if (unlockedRows[0] && String(unlockedRows[0].unlock_type) !== 'free') {
-      if (credits <= 0) {
-        return { kind: 'paywall' as const, walletRow: current };
-      }
       return { kind: 'already' as const, unlockType: unlockedRows[0].unlock_type, walletRow: current };
     }
+
+    const freeUsed = Boolean(Number(current?.free_unlock_used ?? 0));
+    const credits = Math.max(0, Number(current?.credits_remaining ?? 0));
     const decision = decideUnlock({
       isOwner: false,
       alreadyUnlocked: false,
@@ -149,19 +137,35 @@ export async function unlockListingContact(userId: number, listingId: number): P
       return { kind: 'paywall' as const, walletRow: current };
     }
 
-    const unlockType = 'credit';
-    if (unlockedRows[0]) {
+    // Insert-first: only deduct when we actually create a new unlock row.
+    // Duplicate key means a concurrent request won — treat as already unlocked.
+    let inserted = false;
+    if (unlockedRows[0] && String(unlockedRows[0].unlock_type) === 'free') {
       await connExecute(
         conn,
-        `UPDATE contact_unlocks SET unlock_type = ? WHERE user_id = ? AND listing_id = ?`,
-        [unlockType, userId, listingId]
+        `UPDATE contact_unlocks SET unlock_type = 'credit' WHERE user_id = ? AND listing_id = ? AND unlock_type = 'free'`,
+        [userId, listingId]
       );
+      inserted = true;
     } else {
-      await connExecute(
-        conn,
-        `INSERT INTO contact_unlocks (user_id, listing_id, unlock_type) VALUES (?, ?, ?)`,
-        [userId, listingId, unlockType]
-      );
+      try {
+        const insertResult = await connExecute(
+          conn,
+          `INSERT INTO contact_unlocks (user_id, listing_id, unlock_type) VALUES (?, ?, 'credit')`,
+          [userId, listingId]
+        );
+        inserted = Number(insertResult.affectedRows || 0) === 1;
+      } catch (error: any) {
+        // ER_DUP_ENTRY — concurrent unlock already committed.
+        if (error?.code === 'ER_DUP_ENTRY' || Number(error?.errno) === 1062) {
+          return { kind: 'already' as const, unlockType: 'credit', walletRow: current };
+        }
+        throw error;
+      }
+    }
+
+    if (!inserted) {
+      return { kind: 'already' as const, unlockType: 'credit', walletRow: current };
     }
 
     await connExecute(
@@ -171,7 +175,7 @@ export async function unlockListingContact(userId: number, listingId: number): P
     );
     current.credits_remaining = Math.max(0, Number(current.credits_remaining || 0) - 1);
 
-    return { kind: 'unlocked' as const, unlockType, walletRow: current };
+    return { kind: 'unlocked' as const, unlockType: 'credit', walletRow: current };
   });
 
   const walletAfterUnlock = await getWallet(userId);

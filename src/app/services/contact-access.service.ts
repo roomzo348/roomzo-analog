@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, switchMap, catchError, map, finalize, tap } from 'rxjs';
+import { Observable, of, switchMap, catchError, map, finalize, tap, share } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
@@ -35,6 +35,8 @@ export interface UnlockResult {
 export class ContactAccessService {
   private baseUrl = environment.apiUrl;
   private paywallOpen = false;
+  /** Coalesce concurrent unlock calls for the same listing (double-tap / race). */
+  private inflightUnlocks = new Map<number, Observable<UnlockResult | null>>();
 
   constructor(
     private http: HttpClient,
@@ -67,7 +69,10 @@ export class ContactAccessService {
       return of(null);
     }
 
-    return this.unlock(listingId).pipe(
+    const existing = this.inflightUnlocks.get(listingId);
+    if (existing) return existing;
+
+    const request$ = this.unlock(listingId).pipe(
       switchMap((res) => {
         if (res?.status === 1 && res.data?.unlocked && res.data?.contact) {
           return of(res.data as UnlockResult);
@@ -98,8 +103,15 @@ export class ContactAccessService {
         }
         this.toastr.error(err?.error?.message || 'Could not unlock owner contact');
         return of(null);
-      })
+      }),
+      finalize(() => {
+        this.inflightUnlocks.delete(listingId);
+      }),
+      share({ resetOnRefCountZero: true })
     );
+
+    this.inflightUnlocks.set(listingId, request$);
+    return request$;
   }
 
   private noteUnlockOutcome(result: UnlockResult | null): void {

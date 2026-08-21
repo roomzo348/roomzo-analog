@@ -31,11 +31,11 @@ export function decideUnlock(input: {
   creditsRemaining: number;
 }): UnlockDecision {
   if (input.isOwner) return { action: 'allow', reason: 'owner' };
-  // Viewing any owner contact always requires at least one credit in the wallet.
-  // A listing unlocked before does not cost again, but credits must remain > 0.
-  if (input.creditsRemaining <= 0) return { action: 'paywall' };
+  // Pay once per listing: an unlocked property stays open forever and never
+  // charges again. Only a brand-new listing spends a credit.
   if (input.alreadyUnlocked) return { action: 'allow', reason: 'already_unlocked' };
-  return { action: 'allow', reason: 'credit' };
+  if (input.creditsRemaining > 0) return { action: 'allow', reason: 'credit' };
+  return { action: 'paywall' };
 }
 
 export function nextPlanExpiry(currentExpiry: Date | null | undefined, durationDays: number, now = new Date()): Date {

@@ -1,8 +1,12 @@
 import { sqlExecute, sqlQuery, connQuery, connExecute, withTransaction } from '../db/mysql';
 import { CONTACT_PLANS, getContactPlan, type ContactPlan, type PlanCode } from '../config/plans';
 import { nextPlanExpiry, usableCredits, type WalletSnapshot } from '../utils/contact-access';
-import { fetchRazorpayOrderPayments, getRazorpayConfig } from './razorpay.service';
-import { isFailedRazorpayPayment, isPaidRazorpayPayment } from '../utils/razorpay-signature';
+import {
+  fetchCashfreeOrder,
+  getCashfreeConfig,
+  isPaidCashfreeOrder,
+  resolveCashfreePaymentId,
+} from './cashfree.service';
 
 let tablesReady = false;
 
@@ -87,7 +91,8 @@ export async function getWallet(userId: number): Promise<WalletSnapshot> {
 export async function createPendingPayment(input: {
   userId: number;
   plan: ContactPlan;
-  razorpayOrderId: string;
+  /** Cashfree order_id (stored in gateway order column). */
+  orderId: string;
 }): Promise<void> {
   await ensureBillingTables();
   await sqlExecute(
@@ -100,7 +105,7 @@ export async function createPendingPayment(input: {
       input.plan.code,
       input.plan.amountPaise,
       input.plan.currency,
-      input.razorpayOrderId,
+      input.orderId,
     ]
   );
 }
@@ -225,12 +230,11 @@ export function serializeWallet(wallet: WalletSnapshot) {
 }
 
 /**
- * Credits can stay at zero when Razorpay captured the payment but /verify rejected
- * it (for example while the payment was still in `created` status). Look up any
- * still-open orders server-side and fulfil the ones Razorpay shows as paid.
+ * Credits can stay at zero when checkout finished but /verify never ran.
+ * Re-check open orders against Cashfree and fulfil any that are PAID.
  */
 export async function reconcilePendingPaymentsForUser(userId: number): Promise<WalletSnapshot | null> {
-  if (!getRazorpayConfig().configured) return null;
+  if (!getCashfreeConfig().configured) return null;
 
   const pending = await listPendingPaymentsForUser(userId);
   if (!pending.length) return null;
@@ -240,17 +244,19 @@ export async function reconcilePendingPaymentsForUser(userId: number): Promise<W
     const orderId = String(payment.razorpay_order_id || '');
     if (!orderId) continue;
     try {
-      const { items = [] } = await fetchRazorpayOrderPayments(orderId);
-      const match = items.find(
-        (item) =>
-          Number(item.amount) === Number(payment.amount_paise) &&
-          !isFailedRazorpayPayment(item.status) &&
-          isPaidRazorpayPayment(item.status)
-      );
-      if (!match) continue;
+      const remote = await fetchCashfreeOrder(orderId);
+      if (!isPaidCashfreeOrder(remote.order_status)) continue;
+      const expectedRupees = Number(payment.amount_paise) / 100;
+      if (
+        Number.isFinite(remote.order_amount) &&
+        Math.abs(Number(remote.order_amount) - expectedRupees) > 0.01
+      ) {
+        continue;
+      }
+      const paymentId = (await resolveCashfreePaymentId(orderId)) || `cf_${orderId}`;
       const fulfilled = await fulfillPaidOrder({
         orderId,
-        paymentId: match.id,
+        paymentId,
         signature: null,
       });
       latestWallet = fulfilled.wallet;
