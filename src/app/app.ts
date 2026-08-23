@@ -138,7 +138,8 @@ export class App implements OnInit {
   }
 
  private initComingSoonModal(): void {
-  const STORAGE_KEY = 'roomzo-live-cities-modal';
+  // Versioned so existing visitors see the newly added plan launch notice once.
+  const STORAGE_KEY = 'roomzo-live-cities-modal-v2';
   const COOLDOWN_HOURS = 2;
 
   setTimeout(() => {
@@ -156,7 +157,7 @@ export class App implements OnInit {
     const dialogRef = this.dialog.open(ComingSoonModalComponent, {
       width: '520px',
       maxWidth: '92vw',
-      maxHeight: '90vh',
+      maxHeight: '96vh',
       autoFocus: false,
       panelClass: 'roomzo-live-modal-panel',
     });

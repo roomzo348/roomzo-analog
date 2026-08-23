@@ -75,16 +75,27 @@
         <span class="plan-info">
           <span class="plan-name">
             {{ plan.name }}
-            <span class="plan-badge" *ngIf="plan.popular">Best value</span>
+            <span class="plan-badge plan-badge--blue" *ngIf="plan.code === 'plus'">
+              <mat-icon aria-hidden="true">star</mat-icon>
+              Most popular
+            </span>
+            <span class="plan-badge" *ngIf="plan.popular">
+              <mat-icon aria-hidden="true">workspace_premium</mat-icon>
+              Best value
+            </span>
           </span>
           <span class="plan-meta">
             {{ plan.contacts }} owner contacts · ₹{{ perContact(plan) }} each
           </span>
+          <span class="plan-offer" *ngIf="plan.offerLabel">{{ plan.offerLabel }}</span>
         </span>
 
         <span class="plan-price">
-          <strong>₹{{ plan.amountRupees }}</strong>
-          <small>/month</small>
+          <del *ngIf="plan.originalAmountRupees">₹{{ plan.originalAmountRupees }}</del>
+          <span class="current-price">
+            <strong>₹{{ plan.amountRupees }}</strong>
+            <small>/month</small>
+          </span>
         </span>
       </button>
     </div>

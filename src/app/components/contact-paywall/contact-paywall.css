@@ -331,6 +331,9 @@
 
 .plan-badge {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   background: #dcfce7;
   color: #15803d;
   font-size: 0.62rem;
@@ -341,6 +344,17 @@
   border-radius: 999px;
 }
 
+.plan-badge mat-icon {
+  width: 12px;
+  height: 12px;
+  font-size: 12px;
+}
+
+.plan-badge--blue {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .plan-meta {
   font-size: 0.77rem;
   color: var(--rz-text-muted, #6b7280);
@@ -349,12 +363,32 @@
   text-overflow: ellipsis;
 }
 
+.plan-offer {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #dc6b19;
+}
+
 .plan-price {
   flex: none;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  color: #0f172a;
+}
+
+.plan-price del {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.current-price {
+  display: flex;
   align-items: baseline;
   gap: 2px;
-  color: #0f172a;
 }
 
 .plan-price strong {

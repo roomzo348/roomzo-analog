@@ -29,5 +29,20 @@
         <span class="stat-label">{{ stat.label }}</span>
       </div>
     </div>
+
+    <div class="plans-live-card">
+      <div class="plans-live-icon" aria-hidden="true">
+        <mat-icon>rocket_launch</mat-icon>
+      </div>
+      <div class="plans-live-copy">
+        <span class="plans-live-label">Just launched</span>
+        <strong>Owner contact plans are now live</strong>
+        <span>Early-bird plans from ₹19 · Secure Cashfree checkout</span>
+      </div>
+      <a routerLink="/pricing" class="plans-live-action" (click)="close()">
+        View plans
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
   </div>
 </div>

@@ -342,28 +342,28 @@ body.roomzo-paywall-open .cdk-overlay-container {
 }
 
 .roomzo-live-modal-panel .mat-mdc-dialog-container {
-  max-height: 90vh;
-  padding: 16px;
+  max-height: 96vh;
+  padding: 8px;
   align-items: center;
 }
 
 .roomzo-live-modal-panel .mat-mdc-dialog-surface {
   padding: 0;
   border-radius: 20px;
-  overflow: hidden;
+  overflow-y: auto;
   background: transparent;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-  max-height: min(620px, 82vh);
+  max-height: 94vh;
 }
 
 @media (max-width: 520px) {
   .roomzo-live-modal-panel .mat-mdc-dialog-container {
-    padding: 20px 14px;
+    padding: 6px;
     align-items: center;
   }
 
   .roomzo-live-modal-panel .mat-mdc-dialog-surface {
-    max-height: min(520px, 72vh);
+    max-height: 94vh;
     width: 100%;
   }
 }
