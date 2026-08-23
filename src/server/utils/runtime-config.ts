@@ -18,10 +18,17 @@ export interface ServerRuntime {
   cashfreeAppId: string;
   cashfreeSecretKey: string;
   cashfreeEnv: string;
+  contactPlansJson: string;
 }
 
 export function getServerRuntime(): ServerRuntime {
   const runtime = useRuntimeConfig();
+  // Nitro runtimeConfig values may be baked during the build. Read this
+  // deployment-managed value directly as well so changing plan credits does
+  // not require the production server to rely on a local/build-time .env file.
+  const runtimeContactPlans =
+    typeof process !== 'undefined' ? process.env['CONTACT_PLANS_JSON'] : undefined;
+
   return {
     mysqlHost: String(runtime.mysqlHost ?? '127.0.0.1'),
     mysqlPort: Number(runtime.mysqlPort ?? 3306),
@@ -40,5 +47,6 @@ export function getServerRuntime(): ServerRuntime {
     cashfreeAppId: String(runtime.cashfreeAppId ?? '').trim(),
     cashfreeSecretKey: String(runtime.cashfreeSecretKey ?? '').trim(),
     cashfreeEnv: String(runtime.cashfreeEnv ?? 'sandbox').trim(),
+    contactPlansJson: String(runtimeContactPlans || runtime.contactPlansJson || '').trim(),
   };
 }

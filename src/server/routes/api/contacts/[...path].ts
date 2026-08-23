@@ -2,6 +2,7 @@ import { defineEventHandler, getMethod, getQuery, getRouterParam, readBody } fro
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
 import { listContactPlans } from '../../../config/plans';
+import { getServerRuntime } from '../../../utils/runtime-config';
 import { getWallet, serializeWallet } from '../../../services/billing-repository';
 import {
   hasUnlockedListing,
@@ -29,11 +30,13 @@ export default defineEventHandler(async (event) => {
         message: result.message,
         data: {
           ...result.data,
-          plans: listContactPlans().map((plan) => ({
+          plans: listContactPlans(getServerRuntime().contactPlansJson).map((plan) => ({
             code: plan.code,
             name: plan.name,
             tagline: plan.tagline,
             amountRupees: Math.round(plan.amountPaise / 100),
+            originalAmountRupees: plan.originalAmountRupees,
+            offerLabel: plan.offerLabel,
             contacts: plan.contacts,
             popular: plan.popular,
             features: plan.features,

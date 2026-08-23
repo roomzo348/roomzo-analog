@@ -1,6 +1,7 @@
 import { sqlExecute, sqlQuery, connQuery, connExecute, withTransaction } from '../db/mysql';
 import { CONTACT_PLANS, getContactPlan, type ContactPlan, type PlanCode } from '../config/plans';
 import { nextPlanExpiry, usableCredits, type WalletSnapshot } from '../utils/contact-access';
+import { getServerRuntime } from '../utils/runtime-config';
 import {
   fetchCashfreeOrder,
   getCashfreeConfig,
@@ -156,7 +157,7 @@ export async function fulfillPaidOrder(input: {
       throw new Error('Payment order not found');
     }
 
-    const plan = getContactPlan(payment.plan_code);
+    const plan = getContactPlan(payment.plan_code, getServerRuntime().contactPlansJson);
     if (payment.status === 'paid') {
       const wallets = await connQuery<any>(
         conn,

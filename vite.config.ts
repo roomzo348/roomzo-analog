@@ -58,6 +58,7 @@ export default defineConfig(({ mode }) => {
           cashfreeAppId: env['CASHFREE_APP_ID'] || env['CASHFREE_CLIENT_ID'],
           cashfreeSecretKey: env['CASHFREE_SECRET_KEY'] || env['CASHFREE_CLIENT_SECRET'],
           cashfreeEnv: env['CASHFREE_ENV'] || 'sandbox',
+          contactPlansJson: env['CONTACT_PLANS_JSON'],
         },
         prerender: {
           routes: ['/sitemap.xml'],

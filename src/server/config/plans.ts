@@ -5,6 +5,8 @@ export interface ContactPlan {
   name: string;
   tagline: string;
   amountPaise: number;
+  originalAmountRupees?: number;
+  offerLabel?: string;
   currency: 'INR';
   contacts: number;
   durationDays: number;
@@ -21,6 +23,8 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     name: 'Starter',
     tagline: 'Start with 4 owner contacts',
     amountPaise: 1900,
+    originalAmountRupees: 49,
+    offerLabel: 'Early bird offer · ending soon',
     currency: 'INR',
     contacts: 4,
     durationDays: PLAN_DURATION_DAYS,
@@ -37,11 +41,13 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     tagline: 'For focused house hunting',
     amountPaise: 4900,
     currency: 'INR',
-    contacts: 10,
+    originalAmountRupees: 99,
+    offerLabel: 'Early bird offer · ending soon',
+    contacts: 11,
     durationDays: PLAN_DURATION_DAYS,
     popular: false,
     features: [
-      '10 Property Contacts',
+      '11 Property Contacts',
       'Direct Owner Contact',
       'New Listing Alerts',
       'No Brokerage',
@@ -52,6 +58,8 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     name: 'Pro',
     tagline: 'Most popular for serious seekers',
     amountPaise: 9900,
+    originalAmountRupees: 199,
+    offerLabel: 'Early bird offer · ending soon',
     currency: 'INR',
     contacts: 25,
     durationDays: PLAN_DURATION_DAYS,
@@ -67,14 +75,64 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
   },
 };
 
-export function listContactPlans(): ContactPlan[] {
-  return [CONTACT_PLANS.starter, CONTACT_PLANS.plus, CONTACT_PLANS.pro];
+type EnvPlan = {
+  code?: string;
+  price?: number;
+  contacts?: number;
+  originalPrice?: number;
+};
+
+/**
+ * Optional JSON from CONTACT_PLANS_JSON. Invalid or incomplete entries safely
+ * fall back to the defaults above, so bad deployment config cannot create a
+ * zero-price order.
+ */
+export function listContactPlans(rawConfig?: string | null): ContactPlan[] {
+  let configured: EnvPlan[] = [];
+  if (rawConfig) {
+    try {
+      const parsed = JSON.parse(rawConfig);
+      if (Array.isArray(parsed)) configured = parsed;
+    } catch {
+      configured = [];
+    }
+  }
+
+  return (['starter', 'plus', 'pro'] as PlanCode[]).map((code) => {
+    const base = CONTACT_PLANS[code];
+    const envPlan = configured.find((item) => String(item?.code).toLowerCase() === code);
+    const price = Number(envPlan?.price);
+    const contacts = Number(envPlan?.contacts);
+    const originalPrice = Number(envPlan?.originalPrice);
+    const resolvedContacts = Number.isInteger(contacts) && contacts > 0 ? contacts : base.contacts;
+
+    return {
+      ...base,
+      amountPaise: Number.isFinite(price) && price > 0 ? Math.round(price * 100) : base.amountPaise,
+      contacts: resolvedContacts,
+      originalAmountRupees:
+        Number.isFinite(originalPrice) && originalPrice > 0
+          ? originalPrice
+          : base.originalAmountRupees,
+      tagline:
+        code === 'starter'
+          ? `Start with ${resolvedContacts} owner contacts`
+          : base.tagline,
+      features: [
+        `${resolvedContacts} Property Contacts`,
+        ...base.features.slice(1),
+      ],
+    };
+  });
 }
 
-export function getContactPlan(code: string | null | undefined): ContactPlan | null {
+export function getContactPlan(
+  code: string | null | undefined,
+  rawConfig?: string | null
+): ContactPlan | null {
   if (!code) return null;
   const key = code.toLowerCase() as PlanCode;
-  return CONTACT_PLANS[key] ?? null;
+  return listContactPlans(rawConfig).find((plan) => plan.code === key) ?? null;
 }
 
 export function formatPlanPrice(plan: ContactPlan): string {

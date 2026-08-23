@@ -26,6 +26,8 @@ export interface BillingPlan {
   tagline: string;
   amountPaise: number;
   amountRupees: number;
+  originalAmountRupees?: number;
+  offerLabel?: string;
   currency: string;
   contacts: number;
   durationDays: number;

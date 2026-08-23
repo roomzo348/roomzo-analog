@@ -9,6 +9,7 @@
   grid-template-columns: 330px minmax(0, 1fr);
   background: #fff;
   color: var(--rz-text-main, #111827);
+  height: min(88vh, 660px);
   max-height: min(88vh, 660px);
   overflow: hidden;
 }
@@ -177,6 +178,7 @@
 .paywall-main {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
   overflow-y: auto;
   background: #fff;
@@ -465,6 +467,8 @@
 .main-foot {
   position: sticky;
   bottom: 0;
+  z-index: 3;
+  flex: none;
   margin-top: auto;
   padding: 16px 26px 18px;
   background: #fff;
@@ -525,6 +529,7 @@
 @media (max-width: 860px) {
   .rz-paywall {
     grid-template-columns: minmax(0, 1fr);
+    height: auto;
     max-height: 100%;
   }
 

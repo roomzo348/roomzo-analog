@@ -12,12 +12,17 @@
 
   <div class="plan-grid" *ngIf="!loading">
     <article class="plan" *ngFor="let plan of plans" [class.popular]="plan.popular">
-      <div class="badge" *ngIf="plan.popular">Most popular</div>
+      <div class="badge badge--blue" *ngIf="plan.code === 'plus'">Most popular</div>
+      <div class="badge" *ngIf="plan.popular">Best value</div>
       <div class="plan-head">
         <h2>{{ plan.name }}</h2>
-        <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
+        <div class="price-wrap">
+          <del *ngIf="plan.originalAmountRupees">₹{{ plan.originalAmountRupees }}</del>
+          <p class="price">₹{{ plan.amountRupees }}<span>/month</span></p>
+        </div>
       </div>
       <p class="contacts-line">{{ plan.contacts }} owner contacts</p>
+      <p class="offer-line" *ngIf="plan.offerLabel">{{ plan.offerLabel }}</p>
       <button type="button" class="cta" [disabled]="!!payingCode" (click)="startCheckout(plan.code)">
         {{ payingCode === plan.code ? 'Opening…' : (payingCode ? 'Please wait…' : 'Buy ' + plan.name) }}
       </button>

@@ -28,12 +28,14 @@ import { getUnlockedListingIds } from '../../../services/contact-access-reposito
 import { notifyPaidSubscription } from '../../../services/subscription-alert';
 
 function publicPlans() {
-  return listContactPlans().map((plan) => ({
+  return listContactPlans(getServerRuntime().contactPlansJson).map((plan) => ({
     code: plan.code,
     name: plan.name,
     tagline: plan.tagline,
     amountPaise: plan.amountPaise,
     amountRupees: Math.round(plan.amountPaise / 100),
+    originalAmountRupees: plan.originalAmountRupees,
+    offerLabel: plan.offerLabel,
     currency: plan.currency,
     contacts: plan.contacts,
     durationDays: plan.durationDays,
@@ -92,7 +94,10 @@ export default defineEventHandler(async (event) => {
       );
     }
     const body = await readBody(event);
-    const plan = getContactPlan(String(body?.planCode || body?.plan || ''));
+    const plan = getContactPlan(
+      String(body?.planCode || body?.plan || ''),
+      getServerRuntime().contactPlansJson
+    );
     if (!plan) return apiResponse(0, 'Choose Starter, Plus, or Pro to continue');
 
     const orderId = `rz${plan.code}${user.id}${Date.now()}`.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);

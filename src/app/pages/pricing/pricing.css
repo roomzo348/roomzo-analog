@@ -68,10 +68,29 @@ h1 {
 }
 
 .contacts-line {
-  margin: 0 0 18px;
+  margin: 0 0 6px;
   color: #0f766e;
   font-weight: 700;
   font-size: 0.92rem;
+}
+
+.offer-line {
+  margin: 0 0 18px;
+  color: #dc6b19;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.price-wrap {
+  text-align: right;
+}
+
+.price-wrap del {
+  display: block;
+  margin-bottom: -5px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .badge {
@@ -84,6 +103,10 @@ h1 {
   font-weight: 800;
   padding: 5px 10px;
   border-radius: 999px;
+}
+
+.badge--blue {
+  background: #2563eb;
 }
 
 .plan h2 {
