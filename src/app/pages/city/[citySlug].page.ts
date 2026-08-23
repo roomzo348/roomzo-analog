@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID, signal, OnDe
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -75,6 +76,8 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   userHasGivenConsent = signal(false);
   isConsentModalOpen = signal(false);
   pendingAction = signal<PendingAction | any>(null);
+  contactLoadingId: number | null = null;
+  private paywallOpenedSub: Subscription | null = null;
 
   readonly generatePropertyAltText = generatePropertyAltText;
   readonly getListingImageUrl = getListingImageUrl;
@@ -150,10 +153,14 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     });
 
     this.checkReturnFromLogin();
+    this.paywallOpenedSub = this.contactAccess.paywallOpened$.subscribe(() => {
+      this.setContactLoading(null);
+    });
   }
 
   ngOnDestroy(): void {
     this.seo.removeJsonLd();
+    this.paywallOpenedSub?.unsubscribe();
   }
 
   // --- NEW: Load Zones from JSON ---
@@ -376,7 +383,9 @@ toggleMobileFilters(event: Event): void {
   }
 
   handleCardContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    if (this.contactLoadingId != null || this.contactAccess.isPaywallOpen()) return;
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      this.setContactLoading(Number(prop.id));
       this.checkAndExecuteConsent({ prop, actionType }, () => {
         this.executeContactAction(prop, actionType);
       });
@@ -386,15 +395,26 @@ toggleMobileFilters(event: Event): void {
     }
   }
 
+  private setContactLoading(id: number | null): void {
+    if (this.contactLoadingId === id) return;
+    this.contactLoadingId = id;
+    this.cd.detectChanges();
+  }
+
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
-    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe((result) => {
-      if (!result?.unlocked) return;
-      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
-      if (!phone) {
-        if (result) this.toastr.error('Contact number not available');
-        return;
-      }
-      this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    this.setContactLoading(Number(prop.id));
+    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe({
+      next: (result) => {
+        this.setContactLoading(null);
+        if (!result?.unlocked) return;
+        const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+        if (!phone) {
+          if (result) this.toastr.error('Contact number not available');
+          return;
+        }
+        this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+      },
+      error: () => this.setContactLoading(null),
     });
   }
 
@@ -426,18 +446,21 @@ toggleMobileFilters(event: Event): void {
             this.userHasGivenConsent.set(true);
             successCallback();
           } else {
+            this.setContactLoading(null);
             this.pendingAction.set(actionData);
             this.isConsentModalOpen.set(true);
             this.cd.detectChanges();
           }
         },
         error: () => {
+          this.setContactLoading(null);
           this.pendingAction.set(actionData);
           this.isConsentModalOpen.set(true);
           this.cd.detectChanges();
         },
       });
     } else {
+      this.setContactLoading(null);
       this.pendingAction.set(actionData);
       this.isConsentModalOpen.set(true);
       this.cd.detectChanges();

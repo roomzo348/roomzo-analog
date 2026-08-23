@@ -98,6 +98,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
     lastTap: 0,
   };
   private routeSub: Subscription | null = null;
+  private paywallOpenedSub: Subscription | null = null;
 
   userHasGivenConsent = signal(false); 
   isConsentModalOpen = signal(false);
@@ -124,6 +125,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
   ) {}
 
   ngOnInit(): void {
+    this.paywallOpenedSub = this.contactAccess.paywallOpened$.subscribe(() => {
+      this.setContactLoading(false);
+    });
     this.routeSub = this.route.paramMap.pipe(
       tap(() => {
         this.isLoading = true;
@@ -136,6 +140,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
         this.creditsRemaining = null;
         this.contactUnlocked = false;
         this.contactStatusListingId = null;
+        this.isLoadingContact = false;
         this.activePhotoIndex = 0; 
         
         if (this.isBrowser) {
@@ -207,7 +212,21 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy, Afte
       }
     });
   }
-private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
+private setContactLoading(loading: boolean): void {
+    if (this.isLoadingContact === loading) return;
+    this.isLoadingContact = loading;
+    this.cd.detectChanges();
+  }
+
+  private openConsentSheet(actionData: any): void {
+    // Consent UI takes over — release the contact-button spinner so it isn't stuck disabled.
+    this.setContactLoading(false);
+    this.pendingAction.set(actionData);
+    this.isConsentModalOpen.set(true);
+    this.cd.detectChanges();
+  }
+
+  private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     if (this.userHasGivenConsent() || (this.isBrowser && localStorage.getItem('safetyConsentGiven') === 'true')) {
       this.userHasGivenConsent.set(true);
       successCallback();
@@ -225,31 +244,20 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     if (userId) {
       this.propertyService.checkSafetyConsent(userId).subscribe({
         next: (res: any) => {
-          console.log("Backend Response:", res); // Debug log
           if (res.status === 1 && res.hasConsent) {
             if (this.isBrowser) localStorage.setItem('safetyConsentGiven', 'true');
             this.userHasGivenConsent.set(true);
             successCallback();
           } else {
-            console.log("Opening Modal..."); // Debug log
-            // Not in DB -> Show Modal
-            this.pendingAction.set(actionData);
-            this.isConsentModalOpen.set(true);
-            
-            // ADD THIS LINE: Force Angular to update the UI immediately
-            this.cd.detectChanges(); 
+            this.openConsentSheet(actionData);
           }
         },
         error: () => {
-          this.pendingAction.set(actionData);
-          this.isConsentModalOpen.set(true);
-          this.cd.detectChanges(); // ADD THIS LINE HERE TOO
+          this.openConsentSheet(actionData);
         }
       });
     } else {
-      this.pendingAction.set(actionData);
-      this.isConsentModalOpen.set(true);
-      this.cd.detectChanges(); // AND HERE
+      this.openConsentSheet(actionData);
     }
   }
 
@@ -259,7 +267,10 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       this.toastr.info('This property is currently marked as rented.', 'Unavailable');
       return;
     }
+    if (this.isLoadingContact || this.contactAccess.isPaywallOpen()) return;
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      // Consent + unlock are network-bound; acknowledge the tap immediately.
+      this.setContactLoading(true);
       if (this.property?.id) {
         this.activityService.logPropertyContact(this.property.id, 'modal', {
           ownerId: this.property.ownerId
@@ -282,7 +293,10 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       this.toastr.info('This property is currently marked as rented.', 'Unavailable');
       return;
     }
+    if (this.isLoadingContact || this.contactAccess.isPaywallOpen()) return;
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      // Show button spinner before consent/unlock APIs so the tap isn't silent.
+      this.setContactLoading(true);
       if (this.property?.id) {
         this.activityService.logPropertyContact(this.property.id, actionType, {
           ownerId: this.property.ownerId
@@ -310,11 +324,14 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   }
 
   private unlockThenShowContact(): void {
-    if (!this.property?.id) return;
-    this.isLoadingContact = true;
+    if (!this.property?.id) {
+      this.setContactLoading(false);
+      return;
+    }
+    this.setContactLoading(true);
     this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?showContact=true`).subscribe({
       next: (result) => {
-        this.isLoadingContact = false;
+        this.setContactLoading(false);
         if (!result?.unlocked) {
           this.clearUnlockedContactState();
           this.showContactModal = false;
@@ -326,7 +343,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         this.cd.detectChanges();
       },
       error: () => {
-        this.isLoadingContact = false;
+        this.setContactLoading(false);
         this.showContactModal = false;
         this.cd.detectChanges();
       },
@@ -334,14 +351,15 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   }
 
   private unlockThenContact(actionType: 'call' | 'whatsapp'): void {
-    if (!this.property?.id) return;
-    // The unlock round-trip decides whether the paywall opens, so show the
-    // button spinner meanwhile instead of leaving the tap unacknowledged.
-    this.isLoadingContact = true;
-    this.cd.detectChanges();
+    if (!this.property?.id) {
+      this.setContactLoading(false);
+      return;
+    }
+    // Unlock decides contact vs paywall; keep the button spinner until that settles.
+    this.setContactLoading(true);
     this.contactAccess.requestOwnerContact(Number(this.property.id), `/room/${this.currentId}?action=${actionType}`).subscribe({
       next: (result) => {
-        this.isLoadingContact = false;
+        this.setContactLoading(false);
         if (!result?.unlocked) {
           this.clearUnlockedContactState();
           this.cd.detectChanges();
@@ -352,8 +370,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         this.cd.detectChanges();
       },
       error: () => {
-        this.isLoadingContact = false;
-        this.cd.detectChanges();
+        this.setContactLoading(false);
       },
     });
   }
@@ -437,10 +454,10 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       this.toastr.error('Owner information not available');
       return;
     }
-    if (showLoader) this.isLoadingContact = true;
+    if (showLoader) this.setContactLoading(true);
     this.contactAccess.requestOwnerContact(Number(this.property.id)).subscribe({
       next: (result) => {
-        this.isLoadingContact = false;
+        this.setContactLoading(false);
         if (result?.unlocked) {
           this.applyUnlockResult(result);
           onSuccess();
@@ -448,8 +465,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         this.cd.detectChanges();
       },
       error: () => {
-        this.isLoadingContact = false;
-        this.cd.detectChanges();
+        this.setContactLoading(false);
       },
     });
   }
@@ -929,6 +945,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       this.renderer.removeClass(this.document.body, 'zoom-viewer-open');
     }
     if (this.routeSub) this.routeSub.unsubscribe();
+    if (this.paywallOpenedSub) this.paywallOpenedSub.unsubscribe();
   }
   
   loadSuggestions(property: any) {

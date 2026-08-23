@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, switchMap, catchError, map, finalize, tap, share } from 'rxjs';
+import { Observable, of, switchMap, catchError, map, finalize, tap, share, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
@@ -37,6 +37,8 @@ export class ContactAccessService {
   private paywallOpen = false;
   /** Coalesce concurrent unlock calls for the same listing (double-tap / race). */
   private inflightUnlocks = new Map<number, Observable<UnlockResult | null>>();
+  /** Lets pages drop button spinners the moment the plan dialog is on screen. */
+  readonly paywallOpened$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
@@ -50,6 +52,10 @@ export class ContactAccessService {
 
   isLoggedIn(): boolean {
     return Boolean(this.auth.getCurrentUser()?.id);
+  }
+
+  isPaywallOpen(): boolean {
+    return this.paywallOpen;
   }
 
   unlock(listingId: number): Observable<{ status: number; code?: string; message: string; data: UnlockResult }> {
@@ -153,6 +159,8 @@ export class ContactAccessService {
       position: mobile ? { bottom: '0px' } : undefined,
       data: { ...(wallet || {}), returnUrl: returnUrl || this.router.url },
     });
+    // Dialog is open — stop parent "Opening…" spinners so they don't spin under the sheet.
+    this.paywallOpened$.next();
     return ref.afterClosed().pipe(
       finalize(() => {
         this.paywallOpen = false;

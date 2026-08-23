@@ -261,6 +261,27 @@
   transform: translateY(-2px);
 }
 
+.modern-btn.is-busy {
+  opacity: 0.9;
+  cursor: progress;
+  pointer-events: none;
+  transform: none;
+}
+
+.btn-contact-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: card-contact-spin 0.7s linear infinite;
+}
+
+@keyframes card-contact-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* --- Mobile Tweaks --- */
 @media (max-width: 600px) {
   .card-media { height: 210px; }

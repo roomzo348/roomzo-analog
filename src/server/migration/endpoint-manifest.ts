@@ -1,4 +1,5 @@
 export const endpointManifest = [
+  'GET /api/health',
   'POST /api/auth/send-otp',
   'POST /api/auth/verify-otp',
   'POST /api/auth/register',

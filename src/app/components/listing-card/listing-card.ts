@@ -40,6 +40,8 @@ export class ListingCardComponent implements OnInit, OnChanges {
   @Input() locationIcon = 'location_on';
   @Input() availabilityLabel = 'Available';
   @Input() imageFallback = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
+  /** True while consent/unlock is in flight for this card. */
+  @Input() contactLoading = false;
 
   @Output() view = new EventEmitter<ListingCardItem>();
   @Output() call = new EventEmitter<ListingCardItem>();

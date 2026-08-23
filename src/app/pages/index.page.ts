@@ -1,10 +1,11 @@
-import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit, ViewChild, ElementRef, signal } from '@angular/core';
+import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit, OnDestroy, ViewChild, ElementRef, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core'; 
 import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 
 import { HeroComponent } from '../components/hero/hero';
 import { ContactComponent } from '../components/contact/contact';
@@ -66,7 +67,7 @@ interface Listing {
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export default class HomeComponent implements OnInit {
+export default class HomeComponent implements OnInit, OnDestroy {
   @ViewChild('featuredCarouselGrid') featuredCarouselGrid!: ElementRef;
   @ViewChild('recentCarouselGrid') recentCarouselGrid!: ElementRef;
   @ViewChild('nearbyCarouselGrid', { static: false }) nearbyCarouselGrid!: ElementRef;
@@ -77,6 +78,9 @@ export default class HomeComponent implements OnInit {
   isLoadingRecent = true;
   nearbyListings: Listing[] = [];
   isLoadingNearby = false;
+  /** Listing id whose Call/WhatsApp unlock is in flight. */
+  contactLoadingId: number | null = null;
+  private paywallOpenedSub: Subscription | null = null;
   /** Only true after user grants location — hides section on deny/dismiss. */
   nearbySectionVisible = false;
   nearbyIsAtStart = true;
@@ -128,6 +132,9 @@ export default class HomeComponent implements OnInit {
   }));
 
   ngOnInit(): void {
+    this.paywallOpenedSub = this.contactAccess.paywallOpened$.subscribe(() => {
+      this.setContactLoading(null);
+    });
     this.route.fragment.subscribe(fragment => {
       if (fragment === 'contact' && isPlatformBrowser(this.platformId)) {
         setTimeout(() => {
@@ -142,6 +149,10 @@ export default class HomeComponent implements OnInit {
     // Added: Check if returning from Login for Call/WhatsApp
     this.checkReturnFromLogin();
     this.syncFavoriteStateFromStorage();
+  }
+
+  ngOnDestroy(): void {
+    this.paywallOpenedSub?.unsubscribe();
   }
 
   calculateItemsToShow(): void {
@@ -543,7 +554,9 @@ export default class HomeComponent implements OnInit {
   }
 
   handleCardContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
+    if (this.contactLoadingId != null || this.contactAccess.isPaywallOpen()) return;
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      this.setContactLoading(Number(item.id));
       const actionPayload = { prop: item, actionType };
       
       this.checkAndExecuteConsent(actionPayload, () => {
@@ -557,15 +570,26 @@ export default class HomeComponent implements OnInit {
     }
   }
 
+  private setContactLoading(id: number | null): void {
+    if (this.contactLoadingId === id) return;
+    this.contactLoadingId = id;
+    this.cd.detectChanges();
+  }
+
   private executeContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
-    this.contactAccess.requestOwnerContact(Number(item.id), this.router.url).subscribe((result) => {
-      if (!result?.unlocked) return;
-      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
-      if (!phone) {
-        if (result) this.toastr.error('Contact number not available');
-        return;
-      }
-      this.propertyService.triggerPhoneAndWP(phone, actionType, item);
+    this.setContactLoading(Number(item.id));
+    this.contactAccess.requestOwnerContact(Number(item.id), this.router.url).subscribe({
+      next: (result) => {
+        this.setContactLoading(null);
+        if (!result?.unlocked) return;
+        const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+        if (!phone) {
+          if (result) this.toastr.error('Contact number not available');
+          return;
+        }
+        this.propertyService.triggerPhoneAndWP(phone, actionType, item);
+      },
+      error: () => this.setContactLoading(null),
     });
   }
 
@@ -592,18 +616,21 @@ export default class HomeComponent implements OnInit {
             this.userHasGivenConsent.set(true);
             successCallback();
           } else {
+            this.setContactLoading(null);
             this.pendingAction.set(actionData);
             this.isConsentModalOpen.set(true);
             this.cd.detectChanges(); 
           }
         },
         error: () => {
+          this.setContactLoading(null);
           this.pendingAction.set(actionData);
           this.isConsentModalOpen.set(true);
           this.cd.detectChanges();
         }
       });
     } else {
+      this.setContactLoading(null);
       this.pendingAction.set(actionData);
       this.isConsentModalOpen.set(true);
       this.cd.detectChanges();

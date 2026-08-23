@@ -94,6 +94,8 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
   userHasGivenConsent = signal(false); 
   isConsentModalOpen = signal(false);
   pendingAction = signal<PendingAction | any>(null);
+  contactLoadingId: number | null = null;
+  private paywallOpenedSub: Subscription | null = null;
 
   constructor(
     private propertyService: PropertyService,
@@ -182,6 +184,9 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
       });
     }
     this.checkReturnFromLogin();
+    this.paywallOpenedSub = this.contactAccess.paywallOpened$.subscribe(() => {
+      this.setContactLoading(null);
+    });
   }
 
   ngOnDestroy(): void {
@@ -189,6 +194,7 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
     if (this.typingTimeout) clearTimeout(this.typingTimeout);
     if (this.searchSubscription) this.searchSubscription.unsubscribe();
     if (this.documentClickListener) this.documentClickListener();
+    this.paywallOpenedSub?.unsubscribe();
   }
 
   checkReturnFromLogin() {
@@ -587,7 +593,9 @@ this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'A
   }
 
   handleCardContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    if (this.contactLoadingId != null || this.contactAccess.isPaywallOpen()) return;
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      this.setContactLoading(Number(prop.id));
       const actionPayload = { prop, actionType };
       this.checkAndExecuteConsent(actionPayload, () => {
         this.executeContactAction(prop, actionType);
@@ -599,15 +607,26 @@ this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'A
     }
   }
 
+  private setContactLoading(id: number | null): void {
+    if (this.contactLoadingId === id) return;
+    this.contactLoadingId = id;
+    this.cd.detectChanges();
+  }
+
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
-    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe((result) => {
-      if (!result?.unlocked) return;
-      const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
-      if (!phone) {
-        if (result) this.toastr.error('Contact number not available');
-        return;
-      }
-      this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+    this.setContactLoading(Number(prop.id));
+    this.contactAccess.requestOwnerContact(Number(prop.id), this.router.url).subscribe({
+      next: (result) => {
+        this.setContactLoading(null);
+        if (!result?.unlocked) return;
+        const phone = result?.contact?.propertyPhone || result?.contact?.phone || result?.contact?.ownerPhone;
+        if (!phone) {
+          if (result) this.toastr.error('Contact number not available');
+          return;
+        }
+        this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+      },
+      error: () => this.setContactLoading(null),
     });
   }
 
@@ -634,18 +653,21 @@ let userId: string | null = null;
             this.userHasGivenConsent.set(true);
             successCallback();
           } else {
+            this.setContactLoading(null);
             this.pendingAction.set(actionData);
             this.isConsentModalOpen.set(true);
             this.cd.detectChanges(); 
           }
         },
         error: () => {
+          this.setContactLoading(null);
           this.pendingAction.set(actionData);
           this.isConsentModalOpen.set(true);
           this.cd.detectChanges();
         }
       });
     } else {
+      this.setContactLoading(null);
       this.pendingAction.set(actionData);
       this.isConsentModalOpen.set(true);
       this.cd.detectChanges();

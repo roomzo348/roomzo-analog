@@ -361,6 +361,24 @@ h1, h2, h3, p { margin: 0; }
 .contact-btn.wa-btn { border-color: #25d366; color: #25d366; display: inline-flex; align-items: center; gap: 6px; }
 .contact-btn.wa-btn:hover { background: #25d366; color: white; }
 .contact-btn.wa-btn svg { flex-shrink: 0; }
+.contact-btn.is-busy {
+  opacity: 0.9;
+  cursor: progress;
+  pointer-events: none;
+  transform: none;
+}
+.btn-contact-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: city-contact-spin 0.7s linear infinite;
+}
+@keyframes city-contact-spin {
+  to { transform: rotate(360deg); }
+}
 
 .view-btn { grid-column: span 2; background: var(--rz-primary); color: white; border: none; padding: 10px; border-radius: var(--rz-radius-sm, 8px); font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .view-btn:hover { background: var(--rz-primary-hover); transform: translateY(-2px); }

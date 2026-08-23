@@ -202,6 +202,7 @@
             [priceUnit]="'/mo'"
             [locationIcon]="'location_on'"
             [availabilityLabel]="'Owner listing'"
+            [contactLoading]="contactLoadingId === prop.id"
             (view)="viewDetails($event.id)"
             (call)="handleCardContactAction($event, 'call')"
             (whatsapp)="handleCardContactAction($event, 'whatsapp')"

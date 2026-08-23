@@ -87,11 +87,26 @@ a { text-decoration: none; color: inherit; }
 }
 .desktop-contact-actions .dt-whatsapp-btn svg { flex-shrink: 0; }
 
-/* Busy state while the unlock check decides between contact and paywall */
+/* Busy state while consent + unlock decide between contact and paywall */
 .is-busy {
-  opacity: 0.65;
+  opacity: 0.9;
   cursor: progress;
+  pointer-events: none;
   transition: opacity 160ms ease;
+}
+
+.btn-contact-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: contact-btn-spin 0.7s linear infinite;
+}
+
+@keyframes contact-btn-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* --- 3. Desktop Gallery Grid --- */
