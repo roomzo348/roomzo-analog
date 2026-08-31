@@ -40,6 +40,8 @@ export default defineConfig(({ mode }) => {
         },
       },
       nitro: {
+        // Hostinger Node.js apps must run the Node server preset (respects process.env.PORT).
+        preset: 'node-server',
         runtimeConfig: {
           mysqlHost: env['MYSQL_HOST'],
           mysqlPort: env['MYSQL_PORT'],

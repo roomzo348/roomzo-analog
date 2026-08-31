@@ -103,7 +103,7 @@ export default class FlatmatesComponent implements OnInit {
   }
 
   initializeLocation() {
-    if (!navigator.geolocation) return;
+    if (!isPlatformBrowser(this.platformId) || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (position) => {
         this.latitude = position.coords.latitude;
