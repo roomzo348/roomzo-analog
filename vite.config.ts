@@ -66,6 +66,14 @@ export default defineConfig(({ mode }) => {
           routes: ['/sitemap.xml'],
           concurrency: 4,
         },
+        routeRules: {
+          '/room/**': { ssr: true },
+          '/edit-listing/**': { ssr: true },
+          '/profile/**': { ssr: true },
+          '/my-listings/**': { ssr: true },
+          '/list-property/**': { ssr: true },
+          '/owner-auth/**': { ssr: true },
+        },
       },
     }),
     nodePolyfills({
