@@ -2,6 +2,15 @@ Options -MultiViews
 RewriteEngine On
 RewriteBase /
 
+# API/Nitro routes must not be rewritten to index.html.
+# That was returning "<!DOCTYPE html>" for /api/listings/:id and breaking the room page.
+RewriteCond %{REQUEST_URI} ^/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/listings [OR]
+RewriteCond %{REQUEST_URI} ^/favourites [OR]
+RewriteCond %{REQUEST_URI} ^/activity [OR]
+RewriteCond %{REQUEST_URI} ^/sitemap\.xml
+RewriteRule ^ - [L]
+
 RewriteRule ^index\.html$ - [L]
 
 RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
@@ -9,5 +18,3 @@ RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
 RewriteRule ^ - [L]
 
 RewriteRule ^ /index.html [L]
-
-ErrorDocument 404 /index.html

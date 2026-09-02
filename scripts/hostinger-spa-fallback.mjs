@@ -23,8 +23,6 @@ if (!existsSync(index)) {
   process.exit(0);
 }
 
-copyFileSync(index, resolve(pub, '404.html'));
-
 const htaccessSrc = resolve('public/.htaccess');
 if (existsSync(htaccessSrc)) {
   copyFileSync(htaccessSrc, resolve(pub, '.htaccess'));
@@ -43,8 +41,6 @@ writeFileSync(
     'RewriteCond %{REQUEST_FILENAME} !-f',
     'RewriteCond %{REQUEST_FILENAME} !-d',
     'RewriteRule ^ /index.html [L]',
-    '',
-    'ErrorDocument 404 /index.html',
     '',
   ].join('\n')
 );
