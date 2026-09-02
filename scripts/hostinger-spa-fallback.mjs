@@ -25,7 +25,13 @@ if (!existsSync(index)) {
 }
 
 const analogRoot = resolve('dist/analog');
-writeFileSync(join(analogRoot, 'server.js'), "import './server/index.mjs';\n");
+const boot = resolve('scripts/hostinger-app.cjs');
+copyFileSync(boot, join(analogRoot, 'app.js'));
+copyFileSync(boot, join(analogRoot, 'server.js'));
+writeFileSync(
+  join(analogRoot, 'package.json'),
+  JSON.stringify({ name: 'roomzo-analog-server', private: true, main: 'app.js' }, null, 2)
+);
 
 const roomDir = join(pub, 'room');
 mkdirSync(roomDir, { recursive: true });
