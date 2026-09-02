@@ -16,22 +16,28 @@ import { join, resolve } from 'node:path';
 
 loadDotEnv();
 
+const analogRoot = resolve('dist/analog');
+const analogServer = join(analogRoot, 'server', 'index.mjs');
 const pub = resolve('dist/analog/public');
 const index = resolve(pub, 'index.html');
+const boot = resolve('scripts/hostinger-app.cjs');
+
+if (existsSync(analogServer) && existsSync(boot)) {
+  mkdirSync(join(analogRoot, 'server'), { recursive: true });
+  copyFileSync(boot, join(analogRoot, 'app.js'));
+  copyFileSync(boot, join(analogRoot, 'server.js'));
+  copyFileSync(boot, join(analogRoot, 'server', 'app.js'));
+  writeFileSync(
+    join(analogRoot, 'package.json'),
+    JSON.stringify({ name: 'roomzo-analog-server', private: true, main: 'app.js' }, null, 2)
+  );
+  console.log('[hostinger] wrote dist/analog/app.js and dist/analog/server/app.js');
+}
 
 if (!existsSync(index)) {
   console.warn('[hostinger] dist/analog/public/index.html not found; skip SPA fallback');
-  process.exit(0);
+  process.exit(existsSync(analogServer) ? 0 : 0);
 }
-
-const analogRoot = resolve('dist/analog');
-const boot = resolve('scripts/hostinger-app.cjs');
-copyFileSync(boot, join(analogRoot, 'app.js'));
-copyFileSync(boot, join(analogRoot, 'server.js'));
-writeFileSync(
-  join(analogRoot, 'package.json'),
-  JSON.stringify({ name: 'roomzo-analog-server', private: true, main: 'app.js' }, null, 2)
-);
 
 const roomDir = join(pub, 'room');
 mkdirSync(roomDir, { recursive: true });
