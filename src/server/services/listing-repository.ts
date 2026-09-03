@@ -107,8 +107,8 @@ function buildFilterWhere(filters: ListingSearchInput, values: unknown[]): strin
     values.push(filters.state);
   }
   if (filters.zone) {
-    where.push(`LOWER(p.zone) = LOWER(?)`);
-    values.push(filters.zone);
+    where.push(`(LOWER(COALESCE(p.zone, '')) = LOWER(?) OR LOWER(COALESCE(p.landmark, '')) = LOWER(?))`);
+    values.push(filters.zone, filters.zone);
   }
   return where.join(' AND ');
 }

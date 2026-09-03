@@ -93,8 +93,21 @@
               <span class="error-text" *ngIf="detailsGroup.get('address.street')?.invalid && detailsGroup.get('address.street')?.touched">Street address is required.</span>
             </div>
             <div class="input-group">
-              <label class="input-label">Landmark <span class="req-star">*</span></label>
-              <input type="text" formControlName="landmark" placeholder="Near City Mall">
+              <label class="input-label">Landmark / Zone <span class="req-star">*</span></label>
+              <input
+                type="text"
+                formControlName="landmark"
+                placeholder="e.g. Allahpur, Civil Lines"
+                [matAutocomplete]="landmarkAuto"
+                (input)="onLandmarkInput()">
+              <mat-autocomplete #landmarkAuto="matAutocomplete" (optionSelected)="onLandmarkSelected($event)">
+                <mat-option *ngFor="let zone of landmarkSuggestions" [value]="zone">
+                  {{ zone }}
+                </mat-option>
+              </mat-autocomplete>
+              <span class="helper-text" *ngIf="landmarkSuggestions.length">
+                Suggested zones for {{ detailsGroup.get('address.city')?.value || 'this city' }} — pick one for city-page filters, or type your own.
+              </span>
               <span class="error-text" *ngIf="detailsGroup.get('address.landmark')?.invalid && detailsGroup.get('address.landmark')?.touched">Landmark is required.</span>
             </div>
             <div class="input-group">

@@ -11,10 +11,14 @@ import {
 } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PropertyService } from '../../services/property.service';
 import { ToastrService } from 'ngx-toastr';
 import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
+import { resolveZoneName, suggestZonesForLandmark } from '../../utils/location-search.util';
+import { startWith, debounceTime } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
@@ -24,7 +28,7 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-edit-listing',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, MatIconModule, MatButtonModule, MatAutocompleteModule],
   templateUrl: './edit-listing.html',
   styleUrls: ['./edit-listing.css'],
 })
@@ -40,6 +44,8 @@ export default class EditListingComponent implements OnInit {
   newImagePreviews: string[] = [];
   newWatermarkedFiles: File[] = [];
   newOriginalFiles: File[] = [];
+  landmarkSuggestions: string[] = [];
+  private landmarkPickedFromList = false;
 
   propertyTypes = [
     { label: 'Flat', icon: 'home', value: 'Flat' },
@@ -112,6 +118,26 @@ export default class EditListingComponent implements OnInit {
     const idParam = this.route.snapshot.paramMap.get('id');
     this.listingId = idParam ? String(idParam) : null;
 
+    const landmarkCtrl = this.detailsGroup.get('address.landmark');
+    const cityCtrl = this.detailsGroup.get('address.city');
+    if (landmarkCtrl && cityCtrl) {
+      combineLatest([
+        cityCtrl.valueChanges.pipe(startWith(cityCtrl.value || '')),
+        landmarkCtrl.valueChanges.pipe(startWith(landmarkCtrl.value || ''), debounceTime(150)),
+      ]).subscribe(([city, landmark]) => {
+        this.landmarkSuggestions = suggestZonesForLandmark(
+          String(city || ''),
+          String(landmark || '')
+        );
+        if (!this.landmarkPickedFromList) {
+          this.detailsGroup
+            .get('address.zone')
+            ?.setValue(String(landmark || '').trim(), { emitEvent: false });
+        }
+        this.cd.detectChanges();
+      });
+    }
+
     if (this.listingId) {
       this.loadListingData();
     } else {
@@ -130,6 +156,7 @@ export default class EditListingComponent implements OnInit {
         address: this.fb.group({
           street: ['', Validators.required],
           landmark: ['', Validators.required],
+          zone: [''],
           city: ['', Validators.required],
           state: ['', Validators.required],
           zip: ['', Validators.required],
@@ -184,6 +211,21 @@ export default class EditListingComponent implements OnInit {
   }
   get conditionsGroup(): FormGroup {
     return this.editForm.get('conditions') as FormGroup;
+  }
+
+  onLandmarkSelected(event: any): void {
+    const value = String(event?.option?.value ?? '').trim();
+    this.landmarkPickedFromList = true;
+    const zoneName = resolveZoneName(value);
+    this.detailsGroup.get('address.landmark')?.setValue(zoneName);
+    this.detailsGroup.get('address.zone')?.setValue(zoneName);
+    setTimeout(() => {
+      this.landmarkPickedFromList = false;
+    }, 0);
+  }
+
+  onLandmarkInput(): void {
+    this.landmarkPickedFromList = false;
   }
   get guidebookGroup(): FormGroup {
     return this.editForm.get('guidebook') as FormGroup;
@@ -243,7 +285,8 @@ export default class EditListingComponent implements OnInit {
       propertySize: data.propertySize ?? '',
       address: {
         street: data.street || '',
-        landmark: data.landmark || '',
+        landmark: data.landmark || data.zone || '',
+        zone: data.zone || data.landmark || '',
         city: data.city || '',
         state: data.state || '',
         zip: data.zipCode || '',
@@ -405,9 +448,19 @@ export default class EditListingComponent implements OnInit {
 
     this.isSaving = true;
     const raw = this.editForm.value;
+    const landmark = String(raw?.details?.address?.landmark || '').trim();
+    const zone =
+      String(raw?.details?.address?.zone || '').trim() || resolveZoneName(landmark);
 
     const payload = {
-      details: raw.details,
+      details: {
+        ...raw.details,
+        address: {
+          ...raw.details.address,
+          landmark,
+          zone: zone || landmark,
+        },
+      },
       amenities: raw.amenities,
       conditions: raw.conditions,
       guidebook: {

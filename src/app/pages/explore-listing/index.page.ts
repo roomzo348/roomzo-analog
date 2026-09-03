@@ -22,9 +22,12 @@ import { ContactAccessService } from '../../services/contact-access.service';
 import { paymentReturnNotice } from '../../utils/billing-return';
 import {
   buildGeocodeQueries,
+  getCityCenter,
   getKnownZoneCoordinates,
   LocationSearchResult,
   rankLocationResults,
+  resolveLocalCoordinates,
+  resolveZoneName,
   searchLocalLocations,
 } from '../../utils/location-search.util';
 
@@ -63,7 +66,13 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   filteredCities: LocationSearchResult[] = []; 
   selectedLocation: { city: string, state: string } | null = null;
 
-filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'latest' }; // Changed to latest
+filters: ListingFilter = {
+    minPrice: 0,
+    maxPrice: 50000,
+    propertyType: 'Any',
+    bedrooms: 'Any',
+    sortBy: 'nearest',
+  };
   availabilityFilter: 'available' | 'all' = 'all';
 
   currentPage = 0;
@@ -115,24 +124,28 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
     this.typeEffect();
     
     this.searchControl.valueChanges.pipe(
-      debounceTime(400),
+      debounceTime(300),
       distinctUntilChanged(),
-      filter((val): val is string => typeof val === 'string' && val.trim().length > 2), 
-      switchMap(val => {
-        const text = val as string;
+      filter((val): val is string => typeof val === 'string' && val.trim().length >= 1),
+      switchMap((val) => {
+        const text = val.trim();
+        // Instant Roomzo city/zone suggestions from local data.
+        const localRanked = rankLocationResults(text, [], 6);
+        if (text.length < 3) {
+          return of(localRanked);
+        }
+
         const upQuery = `${text}, Uttar Pradesh`;
         const mhQuery = `${text}, Maharashtra`;
         const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=5`;
-        
+
         return forkJoin({
           up: this.http.get<LocationSearchResult[]>(upUrl).pipe(catchError(() => of([]))),
-          mh: this.http.get<LocationSearchResult[]>(mhUrl).pipe(catchError(() => of([])))
-        }).pipe(
-          map(({ up, mh }) => rankLocationResults(text, [...up, ...mh], 6))
-        );
+          mh: this.http.get<LocationSearchResult[]>(mhUrl).pipe(catchError(() => of([]))),
+        }).pipe(map(({ up, mh }) => rankLocationResults(text, [...up, ...mh], 8)));
       })
-    ).subscribe(results => {
+    ).subscribe((results) => {
       this.filteredCities = results || [];
       this.cd.detectChanges();
     });
@@ -247,18 +260,30 @@ filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', be
   displayCity = (result: LocationSearchResult | string | null): string => {
     if (!result) return '';
     if (typeof result === 'string') return result;
+    if (result.roomzoSource === 'city') {
+      return result.roomzoCity || result.name || '';
+    }
     const addr = result.address || {};
-    const locality = addr.neighbourhood || addr.suburb || addr.village || addr.town || result.name || '';
-    const city = addr.city || addr.state_district || addr.county || '';
+    const locality =
+      result.roomzoZone ||
+      addr.neighbourhood ||
+      addr.suburb ||
+      addr.village ||
+      result.name ||
+      '';
+    const city = result.roomzoCity || addr.city || addr.town || addr.state_district || addr.county || '';
     const state = addr.state || '';
-    const parts = [locality, city, state].filter((val, index, arr) => val && arr.indexOf(val) === index);
+    const parts = [locality, city, state].filter(
+      (val, index, arr) => !!val && arr.indexOf(val) === index
+    );
     return parts.join(', ');
-  }
+  };
 
   onCitySelected(event: any) {
     const result = event.option.value as LocationSearchResult;
     this.applyResolvedLocation(result);
     this.searchControl.setValue(this.displayCity(result), { emitEvent: false });
+    this.filters.sortBy = 'nearest';
     this.currentPage = 0;
     this.loadListings();
   }
@@ -344,14 +369,8 @@ loadListings(): void {
     const raw = this.searchControl.value;
     const searchText = typeof raw === 'string' ? raw.trim() : '';
     if (!searchText) return null;
-
-    const localMatch = searchLocalLocations(searchText, 1)[0];
-    if (localMatch) {
-      return { lat: parseFloat(localMatch.lat), lng: parseFloat(localMatch.lon) };
-    }
-
-    const knownZone = getKnownZoneCoordinates(searchText.split(',')[0].trim());
-    return knownZone;
+    const resolved = resolveLocalCoordinates(searchText);
+    return resolved ? { lat: resolved.lat, lng: resolved.lng } : null;
   }
 
   private isLocationResult(value: SearchControlValue): value is LocationSearchResult {
@@ -363,6 +382,10 @@ loadListings(): void {
 
     if (this.isLocationResult(raw)) {
       this.applyResolvedLocation(raw);
+      this.filters.sortBy = this.filters.sortBy || 'nearest';
+      if (this.filters.sortBy !== 'latest' && this.filters.sortBy !== 'oldest') {
+        this.filters.sortBy = 'nearest';
+      }
       this.loadListings();
       return;
     }
@@ -379,9 +402,37 @@ loadListings(): void {
       return;
     }
 
+    const local = resolveLocalCoordinates(searchText);
+    if (local) {
+      this.filters.lat = local.lat;
+      this.filters.lng = local.lng;
+      this.filters.city = undefined;
+      this.filters.state = undefined;
+      this.filters.zone = undefined;
+      this.filters.sortBy = 'nearest';
+      this.selectedLocation = local.city
+        ? { city: local.city, state: local.state || '' }
+        : null;
+      this.searchControl.setValue(
+        local.city && local.label !== local.city
+          ? `${local.label}, ${local.city}`
+          : local.label,
+        { emitEvent: false }
+      );
+      this.activityService.logSearch({
+        city: local.city || '',
+        state: local.state || '',
+        searchQuery: local.label,
+        propertyType: this.filters.propertyType,
+      });
+      this.loadListings();
+      return;
+    }
+
     const localMatch = searchLocalLocations(searchText, 1)[0];
     if (localMatch) {
       this.applyResolvedLocation(localMatch);
+      this.filters.sortBy = 'nearest';
       this.searchControl.setValue(this.displayCity(localMatch), { emitEvent: false });
       this.loadListings();
       return;
@@ -392,6 +443,7 @@ loadListings(): void {
     this.geocodeSearchText(searchText).subscribe((result) => {
       if (result) {
         this.applyResolvedLocation(result);
+        this.filters.sortBy = 'nearest';
         this.searchControl.setValue(this.displayCity(result), { emitEvent: false });
       } else {
         this.filters.lat = undefined;
@@ -418,13 +470,20 @@ loadListings(): void {
   private applyResolvedLocation(result: LocationSearchResult): void {
     this.filters.lat = parseFloat(result.lat);
     this.filters.lng = parseFloat(result.lon);
+    // Geo search only — avoid AND-ing exact city with radius.
     this.filters.city = undefined;
     this.filters.state = undefined;
     this.filters.zone = undefined;
 
     const addr = result.address || {};
-    const city = addr.city || addr.town || addr.village || addr.county || result.roomzoZone || '';
-    const state = addr.state || '';
+    const city =
+      result.roomzoCity ||
+      addr.city ||
+      addr.town ||
+      addr.village ||
+      addr.county ||
+      '';
+    const state = addr.state || getCityCenter(city)?.state || '';
     this.selectedLocation = city ? { city, state } : null;
     this.activityService.logSearch({
       city,
@@ -435,9 +494,16 @@ loadListings(): void {
   }
 
   resetFilters(): void {
-this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'latest' };    this.searchControl.setValue('');
+    this.filters = {
+      minPrice: 0,
+      maxPrice: 50000,
+      propertyType: 'Any',
+      bedrooms: 'Any',
+      sortBy: 'nearest',
+    };
+    this.searchControl.setValue('');
     this.selectedLocation = null;
-    this.availabilityFilter = 'available';
+    this.availabilityFilter = 'all';
     this.applyFilters();
   }
 
@@ -719,13 +785,15 @@ let userId: string | null = null;
   }
 
   quickSearch(zoneName: string, stateName: string): void {
-    this.searchControl.setValue(`${zoneName}, Prayagraj`, { emitEvent: false });
+    const resolvedName = resolveZoneName(zoneName);
+    this.searchControl.setValue(`${resolvedName}, Prayagraj`, { emitEvent: false });
     this.selectedLocation = { city: 'Prayagraj', state: stateName };
     this.filters.city = undefined;
     this.filters.state = undefined;
     this.filters.zone = undefined;
+    this.filters.sortBy = 'nearest';
 
-    const coords = getKnownZoneCoordinates(zoneName);
+    const coords = getKnownZoneCoordinates(resolvedName);
     if (coords) {
       this.filters.lat = coords.lat;
       this.filters.lng = coords.lng;

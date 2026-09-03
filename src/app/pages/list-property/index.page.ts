@@ -3,15 +3,18 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormArray, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
 import { PropertyService } from '../../services/property.service';
 import { Country, State, City } from 'country-state-city';
 import { ToastrService } from 'ngx-toastr';
 import { HttpClient } from '@angular/common/http';
 import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
-import { Router } from '@angular/router'; // <-- Add this import
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map, startWith } from 'rxjs/operators';
+import { of, forkJoin, combineLatest } from 'rxjs';
+import { Router } from '@angular/router';
+import { resolveZoneName, suggestZonesForLandmark } from '../../utils/location-search.util';
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
@@ -28,7 +31,9 @@ import type * as L from 'leaflet';
     ReactiveFormsModule,
     FormsModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatAutocompleteModule,
+    MatInputModule,
   ],
   templateUrl: './list-property.html',
   styleUrls: ['./list-property.css']
@@ -49,6 +54,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
 
   searchControl = new FormControl('');
   searchResults: any[] = [];
+  landmarkSuggestions: string[] = [];
+  private landmarkPickedFromList = false;
 
   commonRules = [
     { label: 'No Smoking', value: 'no_smoking', icon: 'smoke_free' },
@@ -123,6 +130,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
           street: ['', Validators.required],
           city: ['', Validators.required],
           landmark: ['', Validators.required],
+          zone: [''],
           state: ['', Validators.required],
           zip: ['', Validators.required],
           latitude: [null, Validators.required],  
@@ -165,6 +173,26 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
         this.detailsGroup.get('address.city')?.reset();
       }
     });
+
+    const landmarkCtrl = this.detailsGroup.get('address.landmark');
+    const cityCtrl = this.detailsGroup.get('address.city');
+    if (landmarkCtrl && cityCtrl) {
+      combineLatest([
+        cityCtrl.valueChanges.pipe(startWith(cityCtrl.value || '')),
+        landmarkCtrl.valueChanges.pipe(startWith(landmarkCtrl.value || ''), debounceTime(150)),
+      ]).subscribe(([city, landmark]) => {
+        this.landmarkSuggestions = suggestZonesForLandmark(
+          String(city || ''),
+          String(landmark || '')
+        );
+        // Free text: keep zone in sync with typed landmark unless user picked a chip/option.
+        if (!this.landmarkPickedFromList) {
+          const typed = String(landmark || '').trim();
+          this.detailsGroup.get('address.zone')?.setValue(typed, { emitEvent: false });
+        }
+        this.cd.detectChanges();
+      });
+    }
 
     // Real-time OpenStreetMap Locality Search using forkJoin for UP and MH
     this.searchControl.valueChanges.pipe(
@@ -244,6 +272,22 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   get conditionsGroup(): FormGroup { return this.listingForm.get('conditions') as FormGroup; }
   get guidebookGroup(): FormGroup { return this.listingForm.get('guidebook') as FormGroup; }
   get finalGroup(): FormGroup { return this.listingForm.get('final') as FormGroup; }
+
+  onLandmarkSelected(event: any): void {
+    const value = String(event?.option?.value ?? '').trim();
+    this.landmarkPickedFromList = true;
+    const zoneName = resolveZoneName(value);
+    this.detailsGroup.get('address.landmark')?.setValue(zoneName);
+    this.detailsGroup.get('address.zone')?.setValue(zoneName);
+    // Allow free typing again after a pick.
+    setTimeout(() => {
+      this.landmarkPickedFromList = false;
+    }, 0);
+  }
+
+  onLandmarkInput(): void {
+    this.landmarkPickedFromList = false;
+  }
   get nearbyPlaces(): FormArray { return this.guidebookGroup.get('nearby') as FormArray; }
   get rulesArray(): FormArray { return this.guidebookGroup.get('rules') as FormArray; }
 
@@ -315,7 +359,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       city: city,
       zip: zip,
       street: street, 
-      landmark: landmark
+      landmark: landmark,
+      zone: landmark ? resolveZoneName(landmark) : '',
     });
 
     this.searchResults = [];
@@ -424,10 +469,22 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       if (this.isSubmitting) return;
 
       const rawData = this.listingForm.value;
+      const landmark = String(rawData?.details?.address?.landmark || '').trim();
+      const zone =
+        String(rawData?.details?.address?.zone || '').trim() || resolveZoneName(landmark);
 
       // 1. Format the description (converting newlines to pipe separators)
       const payload = {
         ...rawData,
+        details: {
+          ...rawData.details,
+          address: {
+            ...rawData.details.address,
+            landmark,
+            // Landmark doubles as zone for city-page zone chips.
+            zone: zone || landmark,
+          },
+        },
         final: {
           ...rawData.final,
           description: rawData.final.description
@@ -654,7 +711,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
           city: city,
           zip: zip,
           street: street,
-          landmark: landmark
+          landmark: landmark,
+          zone: landmark ? resolveZoneName(landmark) : '',
         });
       }
     });

@@ -71,9 +71,21 @@
           <input type="text" formControlName="street" placeholder="House no., street name">
         </div>
         <div class="form-group">
-          <label>Landmark / Area <span class="req">*</span></label>
-          <input type="text" formControlName="landmark" placeholder="Near City Mall, Civil Lines">
-          <span class="helper-text">Used for zone-wise search on Roomzo.</span>
+          <label>Landmark / Zone <span class="req">*</span></label>
+          <input
+            type="text"
+            formControlName="landmark"
+            placeholder="e.g. Allahpur, Civil Lines"
+            [matAutocomplete]="landmarkAuto"
+            (input)="onLandmarkInput()">
+          <mat-autocomplete #landmarkAuto="matAutocomplete" (optionSelected)="onLandmarkSelected($event)">
+            <mat-option *ngFor="let zone of landmarkSuggestions" [value]="zone">
+              {{ zone }}
+            </mat-option>
+          </mat-autocomplete>
+          <span class="helper-text">
+            Pick a suggested zone for city-page filters, or type your own landmark.
+          </span>
         </div>
         <div class="form-group">
           <label>City <span class="req">*</span></label>
