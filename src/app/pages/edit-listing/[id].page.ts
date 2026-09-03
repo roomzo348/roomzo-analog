@@ -455,6 +455,7 @@ export default class EditListingComponent implements OnInit {
     const payload = {
       details: {
         ...raw.details,
+        propertyName: String(raw?.final?.name || '').trim(),
         address: {
           ...raw.details.address,
           landmark,

@@ -478,6 +478,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
         ...rawData,
         details: {
           ...rawData.details,
+          // Form title lives in final.name; DB column is property_name via details.propertyName
+          propertyName: String(rawData?.final?.name || '').trim(),
           address: {
             ...rawData.details.address,
             landmark,

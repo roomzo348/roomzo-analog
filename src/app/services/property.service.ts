@@ -64,7 +64,7 @@ export interface PaginatedResponse {
 export class PropertyService {
   private storageKey = 'rental_properties';
   private baseUrl = environment.apiUrl;
-  private uploadUrl = environment.hostingerUploadUrl + "/upload.php";
+  private uploadUrl = `${environment.hostingerUploadUrl.replace(/\/+$/, '')}/upload.php`;
   private favoriteIdsStorageKey = 'roomzo_favorite_ids';
 
   constructor(private http: HttpClient) {}
@@ -203,7 +203,12 @@ saveListing(formData: any): Observable<any> {
         // This strips out any Hostinger URL that contains '-org'
         const photoUrls = responses
           .filter(res => res && res.status === 1 && !res.url.includes('-org'))
-          .map(res => environment.hostingerUploadUrl + res.url);
+          .map(res => environment.hostingerUploadUrl.replace(/\/+$/, '') + res.url);
+
+        // If files were provided but none uploaded successfully, abort – don't save to DB
+        if (files.length > 0 && photoUrls.length === 0) {
+          throw new Error('Image upload failed. Please check your internet connection and try again.');
+        }
 
         const user = JSON.parse(localStorage.getItem("user") || '{}');
         const { final, ...rest } = formData;
@@ -307,7 +312,11 @@ return this.http.get(`${this.baseUrl}/api/listings/owner/${ownerId}`);
       switchMap((responses: any[]) => {
         const uploadedUrls = responses
           .filter((res) => res && res.status === 1 && !res.url.includes('-org'))
-          .map((res) => environment.hostingerUploadUrl + res.url);
+          .map((res) => environment.hostingerUploadUrl.replace(/\/+$/, '') + res.url);
+
+        if (filesToUpload.length > 0 && uploadedUrls.length === 0) {
+          throw new Error('Image upload failed. Please try again.');
+        }
 
         const existingUrls: string[] = payload.photos || [];
         const finalPayload = {

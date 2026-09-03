@@ -17,7 +17,14 @@ export default defineConfig(({ mode }) => {
 
   return ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  define: {},
+  define: {
+    'import.meta.env.VITE_UPLOAD_SECRET_KEY': JSON.stringify(
+      env['VITE_UPLOAD_SECRET_KEY'] || env['UPLOAD_SECRET_KEY'] || 'vK9#mP2$xL5@jR8&qW3'
+    ),
+    'import.meta.env.VITE_HOSTINGER_UPLOAD_URL': JSON.stringify(
+      env['VITE_HOSTINGER_UPLOAD_URL'] || env['HOSTINGER_UPLOAD_URL'] || 'https://roomzo.in'
+    ),
+  },
   build: {
     target: ['es2020'],
   },

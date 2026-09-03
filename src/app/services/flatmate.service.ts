@@ -50,8 +50,7 @@ export class FlatmateService {
     `${environment.apiUrl}/api/flatmates`;
 
   private uploadUrl =
-    environment.hostingerUploadUrl +
-    "/upload.php";
+    `${String(environment.hostingerUploadUrl || 'https://roomzo.in').replace(/\/+$/, '')}/upload.php`;
 
   constructor(
     private http: HttpClient

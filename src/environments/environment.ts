@@ -11,8 +11,9 @@ function getEnv(key: string, fallback = ''): string {
 export const environment = {
   production: (getEnv('NODE_ENV') === 'production') || getEnv('PRODUCTION') === 'true',
   apiUrl: getEnv('API_URL', ''),
-  hostingerUploadUrl: getEnv('HOSTINGER_UPLOAD_URL', 'https://roomzo.in/'),
-  uploadSecretKey: getEnv('UPLOAD_SECRET_KEY', ''),
+  hostingerUploadUrl: getEnv('HOSTINGER_UPLOAD_URL', 'https://roomzo.in').replace(/\/+$/, ''),
+  // Must match public/upload.php. This key is sent from the browser, so it is not a server-only secret.
+  uploadSecretKey: getEnv('UPLOAD_SECRET_KEY', 'vK9#mP2$xL5@jR8&qW3'),
   firebaseConfig: {
     apiKey: getEnv('FIREBASE_API_KEY', ''),
     authDomain: getEnv('FIREBASE_AUTH_DOMAIN', ''),
