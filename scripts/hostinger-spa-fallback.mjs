@@ -27,10 +27,15 @@ if (existsSync(analogServer) && existsSync(boot)) {
   copyFileSync(boot, join(analogRoot, 'app.js'));
   copyFileSync(boot, join(analogRoot, 'server.js'));
   copyFileSync(boot, join(analogRoot, 'server', 'app.js'));
-  writeFileSync(
-    join(analogRoot, 'package.json'),
-    JSON.stringify({ name: 'roomzo-analog-server', private: true, main: 'app.js' }, null, 2)
-  );
+  const pkgPath = join(analogRoot, 'package.json');
+  let pkg = { name: 'roomzo-analog-server', private: true, main: 'app.js' };
+  
+  if (existsSync(pkgPath)) {
+    pkg = { ...JSON.parse(readFileSync(pkgPath, 'utf8')), ...pkg };
+  }
+  
+  pkg.scripts = { ...pkg.scripts, start: 'node app.js' };
+  writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
   console.log('[hostinger] wrote dist/analog/app.js and dist/analog/server/app.js');
 }
 
