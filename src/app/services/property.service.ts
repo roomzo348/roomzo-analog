@@ -64,7 +64,7 @@ export interface PaginatedResponse {
 export class PropertyService {
   private storageKey = 'rental_properties';
   private baseUrl = environment.apiUrl;
-  private uploadUrl = `${environment.hostingerUploadUrl.replace(/\/+$/, '')}/upload.php`;
+  private uploadUrl = `${environment.apiUrl || ''}/api/upload`;
   private favoriteIdsStorageKey = 'roomzo_favorite_ids';
 
   constructor(private http: HttpClient) {}

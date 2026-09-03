@@ -10,7 +10,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideFileRouter(
       withComponentInputBinding(),
-  withNavigationErrorHandler(console.error),
+      withNavigationErrorHandler(console.error),
   // This enables the "scroll to anchor" behavior
   withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' })
     ),

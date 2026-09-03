@@ -68,12 +68,16 @@ export default defineConfig(({ mode }) => {
           cashfreeSecretKey: env['CASHFREE_SECRET_KEY'] || env['CASHFREE_CLIENT_SECRET'],
           cashfreeEnv: env['CASHFREE_ENV'] || 'sandbox',
           contactPlansJson: env['CONTACT_PLANS_JSON'],
+          imageStoragePath: env['IMAGE_STORAGE_PATH'],
         },
         prerender: {
           routes: ['/sitemap.xml'],
           concurrency: 4,
         },
         routeRules: {
+          '/images/**': { ssr: false },
+          '/assets/**': { ssr: false },
+          '/upload.php': { ssr: false },
           '/room/**': { ssr: true },
           '/edit-listing/**': { ssr: true },
           '/profile/**': { ssr: true },

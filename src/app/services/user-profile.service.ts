@@ -21,7 +21,7 @@ export interface UserProfile {
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
   private baseUrl = environment.apiUrl;
-  private uploadUrl = `${environment.hostingerUploadUrl.replace(/\/+$/, '')}/upload.php`;
+  private uploadUrl = `${environment.apiUrl || ''}/api/upload`;
 
   constructor(private http: HttpClient) {}
 
