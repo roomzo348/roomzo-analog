@@ -32,7 +32,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
     features: [
       '4 Property Contacts',
       'Direct Owner Contact',
-      'No Brokerage',
+      'No brokerage cut on rent',
     ],
   },
   plus: {
@@ -50,7 +50,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
       '11 Property Contacts',
       'Direct Owner Contact',
       'New Listing Alerts',
-      'No Brokerage',
+      'No brokerage cut on rent',
     ],
   },
   pro: {
@@ -68,7 +68,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
       '25 Property Contacts',
       'Direct Owner Contact',
       'New Listing Alerts',
-      'No Brokerage',
+      'No brokerage cut on rent',
       'Full-time WhatsApp & call support',
       'Shortlist & Compare Properties',
     ],

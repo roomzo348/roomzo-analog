@@ -17,7 +17,7 @@ export const CITY_GUIDES: Record<string, CityGuide> = {
     slug: 'prayagraj',
     tagline: 'Student rooms, PGs & flats near colleges and key localities',
     intro:
-      'Prayagraj (Allahabad) is one of Uttar Pradesh’s busiest rental markets for students and working professionals. Demand stays high around Allahabad University, Katra, Civil Lines, Mumfordganj, Teliarganj, and Naini. Roomzo helps you browse owner-listed rooms, paying guest (PG) accommodations, and flats, then contact the owner directly after a simple safety reminder — without paying platform brokerage to Roomzo for browsing or owner contact.',
+      'Prayagraj (Allahabad) is one of Uttar Pradesh’s busiest rental markets for students and working professionals. Demand stays high around Allahabad University, Katra, Civil Lines, Mumfordganj, Teliarganj, and Naini. Roomzo helps you browse owner-listed rooms, paying guest (PG) accommodations, and flats for free, then unlock owner contact with an affordable contact plan after a simple safety reminder — without traditional brokerage on rent or deposit.',
     sections: [
       {
         heading: 'Popular areas to rent in Prayagraj',
@@ -71,7 +71,7 @@ export const CITY_GUIDES: Record<string, CityGuide> = {
     slug: 'varanasi',
     tagline: 'PG & rooms near BHU, Lanka, Assi and Sigra',
     intro:
-      'Varanasi (Banaras / Kashi) attracts thousands of students every year, especially around Banaras Hindu University (BHU). Students and young professionals commonly search for PGs and rooms in Lanka, Durgakund, Assi, Sigra, and nearby localities. Roomzo lists owner-published rentals so you can compare options and speak with owners directly, without Roomzo charging you brokerage for viewing or contacting a listing.',
+      'Varanasi (Banaras / Kashi) attracts thousands of students every year, especially around Banaras Hindu University (BHU). Students and young professionals commonly search for PGs and rooms in Lanka, Durgakund, Assi, Sigra, and nearby localities. Roomzo lists owner-published rentals so you can compare options for free and unlock owner contact with a plan when ready — without a traditional brokerage cut on your rental deal.',
     sections: [
       {
         heading: 'Best student localities in Varanasi',
@@ -113,7 +113,7 @@ export const CITY_GUIDES: Record<string, CityGuide> = {
     slug: 'pune',
     tagline: 'Rooms, PGs & flats in Hinjewadi, Viman Nagar, Kothrud & more',
     intro:
-      'Pune’s rental market serves IT professionals, students, and families across Hinjewadi, Wakad, Baner, Viman Nagar, Kothrud, and nearby hubs. Competition for good 1BHKs and shared flats is high — so transparent owner contact and realistic photos matter. Roomzo is built for direct owner–tenant discovery with brokerage-free browsing and contact on our platform.',
+      'Pune’s rental market serves IT professionals, students, and families across Hinjewadi, Wakad, Baner, Viman Nagar, Kothrud, and nearby hubs. Competition for good 1BHKs and shared flats is high — so transparent owner contact and realistic photos matter. Roomzo is built for direct owner–tenant discovery: browse free, unlock contacts with a plan, and avoid traditional brokerage on rent.',
     sections: [
       {
         heading: 'Localities renters ask about most',
@@ -130,7 +130,7 @@ export const CITY_GUIDES: Record<string, CityGuide> = {
       {
         heading: 'Budget planning for Pune rentals',
         paragraphs: [
-          'Expect deposit requests of multiple months’ rent in many buildings (confirm locally). Ask whether society maintenance, parking, and brokerage (if any third party is involved outside Roomzo) are separate. Roomzo itself does not take brokerage for connecting you with owners through the site.',
+          'Expect deposit requests of multiple months’ rent in many buildings (confirm locally). Ask whether society maintenance, parking, and brokerage (if any third party is involved outside Roomzo) are separate. Roomzo itself does not take traditional brokerage on rent; owner contact unlocks use affordable contact credits.',
           'For flat shares, clarify how utilities are split and whether the leave-and-license agreement will be in your name or a flatmate’s.',
         ],
       },
@@ -154,7 +154,7 @@ export const CITY_GUIDES: Record<string, CityGuide> = {
     slug: 'lucknow',
     tagline: 'Flats, rooms & PGs across Gomti Nagar, Hazratganj & Alambagh',
     intro:
-      'Lucknow’s rentals span heritage localities and newer residential sectors. Working professionals often look toward Gomti Nagar and nearby sectors, while students and budget seekers compare rooms and PGs across Alambagh, Aminabad-adjacent belts, and other connected areas. Roomzo surfaces owner-listed inventory so you can evaluate options and talk to owners without paying Roomzo a brokerage fee for discovery or contact.',
+      'Lucknow’s rentals span heritage localities and newer residential sectors. Working professionals often look toward Gomti Nagar and nearby sectors, while students and budget seekers compare rooms and PGs across Alambagh, Aminabad-adjacent belts, and other connected areas. Roomzo surfaces owner-listed inventory so you can evaluate options for free and unlock owner contact with a plan — without a traditional brokerage fee on rent or deposit.',
     sections: [
       {
         heading: 'Where to look first in Lucknow',

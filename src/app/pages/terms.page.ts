@@ -61,11 +61,13 @@ export const routeMeta: RouteMeta = {
         it does not infringe others’ rights.
       </p>
 
-      <h2>5. No brokerage fee for platform contact — offline deals are yours</h2>
+      <h2>5. No traditional brokerage — contact credits are separate</h2>
       <p>
-        Roomzo’s product is designed so tenants can browse listings and contact owners through the site without Roomzo
-        charging brokerage for that connection. Any rent, deposit, agreement, keys, or payment arrangement is strictly
-        between the owner and the seeker. If you involve a third-party broker offline, that relationship is outside Roomzo.
+        Roomzo is not a real estate broker and does not take a traditional brokerage cut (such as a month’s rent)
+        on your rental deal. Browsing listings is free. Unlocking an owner’s phone, WhatsApp, or email uses
+        contact credits from a paid plan described in section 7. Any rent, deposit, agreement, keys, or payment
+        arrangement is strictly between the owner and the seeker. If you involve a third-party broker offline,
+        that relationship is outside Roomzo.
       </p>
 
       <h2>6. Safety — visit before you pay</h2>

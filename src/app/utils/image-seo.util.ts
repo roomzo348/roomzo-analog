@@ -22,7 +22,7 @@ export function generatePropertyAltText(
     .join(', ');
   const suffix =
     index === 0
-      ? ' — verified broker-free listing'
+      ? ' — verified owner-listed rental'
       : ` — photo ${index + 1}`;
   const base = property.propertyName
     ? `${property.propertyName}${suffix}`

@@ -52,7 +52,7 @@ export default class FaqComponent implements OnInit, OnDestroy {
     },
     {
       question: 'Is Roomzo free to use?',
-      answer: 'Browsing listings and contacting owners through Roomzo is free for tenants. Owners can list properties for discovery on the platform. Any optional paid promotion features, if offered later, will be clearly labelled before purchase.',
+      answer: 'Browsing listings, photos, and city guides on Roomzo is free. Unlocking an owner’s phone, WhatsApp, or email uses a contact credit from a paid plan (Starter, Plus, or Pro). Owners can still list properties for discovery on the platform. See the Pricing page for current plans.',
       category: 'General'
     },
     {
@@ -62,7 +62,12 @@ export default class FaqComponent implements OnInit, OnDestroy {
     },
     {
       question: 'Does Roomzo charge brokerage?',
-      answer: 'Roomzo does not charge tenants brokerage simply for browsing or contacting an owner through the website. Offline rent, deposits, and any third-party help you arrange yourself are between you and those parties. Always clarify costs before paying.',
+      answer: 'Roomzo is not a real estate broker and does not take a traditional brokerage cut (such as a month’s rent) on your rental deal. Browsing is free. Revealing owner contact details uses affordable contact credits from a subscription plan — not brokerage. Offline rent, deposits, and any third-party help you arrange yourself remain between you and those parties.',
+      category: 'Tenants'
+    },
+    {
+      question: 'How do owner contact plans work?',
+      answer: 'Owner phone, WhatsApp, and email stay hidden until you unlock a listing with a contact credit. Buy Starter, Plus, or Pro on the Pricing page. Credits never expire, and a property you already unlocked stays available on your account. Roomzo still does not charge traditional brokerage on rent or deposit.',
       category: 'Tenants'
     },
     {
@@ -92,7 +97,7 @@ export default class FaqComponent implements OnInit, OnDestroy {
     },
     {
       question: 'Can I find PG for rent in Pune without paying portal brokerage?',
-      answer: 'Yes — Roomzo does not charge tenants brokerage for contacting owners via the site. Browse Pune listings (Hinjewadi, Viman Nagar, Kothrud, Wakad, Baner and more when available), visit properties, and confirm all money transfers only after you are comfortable.',
+      answer: 'Yes — Roomzo does not take traditional brokerage on your rental. Browse Pune listings (Hinjewadi, Viman Nagar, Kothrud, Wakad, Baner and more when available), unlock owner contact with a contact plan when you are ready, visit properties, and confirm all money transfers only after you are comfortable.',
       category: 'Tenants'
     },
     {

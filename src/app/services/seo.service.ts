@@ -125,7 +125,7 @@ export class SeoService {
       name,
       description:
         property.description?.replace(/\|/g, ' ').slice(0, 300) ??
-        `${name} — broker-free rental on Roomzo`,
+        `${name} — owner-listed rental on Roomzo`,
       image: property.photos?.map((p) => p.photoUrl) ?? [image],
       brand: { '@type': 'Brand', name: SEO_CONFIG.siteName },
       url: this.buildCanonicalUrl(this.buildRoomPath(property.id)),
@@ -297,5 +297,5 @@ export class SeoService {
 }
 
 function getCitySeoDescriptionText(name: string, state: string): string {
-  return `Verified broker-free rooms, PGs, and flats for rent in ${name}, ${state} on Roomzo.`;
+  return `Owner-listed rooms, PGs, and flats for rent in ${name}, ${state}. Browse free on Roomzo and unlock direct owner contact with a plan.`;
 }

@@ -156,8 +156,8 @@ export default class CategoryLandingPage implements OnInit, OnDestroy {
     if (s.includes('flat')) return '1BHK, 2BHK, 3BHK & more';
     if (s.includes('pg')) return 'Boys PG, Girls PG & Co-living';
     if (s.includes('student')) return 'Near colleges & coaching hubs';
-    if (s.includes('broker')) return 'No brokerage. Direct owner contact.';
+    if (s.includes('broker')) return 'No brokerage cut. Unlock owner contact with a plan.';
     if (s.includes('flatmate')) return 'Find like-minded roommates';
-    return 'Verified listings. No hidden charges.';
+    return 'Owner-listed rentals. Browse free.';
   }
 }

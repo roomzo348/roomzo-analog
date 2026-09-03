@@ -146,7 +146,7 @@ export function getCitySeoTitle(city: RoomzoCity): string {
 export function getCitySeoDescription(city: RoomzoCity): string {
   return (
     city.seoDescription ??
-    `Browse owner-listed rooms, PGs, and flats for rent in ${city.name}, ${city.state}. Compare options on Roomzo, contact owners directly, and follow our safety tips before you pay or move in.`
+    `Browse owner-listed rooms, PGs, and flats for rent in ${city.name}, ${city.state}. Compare options on Roomzo for free, unlock owner contact with a plan, and follow our safety tips before you pay or move in.`
   );
 }
 

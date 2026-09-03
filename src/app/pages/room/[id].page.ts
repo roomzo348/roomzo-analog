@@ -1216,7 +1216,7 @@ private setContactLoading(loading: boolean): void {
     const title = `${property.propertyType} for Rent in ${property.city} — ₹${property.rentAmount?.toLocaleString('en-IN') ?? '0'}/mo | Roomzo`;
     const description = (
       property.description?.replace(/\|/g, ' ').slice(0, 155) ||
-      `Verified ${property.propertyType} for rent in ${property.street}, ${property.city}. Broker-free listing with direct owner contact on Roomzo.`
+      `Verified ${property.propertyType} for rent in ${property.street}, ${property.city}. Owner-listed on Roomzo — browse free, unlock contact with a plan.`
     );
     const ogImage = property.photos?.[0]?.photoUrl;
 

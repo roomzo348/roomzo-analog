@@ -10,7 +10,7 @@ export const CATEGORY_GUIDES: Record<string, CategoryGuide> = {
   'rooms-for-rent': {
     slug: 'rooms-for-rent',
     intro:
-      'Looking for a single room or shared room without unnecessary middlemen? Roomzo’s rooms-for-rent category helps you compare owner-listed rooms across cities like Prayagraj, Varanasi, Pune, and Lucknow. You can review rent, photos, and amenities, then contact the owner directly after a safety reminder — Roomzo does not charge tenants brokerage simply for browsing or calling through the platform.',
+      'Looking for a single room or shared room without unnecessary middlemen? Roomzo’s rooms-for-rent category helps you compare owner-listed rooms across cities like Prayagraj, Varanasi, Pune, and Lucknow. You can review rent, photos, and amenities for free, then unlock owner contact with a contact plan after a safety reminder — Roomzo does not take traditional brokerage on your rental deal.',
     sections: [
       {
         heading: 'What “room for rent” usually means in India',
@@ -75,7 +75,7 @@ export const CATEGORY_GUIDES: Record<string, CategoryGuide> = {
   'pg-for-rent': {
     slug: 'pg-for-rent',
     intro:
-      'Paying Guest (PG) housing is popular with students and early-career professionals who want food, furniture, and a managed stay. Roomzo’s PG category highlights owner and caretaker-listed PGs so you can compare inclusions and contact them directly without Roomzo brokerage on contact.',
+      'Paying Guest (PG) housing is popular with students and early-career professionals who want food, furniture, and a managed stay. Roomzo’s PG category highlights owner and caretaker-listed PGs so you can compare inclusions for free and unlock contact with a plan — without traditional brokerage on rent.',
     sections: [
       {
         heading: 'Boys PG, girls PG, and co-living notes',
@@ -129,7 +129,7 @@ export const CATEGORY_GUIDES: Record<string, CategoryGuide> = {
   'brokerless-property': {
     slug: 'brokerless-property',
     intro:
-      '“Brokerless” on Roomzo means we design the product so tenants can discover listings and contact property owners directly through the site, without Roomzo charging brokerage for that connection. We are a technology platform, not a real estate brokerage. Offline third parties may still exist in the market — you should still verify every deal carefully.',
+      '“Brokerless” on Roomzo means we are not a real estate broker taking a month’s rent as commission. Tenants browse owner-listed properties for free and unlock phone, WhatsApp, or email with affordable contact credits. We are a technology platform, not a brokerage agency. Offline third parties may still exist in the market — you should still verify every deal carefully.',
     sections: [
       {
         heading: 'What Roomzo does and does not do',

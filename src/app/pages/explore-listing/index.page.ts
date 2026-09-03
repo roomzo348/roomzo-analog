@@ -36,10 +36,10 @@ type SearchControlValue = string | LocationSearchResult | null;
 export const routeMeta: RouteMeta = {
   title: 'Explore Rooms, PG & Flats for Rent | Roomzo',
   meta: [
-    { name: 'description', content: 'Search owner-listed rooms, PGs, and flats for rent in Prayagraj, Varanasi, Pune, Lucknow and more. Contact owners directly and visit before you pay.' },
+    { name: 'description', content: 'Search owner-listed rooms, PGs, and flats for rent in Prayagraj, Varanasi, Pune, Lucknow and more. Browse free, unlock owner contact with a plan, and visit before you pay.' },
     { name: 'keywords', content: 'room rent, pg for rent, flat for rent, prayagraj, varanasi, pune, roomzo' },
     { property: 'og:title', content: 'Explore Rentals | Roomzo' },
-    { property: 'og:description', content: 'Browse rooms, hostels, and flats with direct owner contact. Safety tips included before you call or WhatsApp.' },
+    { property: 'og:description', content: 'Browse rooms, hostels, and flats with direct owner contact. Unlock contacts with a plan. Safety tips included before you call or WhatsApp.' },
     { property: 'og:type', content: 'website' },
     { property: 'og:image', content: 'https://www.roomzo.in/assets/og-roomzo-share.jpg' },
   ]

@@ -30,7 +30,7 @@ constructor(private router: Router) {}
     { 
       icon: 'visibility', 
       title: 'Transparency', 
-      desc: 'Clear role as a listing platform. Direct owner contact. No hidden Roomzo brokerage for browsing or calling through the site.' 
+      desc: 'Clear role as a listing platform. Direct owner contact via affordable contact plans. No traditional brokerage cut on rent or deposit.' 
     },
     { 
       icon: 'verified_user', 

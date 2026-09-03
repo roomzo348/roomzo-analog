@@ -21,7 +21,7 @@ export const routeMeta: RouteMeta = {
     {
       name: 'description',
       content:
-        'Find rooms, PGs, and flats listed by owners across India. Browse on Roomzo, contact owners directly, and follow safety tips before you pay or move in.',
+        'Find owner-listed rooms, PGs, and flats across India. Browse free on Roomzo, unlock owner contact with a plan, and follow safety tips before you pay or move in.',
     },
     {
       name: 'keywords',
@@ -31,7 +31,8 @@ export const routeMeta: RouteMeta = {
     { property: 'og:title', content: 'Roomzo | Rooms, PG & Flats with Direct Owner Contact' },
     {
       property: 'og:description',
-      content: 'Owner-listed rentals with city guides and safety tips. Browse, contact, then visit before you pay.',
+      content:
+        'Owner-listed rentals with city guides and safety tips. Browse free, unlock contacts with a plan, then visit before you pay.',
     },
     { property: 'og:type', content: 'website' },
     { property: 'og:image', content: 'https://www.roomzo.in/assets/og-roomzo-share.jpg' },

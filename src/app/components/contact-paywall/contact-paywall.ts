@@ -29,7 +29,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
       contacts: 4,
       durationDays: 30,
       popular: false,
-      features: ['4 Property Contacts', 'Direct Owner Contact', 'No Brokerage'],
+      features: ['4 Property Contacts', 'Direct Owner Contact', 'No brokerage cut on rent'],
       priceLabel: '₹19/month',
     },
     {
@@ -44,7 +44,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
       contacts: 11,
       durationDays: 30,
       popular: false,
-      features: ['11 Property Contacts', 'Direct Owner Contact', 'New Listing Alerts', 'No Brokerage'],
+      features: ['11 Property Contacts', 'Direct Owner Contact', 'New Listing Alerts', 'No brokerage cut on rent'],
       priceLabel: '₹49/month',
     },
     {
@@ -63,7 +63,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
         '25 Property Contacts',
         'Direct Owner Contact',
         'New Listing Alerts',
-        'No Brokerage',
+        'No brokerage cut on rent',
         'Full-time WhatsApp & call support',
       ],
       priceLabel: '₹99/month',

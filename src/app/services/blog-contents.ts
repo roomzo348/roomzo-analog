@@ -263,10 +263,10 @@ imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=for
     readTime: '3 min read',
     imageUrl: 'https://images.unsplash.com/photo-1556156653-e5a7c69cc263?w=800&q=80',
     content: `
-      <p>For decades, finding a house meant dealing with middlemen. You would pay 15 days to a full month's rent just as a "finder's fee." Platforms like Roomzo are dismantling that system. Here is why the no-brokerage model wins.</p>
+      <p>For decades, finding a house meant dealing with middlemen. You would pay 15 days to a full month's rent just as a "finder's fee." Platforms like Roomzo are dismantling that system. Here is why the no-brokerage model wins — and how it differs from affordable contact unlock plans.</p>
       
       <h3>1. Massive Financial Savings</h3>
-      <p>If you rent a flat for ₹15,000, traditional brokers charge a minimum of ₹15,000 as a fee. By using a platform that connects you directly with owners, that money stays in your bank account, helping you cover your security deposit or buy furniture.</p>
+      <p>If you rent a flat for ₹15,000, traditional brokers charge a minimum of ₹15,000 as a fee. By using a platform that connects you directly with owners, that money stays in your bank account, helping you cover your security deposit or buy furniture. On Roomzo, browsing is free; unlocking an owner’s number uses a small contact credit plan, not a month’s rent as brokerage.</p>
       
       <h3>2. Direct Negotiation</h3>
       <p>Brokers often act as a barrier, pushing the rent higher to increase their cut. When you speak directly to an owner on Roomzo, you can have honest, human conversations. You can negotiate rent, discuss pet policies, or ask for a fresh coat of paint directly.</p>
