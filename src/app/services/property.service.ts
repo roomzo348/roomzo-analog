@@ -200,10 +200,10 @@ saveListing(formData: any): Observable<any> {
     return forkJoin(uploadObservables).pipe(
       switchMap((responses: any[]) => {
         
-        // This strips out any Hostinger URL that contains '-org'
+        // Upload API returns public symlink URL: https://roomzo.in/images/file.jpg
         const photoUrls = responses
-          .filter(res => res && res.status === 1 && !res.url.includes('-org'))
-          .map(res => environment.hostingerUploadUrl.replace(/\/+$/, '') + res.url);
+          .filter(res => res && res.status === 1 && res.url && !String(res.url).includes('-org'))
+          .map(res => this.toPublicImageUrl(res.url));
 
         // If files were provided but none uploaded successfully, abort – don't save to DB
         if (files.length > 0 && photoUrls.length === 0) {
@@ -233,6 +233,15 @@ saveListing(formData: any): Observable<any> {
 
     // DO NOT set headers manually; Angular will set multipart/form-data automatically
     return this.http.post<any>(this.uploadUrl, formData);
+  }
+
+  /** DB / display URL via symlink: https://roomzo.in/images/file.jpg — never storage/ or base64. */
+  private toPublicImageUrl(url: string): string {
+    const raw = String(url || '').trim();
+    if (!raw) return raw;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    const base = environment.hostingerUploadUrl.replace(/\/+$/, '') || 'https://roomzo.in';
+    return `${base}${raw.startsWith('/') ? raw : `/${raw}`}`;
   }
 
   getAllListings(page: number, size: number, isRented?: boolean): Observable<PaginatedResponse> {
@@ -311,8 +320,8 @@ return this.http.get(`${this.baseUrl}/api/listings/owner/${ownerId}`);
     return forkJoin(uploadObservables).pipe(
       switchMap((responses: any[]) => {
         const uploadedUrls = responses
-          .filter((res) => res && res.status === 1 && !res.url.includes('-org'))
-          .map((res) => environment.hostingerUploadUrl.replace(/\/+$/, '') + res.url);
+          .filter((res) => res && res.status === 1 && res.url && !String(res.url).includes('-org'))
+          .map((res) => this.toPublicImageUrl(res.url));
 
         if (filesToUpload.length > 0 && uploadedUrls.length === 0) {
           throw new Error('Image upload failed. Please try again.');

@@ -23,36 +23,16 @@ if (!isset($_FILES['file']) || !is_uploaded_file($_FILES['file']['tmp_name'])) {
     exit();
 }
 
-/**
- * Files live in storage/images (outside public_html).
- * public_html/images should be a symlink to that folder.
- */
-function resolveUploadDir(): string {
-    $candidates = [
-        dirname(__DIR__) . '/storage/images',
-        __DIR__ . '/../storage/images',
-        __DIR__ . '/images',
-    ];
-
-    foreach ($candidates as $dir) {
-        $dir = rtrim(str_replace('\\', '/', $dir), '/');
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        if (is_dir($dir) && is_writable($dir)) {
-            $real = realpath($dir);
-            return $real !== false ? $real : $dir;
-        }
-    }
-
-    return dirname(__DIR__) . '/storage/images';
+// Disk: domains/roomzo.in/storage/images (outside public_html)
+$target_dir = dirname(__DIR__) . '/storage/images';
+if (!is_dir($target_dir)) {
+    @mkdir($target_dir, 0755, true);
 }
 
-$target_dir = resolveUploadDir();
-if (!is_dir($target_dir) && !@mkdir($target_dir, 0755, true)) {
+if (!is_dir($target_dir) || !is_writable($target_dir)) {
     echo json_encode([
         "status" => 0,
-        "message" => "Upload folder not writable. Check storage/images permissions and symlink.",
+        "message" => "Cannot write to storage/images",
         "dir" => $target_dir,
     ]);
     exit();
@@ -64,14 +44,15 @@ $file_name = uniqid() . '_' . $original;
 $target_file = $target_dir . DIRECTORY_SEPARATOR . $file_name;
 
 if (move_uploaded_file($_FILES['file']['tmp_name'], $target_file)) {
+    // Public URL via symlink public_html/images -> storage/images
     echo json_encode([
         "status" => 1,
-        "url" => "/images/" . $file_name
+        "url" => "https://roomzo.in/images/" . $file_name
     ]);
 } else {
     echo json_encode([
         "status" => 0,
-        "message" => "Upload failed. Check storage/images permissions and that public_html/images is a symlink.",
+        "message" => "Upload failed",
         "dir" => $target_dir,
     ]);
 }

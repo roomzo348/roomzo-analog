@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, Inject, NgZone, OnDestroy, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -58,6 +58,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   profilePhotoPreview: string | null = null;
   pendingPhotoFile: File | null = null;
   removePhotoFlag = false;
+  private previewObjectUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -70,6 +71,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toastr: ToastrService,
     private cd: ChangeDetectorRef,
+    private zone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -106,6 +108,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.walletSub?.unsubscribe();
+    this.clearLocalPreview();
     if (isPlatformBrowser(this.platformId)) {
       document.body.classList.remove('profile-sidebar-open');
     }
@@ -137,6 +140,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
     this.profile = { ...(this.profile ?? {}), ...data } as UserProfile;
     this.profilePhotoUrl = data.profilePhotoUrl || null;
+    this.clearLocalPreview();
     this.profilePhotoPreview = null;
     this.pendingPhotoFile = null;
     this.removePhotoFlag = false;
@@ -401,9 +405,12 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
   closeEditSidebar(): void {
     this.isEditSidebarOpen = false;
+    this.clearLocalPreview();
     this.profilePhotoPreview = null;
     this.pendingPhotoFile = null;
     this.removePhotoFlag = false;
+    this.isSaving = false;
+    this.isUploadingPhoto = false;
     if (this.profile) {
       this.profilePhotoUrl = this.profile.profilePhotoUrl || null;
     }
@@ -415,6 +422,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   onPhotoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -429,20 +437,34 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
     this.pendingPhotoFile = file;
     this.removePhotoFlag = false;
+    this.setLocalPreview(file);
+    this.cd.detectChanges();
+  }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.profilePhotoPreview = String(reader.result || '');
-    };
-    reader.readAsDataURL(file);
-    input.value = '';
+  private setLocalPreview(file: File): void {
+    this.clearLocalPreview();
+    if (isPlatformBrowser(this.platformId)) {
+      this.previewObjectUrl = URL.createObjectURL(file);
+      this.profilePhotoPreview = this.previewObjectUrl;
+      return;
+    }
+    this.profilePhotoPreview = null;
+  }
+
+  private clearLocalPreview(): void {
+    if (this.previewObjectUrl && isPlatformBrowser(this.platformId)) {
+      URL.revokeObjectURL(this.previewObjectUrl);
+    }
+    this.previewObjectUrl = null;
   }
 
   removePhoto(): void {
     this.pendingPhotoFile = null;
+    this.clearLocalPreview();
     this.profilePhotoPreview = null;
     this.profilePhotoUrl = null;
     this.removePhotoFlag = true;
+    this.cd.detectChanges();
   }
 
   onSaveProfile(): void {
@@ -450,8 +472,10 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
       this.profileForm.markAllAsTouched();
       return;
     }
+    if (this.isSaving) return;
 
     this.isSaving = true;
+    this.cd.detectChanges();
     const { email: _email, ...payload } = this.profileForm.getRawValue();
     const ageValue = payload.age as number | string | null;
     if (ageValue === '' || ageValue == null) {
@@ -459,6 +483,14 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     } else {
       payload.age = Number(ageValue);
     }
+
+    const stopSaving = () => {
+      this.zone.run(() => {
+        this.isSaving = false;
+        this.isUploadingPhoto = false;
+        this.cd.detectChanges();
+      });
+    };
 
     const finalizeSave = (photoUrl: string | null | undefined) => {
       const updatePayload: Partial<UserProfile> = {
@@ -468,24 +500,27 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
       this.profileService.updateProfile(this.userId!, updatePayload).subscribe({
         next: (res) => {
-          this.isSaving = false;
-          this.isUploadingPhoto = false;
           const ok = Number(res?.status) === 1;
           if (ok) {
-            this.profile = res.data;
-            this.applyProfileData(res.data);
-            const stored = this.getStoredUser() || {};
-            this.authService.saveSession({ ...stored, ...res.data });
-            this.profileLoadWarning = '';
-            this.toastr.success('Profile updated successfully');
-            this.closeEditSidebar();
+            this.zone.run(() => {
+              this.profile = res.data;
+              this.applyProfileData(res.data);
+              const stored = this.getStoredUser() || {};
+              this.authService.saveSession({ ...stored, ...res.data });
+              this.profileLoadWarning = '';
+              this.isSaving = false;
+              this.isUploadingPhoto = false;
+              this.toastr.success('Profile updated successfully');
+              this.closeEditSidebar();
+              this.cd.detectChanges();
+            });
           } else {
+            stopSaving();
             this.toastr.error(res?.message || 'Update failed');
           }
         },
         error: () => {
-          this.isSaving = false;
-          this.isUploadingPhoto = false;
+          stopSaving();
           this.toastr.error('Could not save profile. Ensure DB migration is applied and backend is redeployed.');
         },
       });
@@ -495,20 +530,18 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
       this.isUploadingPhoto = true;
       this.profileService.uploadProfilePhoto(this.pendingPhotoFile).subscribe({
         next: (res) => {
-          if (!res || res.status !== 1 || !res.url) {
-            this.isSaving = false;
-            this.isUploadingPhoto = false;
+          if (!res || Number(res.status) !== 1 || !res.url) {
+            stopSaving();
             this.toastr.error('Photo upload failed. Try again.');
             return;
           }
           const url = res.url.startsWith('http')
             ? res.url
-            : environment.hostingerUploadUrl + res.url;
+            : environment.hostingerUploadUrl.replace(/\/+$/, '') + res.url;
           finalizeSave(url);
         },
         error: () => {
-          this.isSaving = false;
-          this.isUploadingPhoto = false;
+          stopSaving();
           this.toastr.error('Photo upload failed. Try again.');
         },
       });

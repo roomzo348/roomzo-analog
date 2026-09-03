@@ -1,24 +1,18 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { writeFile } from 'node:fs/promises';
 import { createError, type H3Event, readMultipartFormData } from 'h3';
+import { getImageStorageDir, imageFilePath, publicImageUrl } from './image-storage-path';
 
 const UPLOAD_SECRET = process.env['UPLOAD_SECRET_KEY'] || 'vK9#mP2$xL5@jR8&qW3';
 const MAX_BYTES = 12 * 1024 * 1024;
-const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg']);
-
-function resolveUploadDir(): string {
-  const fromEnv = String(process.env['IMAGE_STORAGE_PATH'] || '').trim();
-  if (fromEnv) return fromEnv.replace(/[/\\]+$/, '');
-  return join(process.cwd(), 'public', 'images');
-}
 
 function safeName(original: string): string {
   const base = original.replace(/\\/g, '/').split('/').pop() || 'photo.jpg';
   return base.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 120) || 'photo.jpg';
 }
 
-export async function handleImageUpload(event: H3Event): Promise<{ status: number; url?: string; message?: string }> {
+export async function handleImageUpload(
+  event: H3Event
+): Promise<{ status: number; url?: string; message?: string }> {
   const parts = await readMultipartFormData(event);
   if (!parts?.length) {
     throw createError({ statusCode: 400, statusMessage: 'No file received' });
@@ -36,7 +30,7 @@ export async function handleImageUpload(event: H3Event): Promise<{ status: numbe
   }
 
   const mime = String(filePart.type || '').toLowerCase();
-  if (mime && !ALLOWED.has(mime) && !mime.startsWith('image/')) {
+  if (mime && !mime.startsWith('image/')) {
     throw createError({ statusCode: 400, statusMessage: 'Only image files are allowed' });
   }
 
@@ -44,16 +38,27 @@ export async function handleImageUpload(event: H3Event): Promise<{ status: numbe
     throw createError({ statusCode: 400, statusMessage: 'Image is too large (max 12MB)' });
   }
 
-  const dir = resolveUploadDir();
-  if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true });
+  // 1) Write to disk: roomzo.in/storage/images/<file>
+  const dir = getImageStorageDir();
+  const fileName = `${Date.now().toString(16)}_${safeName(filePart.filename || 'photo.jpg')}`;
+  const fullPath = imageFilePath(fileName);
+
+  try {
+    await writeFile(fullPath, filePart.data);
+  } catch (err: any) {
+    console.error('[upload] failed writing to', fullPath, err);
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Cannot write to ${dir}. Set IMAGE_STORAGE_PATH on Hostinger.`,
+    });
   }
 
-  const fileName = `${Date.now().toString(16)}_${safeName(filePart.filename || 'photo.jpg')}`;
-  await writeFile(join(dir, fileName), filePart.data);
+  // 2) Return symlink URL for DB: https://roomzo.in/images/<file>
+  const url = publicImageUrl(fileName);
+  console.log('[upload] disk=', fullPath, 'url=', url);
 
   return {
     status: 1,
-    url: `/images/${fileName}`,
+    url,
   };
 }
