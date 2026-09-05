@@ -114,10 +114,6 @@
                 {{ prop.isRented === 1 ? 'Rented' : 'Available' }}
               </span>
             </div>
-            <div class="media-age-chip">
-              <mat-icon>schedule</mat-icon>
-              <span>{{ formatPostedDate(prop.createdOn) }}</span>
-            </div>
             <div class="media-price-overlay">
               <span class="currency-symbol">₹</span>
               <span class="price-digits">{{ prop.rentAmount ? prop.rentAmount.toLocaleString('en-IN') : '0' }}</span>

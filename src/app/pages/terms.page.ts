@@ -84,7 +84,7 @@ export const routeMeta: RouteMeta = {
         monthly credit pack: <strong>Starter at ₹19/month (4 contacts)</strong>,
         <strong>Plus at ₹49/month (10 contacts)</strong>, or
         <strong>Pro at ₹99/month (25 contacts)</strong>.
-        Pro includes <strong>full-time WhatsApp and call support</strong>; Starter and Plus do not.
+        Pro includes <strong>WhatsApp chat support</strong>; Starter and Plus do not.
         Payments are processed by Cashfree. Purchased contact credits never expire.
         <strong>A property you already unlocked stays available on your account even after credits run out</strong>,
         because that contact was already paid for.

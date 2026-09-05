@@ -120,6 +120,59 @@ h1, h2, h3, h4, p { margin: 0; }
 .btn-primary:hover { background: var(--rz-primary-hover); transform: translateY(-2px); }
 .mt-4 { margin-top: 24px; }
 
+.listing-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.listing-search-icon {
+  color: #94a3b8;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.listing-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #0f172a;
+  min-width: 0;
+}
+
+.listing-search-bar input::placeholder {
+  color: #94a3b8;
+}
+
+.listing-search-clear {
+  border: none;
+  background: #f1f5f9;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0;
+}
+
+.listing-search-clear mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 /* --- 3. Grid & Cards --- */
 .listings-grid {
   display: grid;
@@ -181,6 +234,20 @@ h1, h2, h3, h4, p { margin: 0; }
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+.listing-id-chip {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0f172a;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 /* Card Content */

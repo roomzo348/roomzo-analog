@@ -14,7 +14,7 @@ export const routeMeta: RouteMeta = {
     {
       name: 'description',
       content:
-        'Unlock owner contacts on Roomzo. Starter is ₹19 for 4 contacts, Plus is ₹49 for 11, and Pro is ₹99 for 25 with full-time WhatsApp and call support.',
+        'Unlock owner contacts on Roomzo. Starter is ₹19 for 4 contacts, Plus is ₹49 for 11, and Pro is ₹99 for 25 with WhatsApp chat support.',
     },
   ],
 };

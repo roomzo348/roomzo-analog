@@ -124,8 +124,8 @@
             <span class="type-eyebrow">
               <mat-icon>verified</mat-icon> Owner listed · No brokerage
             </span>
-            <span class="posted-inline" *ngIf="property.createdOn">
-              <mat-icon>schedule</mat-icon> {{ property.createdOn | date: 'MMM d, y' }}
+            <span class="posted-inline" *ngIf="isListingOwner() && property.createdOn">
+              <mat-icon>schedule</mat-icon> Added {{ property.createdOn | date: 'MMM d, y' }}
             </span>
           </div>
           <h1>{{ property.propertyType }} in {{ property.street }}</h1>

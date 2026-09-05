@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,7 +48,8 @@ export class ConfirmDeleteDialogComponent {}
   selector: 'app-my-listings',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
+    FormsModule,
     MatIconModule, 
     MatButtonModule, 
     RouterLink, 
@@ -67,6 +69,7 @@ export default class MyListingsComponent implements OnInit {
   ownerId: number | null = null;
   activeTab: 'my-properties' | 'favorites' = 'my-properties';
   listingInsights: Record<number, ListingInsights> = {};
+  listingIdSearch = '';
 
   constructor(
     private propertyService: PropertyService,
@@ -141,6 +144,16 @@ export default class MyListingsComponent implements OnInit {
 
   switchTab(tab: 'my-properties' | 'favorites'): void {
     this.activeTab = tab;
+  }
+
+  get filteredListings(): any[] {
+    const q = String(this.listingIdSearch || '').trim();
+    if (!q) return this.listings;
+    return this.listings.filter((prop) => String(prop?.id ?? '').includes(q));
+  }
+
+  clearListingSearch(): void {
+    this.listingIdSearch = '';
   }
 
   loadMyListings() {
@@ -286,18 +299,14 @@ export default class MyListingsComponent implements OnInit {
   }
 
   formatPostedDate(dateString?: string): string {
-    if (!dateString) return 'Recently posted';
-    
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    if (!dateString) return 'Added recently';
 
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    else if (diffInHours < 24) return `${diffInHours}h ago`;
-    else if (diffInDays < 7) return `${diffInDays}d ago`;
-    else return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return 'Added recently';
+
+    return (
+      'Added ' +
+      date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    );
   }
 }

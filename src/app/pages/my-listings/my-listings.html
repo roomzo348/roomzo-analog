@@ -31,6 +31,25 @@
       </button>
     </div>
 
+    <div class="listing-search-bar" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length > 0">
+      <mat-icon class="listing-search-icon">search</mat-icon>
+      <input
+        type="search"
+        inputmode="numeric"
+        [(ngModel)]="listingIdSearch"
+        placeholder="Search by room ID (e.g. 261)"
+        aria-label="Search listings by room ID"
+      />
+      <button
+        type="button"
+        class="listing-search-clear"
+        *ngIf="listingIdSearch"
+        (click)="clearListingSearch()"
+        aria-label="Clear search">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
     <div class="loading-state" *ngIf="isLoading">
         <div class="modern-spinner"></div>
         <p>Loading your portfolio...</p>
@@ -53,9 +72,20 @@
       <p>Save properties you like and they will appear here for quick access.</p>
     </div>
 
-    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length > 0">
+    <div
+      class="empty-state"
+      *ngIf="!isLoading && activeTab === 'my-properties' && listings.length > 0 && filteredListings.length === 0">
+        <div class="empty-icon-circle">
+            <mat-icon>search_off</mat-icon>
+        </div>
+        <h3>No listing with ID “{{ listingIdSearch }}”</h3>
+        <p>Check the room ID and try again, or clear the search.</p>
+        <button type="button" class="btn-primary mt-4" (click)="clearListingSearch()">Clear search</button>
+    </div>
 
-        <div class="property-card" *ngFor="let prop of listings">
+    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'my-properties' && filteredListings.length > 0">
+
+        <div class="property-card" *ngFor="let prop of filteredListings">
 
             <div class="card-image" (click)="editProperty(prop.id)" style="cursor: pointer;">
                 <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
@@ -64,10 +94,10 @@
                     <span class="dot"></span> {{ getStatusLabel(prop.isRented) | titlecase }}
                 </div>
 
-                <!-- Posted Date Badge -->
-                <div class="posted-date-badge">
-                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
+                <div class="posted-date-badge" title="When you added this listing">
+                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated || prop.createdOn) }}
                 </div>
+                <div class="listing-id-chip">ID {{ prop.id }}</div>
             </div>
 
             <div class="card-content">
@@ -142,9 +172,6 @@
         <div class="property-card" *ngFor="let prop of favoriteListings">
             <div class="card-image" [routerLink]="['/room', prop.id]" style="cursor: pointer;">
                 <img [src]="(prop.photos && prop.photos.length > 0) ? (prop.photos[0].photoUrl || prop.photos[0].url) : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Saved home">
-                <div class="posted-date-badge">
-                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
-                </div>
             </div>
 
             <div class="card-content">

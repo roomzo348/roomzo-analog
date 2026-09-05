@@ -64,7 +64,7 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
         'Direct Owner Contact',
         'New Listing Alerts',
         'No brokerage cut on rent',
-        'Full-time WhatsApp & call support',
+        'WhatsApp chat support',
       ],
       priceLabel: '₹99/month',
     },

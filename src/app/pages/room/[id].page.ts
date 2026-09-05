@@ -767,6 +767,13 @@ private setContactLoading(loading: boolean): void {
     }
     return false;
   }
+
+  /** True when the logged-in user owns this listing (used to show added date privately). */
+  isListingOwner(): boolean {
+    const user = this.getLoggedInUser();
+    if (!user?.id || !this.property?.ownerId) return false;
+    return Number(user.id) === Number(this.property.ownerId);
+  }
   
   checkReturnFromLogin() {
     const params = this.route.snapshot.queryParams;

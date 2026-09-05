@@ -35,7 +35,8 @@ export class ListingCardComponent implements OnInit, OnChanges {
   @Input() showActions = true;
   @Input() showSpecs = true;
   @Input() showAvailabilityBadge = true;
-  @Input() showPostedDate = true;
+  /** Hidden by default so public feeds don't look "old". Sorting still uses postedDate. */
+  @Input() showPostedDate = false;
   @Input() priceUnit = '/month';
   @Input() locationIcon = 'location_on';
   @Input() availabilityLabel = 'Available';

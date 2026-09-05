@@ -10,9 +10,9 @@ describe('contact plans', () => {
     expect(CONTACT_PLANS.pro.amountPaise).toBe(9900);
     expect(CONTACT_PLANS.pro.contacts).toBe(25);
     expect(listContactPlans()).toHaveLength(3);
-    expect(CONTACT_PLANS.pro.features.some((item) => /full-time whatsapp/i.test(item))).toBe(true);
-    expect(CONTACT_PLANS.starter.features.some((item) => /full-time whatsapp/i.test(item))).toBe(false);
-    expect(CONTACT_PLANS.plus.features.some((item) => /full-time whatsapp/i.test(item))).toBe(false);
+    expect(CONTACT_PLANS.pro.features.some((item) => /whatsapp chat support/i.test(item))).toBe(true);
+    expect(CONTACT_PLANS.starter.features.some((item) => /whatsapp chat support/i.test(item))).toBe(false);
+    expect(CONTACT_PLANS.plus.features.some((item) => /whatsapp chat support/i.test(item))).toBe(false);
   });
 
   it('resolves plan codes case-insensitively', () => {

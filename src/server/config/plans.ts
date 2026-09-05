@@ -69,7 +69,7 @@ export const CONTACT_PLANS: Record<PlanCode, ContactPlan> = {
       'Direct Owner Contact',
       'New Listing Alerts',
       'No brokerage cut on rent',
-      'Full-time WhatsApp & call support',
+      'WhatsApp chat support',
       'Shortlist & Compare Properties',
     ],
   },
