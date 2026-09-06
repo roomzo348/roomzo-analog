@@ -169,8 +169,8 @@
                 <mat-icon class="dropdown-icon">expand_more</mat-icon>
               </div>
               <div class="dropdown-menu" *ngIf="isDropdownOpen">
-                <div class="dropdown-item" [class.active]="filters.sortBy === 'nearest'" (click)="selectSort('nearest')">Nearest First</div>
                 <div class="dropdown-item" [class.active]="filters.sortBy === 'latest'" (click)="selectSort('latest')">Latest First</div>
+                <div class="dropdown-item" [class.active]="filters.sortBy === 'nearest'" (click)="selectSort('nearest')">Nearest First</div>
                 <div class="dropdown-item" [class.active]="filters.sortBy === 'oldest'" (click)="selectSort('oldest')">Oldest First</div>
               </div>
             </div>

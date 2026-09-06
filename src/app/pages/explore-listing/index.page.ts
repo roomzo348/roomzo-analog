@@ -71,7 +71,7 @@ filters: ListingFilter = {
     maxPrice: 50000,
     propertyType: 'Any',
     bedrooms: 'Any',
-    sortBy: 'nearest',
+    sortBy: 'latest',
   };
   availabilityFilter: 'available' | 'all' = 'all';
 
@@ -283,7 +283,6 @@ filters: ListingFilter = {
     const result = event.option.value as LocationSearchResult;
     this.applyResolvedLocation(result);
     this.searchControl.setValue(this.displayCity(result), { emitEvent: false });
-    this.filters.sortBy = 'nearest';
     this.currentPage = 0;
     this.loadListings();
   }
@@ -382,10 +381,7 @@ loadListings(): void {
 
     if (this.isLocationResult(raw)) {
       this.applyResolvedLocation(raw);
-      this.filters.sortBy = this.filters.sortBy || 'nearest';
-      if (this.filters.sortBy !== 'latest' && this.filters.sortBy !== 'oldest') {
-        this.filters.sortBy = 'nearest';
-      }
+      this.filters.sortBy = this.filters.sortBy || 'latest';
       this.loadListings();
       return;
     }
@@ -409,7 +405,6 @@ loadListings(): void {
       this.filters.city = undefined;
       this.filters.state = undefined;
       this.filters.zone = undefined;
-      this.filters.sortBy = 'nearest';
       this.selectedLocation = local.city
         ? { city: local.city, state: local.state || '' }
         : null;
@@ -432,7 +427,6 @@ loadListings(): void {
     const localMatch = searchLocalLocations(searchText, 1)[0];
     if (localMatch) {
       this.applyResolvedLocation(localMatch);
-      this.filters.sortBy = 'nearest';
       this.searchControl.setValue(this.displayCity(localMatch), { emitEvent: false });
       this.loadListings();
       return;
@@ -443,7 +437,6 @@ loadListings(): void {
     this.geocodeSearchText(searchText).subscribe((result) => {
       if (result) {
         this.applyResolvedLocation(result);
-        this.filters.sortBy = 'nearest';
         this.searchControl.setValue(this.displayCity(result), { emitEvent: false });
       } else {
         this.filters.lat = undefined;
@@ -499,7 +492,7 @@ loadListings(): void {
       maxPrice: 50000,
       propertyType: 'Any',
       bedrooms: 'Any',
-      sortBy: 'nearest',
+      sortBy: 'latest',
     };
     this.searchControl.setValue('');
     this.selectedLocation = null;
@@ -652,9 +645,9 @@ loadListings(): void {
 
   getSortLabel(): string {
     switch(this.filters.sortBy) {
-      case 'latest': return 'Latest First';
+      case 'nearest': return 'Nearest First';
       case 'oldest': return 'Oldest First';
-      default: return 'Nearest First';
+      default: return 'Latest First';
     }
   }
 
@@ -791,7 +784,6 @@ let userId: string | null = null;
     this.filters.city = undefined;
     this.filters.state = undefined;
     this.filters.zone = undefined;
-    this.filters.sortBy = 'nearest';
 
     const coords = getKnownZoneCoordinates(resolvedName);
     if (coords) {
