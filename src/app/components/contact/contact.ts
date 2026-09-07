@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,9 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./contact.css']
 })
 export class ContactComponent {
+  /** Softer layout when nested on the home page */
+  @Input() embedded = false;
+
   contactForm: FormGroup;
   isSubmitting = false;
 

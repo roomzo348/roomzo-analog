@@ -471,6 +471,11 @@
   .desktop-only { display: none; }
   .flatmates-wrapper { padding: 0; background: #000; }
   .feed-container { display: block; padding: 0; }
+
+  .page-header { margin-bottom: 1.25rem; padding: 16px 16px 0; }
+  .header-content h1 { font-size: 1.3rem !important; }
+  .header-content p { font-size: 0.88rem !important; margin-bottom: 16px !important; }
+  .btn-post-ad { font-size: 0.9rem !important; padding: 10px 20px; }
   
   .profile-card {
     height: 100vh;
@@ -494,11 +499,11 @@
     gap: 10px;
   }
 
-  .card-title { color: white; font-size: 1.45rem; }
+  .card-title { color: white; font-size: 1.2rem !important; }
   .age-gender { color: rgba(255,255,255,0.75); }
   .profession { color: rgba(255,255,255,0.88); font-size: 0.88rem; }
   
-  .bio { color: rgba(255,255,255,0.96); font-size: 0.92rem; }
+  .bio { color: rgba(255,255,255,0.96); font-size: 0.88rem; }
   .read-more-text { color: #60a5fa; } /* Brighter blue for dark background */
 
   .tag {

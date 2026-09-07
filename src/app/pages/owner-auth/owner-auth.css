@@ -89,6 +89,17 @@
   .pt-header {
     padding-top: 80px !important;
   }
+  .letter-spacing-lg {
+    font-size: 1.2rem !important;
+  }
+  .auth-card h2,
+  .auth-card .h4,
+  .auth-card h4 {
+    font-size: 1.15rem !important;
+  }
+  .form-control, .form-select, .input-group-text {
+    font-size: 0.88rem !important;
+  }
 }
 .cursor-pointer {
   cursor: pointer;

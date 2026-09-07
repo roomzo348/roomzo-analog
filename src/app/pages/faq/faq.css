@@ -154,6 +154,8 @@
 /* Mobile Adjustments */
 @media (max-width: 600px) {
   .faq-header { padding: 40px 20px 80px; } /* More bottom padding for overlap */
+  .faq-header h1 { font-size: 1.35rem !important; }
+  .faq-header p { font-size: 0.88rem !important; }
   
   .tabs-container {
     flex-wrap: wrap;
@@ -164,5 +166,6 @@
   .tab-btn {
     flex: 1 1 auto;
     text-align: center;
+    font-size: 0.85rem;
   }
 }

@@ -1,261 +1,220 @@
 /* ============================================================
-   HERO — RoomZo
-   Theme color: #196153 (deep teal)
-
-   Image: Unsplash photo-1484154218962-a197022b5858
-   Bright, airy modern room interior — warm whites + wood tones
-   complement the deep teal perfectly. 100% free commercial use.
-   Alt option: photo-1556909114-f6e7ad7d3136 (cozy desk setup)
+   HERO — flush under header + screenshot layout
 ============================================================ */
 
 .hero-full {
   position: relative;
-  min-height: 480px;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 0;
+  /* Desktop flush: matches .rz-header.scrolled height: 52px */
+  margin-top: 52px;
+  overflow: hidden;
   background: url('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1400&q=85')
-              center center / cover no-repeat;
+              center 32% / cover no-repeat;
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  /* Teal-tinted overlay instead of plain black — ties to brand */
   background:
     linear-gradient(
       105deg,
-      rgba(15, 40, 35, 0.88) 0%,
-      rgba(15, 40, 35, 0.60) 50%,
-      rgba(15, 40, 35, 0.10) 100%
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.45) 42%,
+      rgba(255, 255, 255, 0.2) 70%,
+      rgba(255, 255, 255, 0.35) 100%
     ),
     linear-gradient(
-      to top,
-      rgba(15, 40, 35, 0.75) 0%,
-      transparent 55%
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 40%,
+      rgba(241, 245, 249, 0.75) 88%,
+      rgba(226, 232, 240, 0.9) 100%
     );
   z-index: 1;
+  pointer-events: none;
 }
 
-.hero-content-center {
+.hero-inner {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 960px;
-  padding: 56px 24px 44px;
-  text-align: left;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 32px 12px;
 }
 
-/* ---- Heading ---- */
-.hero-content-center h1 {
+/* Height = title + sub only; script overlays title area, never search */
+.hero-text-block {
+  position: relative;
+  margin-bottom: 12px;
+  max-width: 640px;
+  padding-right: 110px;
+  overflow: visible;
+}
+
+.hero-text-block h1 {
   font-family: 'Outfit', sans-serif;
-  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  font-size: clamp(1.85rem, 3.2vw, 2.6rem);
   font-weight: 800;
   line-height: 1.15;
-  letter-spacing: -0.3px;
-  color: #ffffff;
+  letter-spacing: -0.4px;
+  color: #0f172a;
   margin: 0 0 6px;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+  text-shadow: none;
 }
 
-.hero-accent {
-  /* Lighter teal-green for accent — visible on dark overlay */
-  color: #4ade80;
-  display: block;
-}
-
-/* ---- Sub ---- */
 .hero-sub {
   font-family: 'Outfit', sans-serif;
-  color: rgba(255,255,255,0.80);
+  color: #475569;
   font-size: 1rem;
   font-weight: 400;
-  margin: 0 0 18px;
+  margin: 0;
 }
 
-/* ---- Trust badges ---- */
-.hero-badges {
+/* 2-line signature — stays beside title, clear of search */
+.hero-script {
+  position: absolute;
+  top: 0;
+  right: 4px;
+  margin: 0;
+  max-width: 100px;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+  font-weight: 600;
+  color: #196153;
+  line-height: 1.05;
+  text-align: right;
+  transform: rotate(-6deg);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hero-script-marks {
+  display: block;
+  width: 36px;
+  height: 2px;
+  margin: 4px 0 0 auto;
+  background: #196153;
+  border-radius: 2px;
+  transform: rotate(-4deg);
+  opacity: 0.9;
+}
+
+.hero-trust {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 22px;
+  justify-content: center;
+  gap: 28px;
   flex-wrap: wrap;
+  padding: 10px 20px 12px;
+  background: rgba(226, 232, 240, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.badge-pill {
+.trust-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.22);
-  color: #fff;
-  border-radius: 50px;
-  padding: 6px 14px;
-  font-size: 0.84rem;
+  color: #1e293b;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
   font-weight: 500;
-  font-family: 'Outfit', sans-serif;
 }
 
-.badge-pill mat-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-  color: #4ade80;
-}
-
-.badge-sep {
-  color: rgba(255,255,255,0.35);
-  font-size: 1rem;
-}
-
-/* ============================================================
-   STATS STRIP — below hero
-============================================================ */
-.hero-stats-strip {
-  display: flex;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
-  max-width: 960px;
-  width: calc(100% - 32px);
-  margin: 14px auto 0;
-  padding: 16px 24px;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  justify-content: center;
-}
-
-.stat-icon {
-  font-size: 26px;
-  width: 26px;
-  height: 26px;
-  color: #196153;
-  flex-shrink: 0;
-}
-
-.stat-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.stat-number {
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
+.trust-item mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
   color: #196153;
 }
 
-.stat-label {
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 400;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 36px;
-  background: #e5e7eb;
-  flex-shrink: 0;
-  margin: 0 8px;
-}
-
-/* ============================================================
-   MOBILE (≤ 768px)
-============================================================ */
+/* ---- Mobile: tight title → search like screenshot ---- */
 @media (max-width: 768px) {
   .hero-full {
-    min-height: 370px;
+    /* Mobile: live-measured header height */
+    margin-top: var(--rz-header-height, 56px);
+    min-height: 0;
+    border-radius: 0 0 20px 20px;
+    padding-bottom: 0;
   }
 
-  .hero-content-center {
-    padding: 0 16px 22px !important;
+  .hero-overlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.42) 0%,
+        rgba(255, 255, 255, 0.55) 45%,
+        rgba(248, 250, 252, 0.78) 80%,
+        rgba(226, 232, 240, 0.7) 100%
+      );
   }
 
-  .hero-content-center h1 {
-    font-size: 1.65rem;
-    margin: 0 0 4px;
+  .hero-inner {
+    padding: 8px 14px 6px !important;
   }
 
-  .hero-accent {
-    font-size: 1.75rem;
+  .hero-text-block {
+    margin-bottom: 8px !important;
+    max-width: 100%;
+    padding-right: 72px;
+  }
+
+  .hero-text-block h1 {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.25px !important;
+    color: #0f172a !important;
+    margin: 0 0 2px !important;
+    text-shadow: none !important;
   }
 
   .hero-sub {
-    font-size: 0.85rem;
-    margin: 0 0 12px;
+    font-size: 0.65rem !important;
+    line-height: 1.25 !important;
+    color: #475569 !important;
+    margin: 0 !important;
   }
 
-  .hero-badges {
-    margin-bottom: 16px;
-    gap: 8px;
+  .hero-script {
+    top: 0;
+    right: 2px;
+    max-width: 68px;
+    font-size: 0.78rem;
+    line-height: 1.02;
+    transform: rotate(-5deg);
   }
 
-  .badge-pill {
-    padding: 5px 11px;
-    font-size: 0.80rem;
+  .hero-script-marks {
+    width: 22px;
+    height: 1.5px;
+    margin-top: 2px;
   }
 
-  /* Stats mobile — all 4 in one row */
-  .hero-stats-strip {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    width: calc(100% - 20px);
-    margin: 10px auto 0;
-    padding: 10px 4px;
-    border-radius: 12px;
+  .hero-trust {
     gap: 0;
+    justify-content: space-between;
+    padding: 6px 10px 8px;
+    margin: 0;
   }
 
-  .stat-item {
-    flex: 1 1 0;
-    min-width: 0;
-    flex-direction: column;
-    gap: 2px;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 0 2px;
-  }
-
-  .stat-icon {
-    font-size: 15px;
-    width: 15px;
-    height: 15px;
-  }
-
-  .stat-text {
-    align-items: center;
-  }
-
-  .stat-number {
-    font-size: 0.8rem;
-    letter-spacing: -0.02em;
-  }
-
-  .stat-label {
+  .trust-item {
     font-size: 0.56rem;
+    gap: 2px;
     white-space: nowrap;
-    line-height: 1.15;
+    flex: 1 1 0;
+    justify-content: center;
   }
 
-  .stat-divider {
-    display: block;
-    align-self: center;
-    height: 28px;
-    margin: 0 1px;
-    flex-shrink: 0;
+  .trust-item mat-icon {
+    font-size: 11px;
+    width: 11px;
+    height: 11px;
   }
 }
-
-/* Removed animated city rotate — replaced with static 4+ Cities */

@@ -91,7 +91,7 @@ function buildFilterWhere(filters: ListingSearchInput, values: unknown[]): strin
     values.push(filters.minPrice);
   }
   if (filters.propertyType) {
-    where.push(`p.property_type = ?`);
+    where.push(`LOWER(TRIM(p.property_type)) = LOWER(TRIM(?))`);
     values.push(filters.propertyType);
   }
   if (filters.bedrooms != null) {
@@ -107,8 +107,15 @@ function buildFilterWhere(filters: ListingSearchInput, values: unknown[]): strin
     values.push(filters.state);
   }
   if (filters.zone) {
-    where.push(`(LOWER(COALESCE(p.zone, '')) = LOWER(?) OR LOWER(COALESCE(p.landmark, '')) = LOWER(?))`);
-    values.push(filters.zone, filters.zone);
+    // Match exact zone/landmark or partial (typed landmarks, street mentions).
+    where.push(`(
+      LOWER(COALESCE(p.zone, '')) = LOWER(?)
+      OR LOWER(COALESCE(p.landmark, '')) = LOWER(?)
+      OR LOWER(COALESCE(p.zone, '')) LIKE CONCAT('%', LOWER(?), '%')
+      OR LOWER(COALESCE(p.landmark, '')) LIKE CONCAT('%', LOWER(?), '%')
+      OR LOWER(COALESCE(p.street, '')) LIKE CONCAT('%', LOWER(?), '%')
+    )`);
+    values.push(filters.zone, filters.zone, filters.zone, filters.zone, filters.zone);
   }
   return where.join(' AND ');
 }
@@ -161,11 +168,21 @@ export async function searchListings(filters: ListingSearchInput): Promise<{
       distanceParams.push(lat, lng, lat);
     } else if (sort === 'oldest') {
       orderBy = 'p.created_on ASC';
+    } else if (sort === 'price_low' || sort === 'price-low' || sort === 'price_asc') {
+      orderBy = 'p.rent_amount ASC, p.created_on DESC';
+    } else if (sort === 'price_high' || sort === 'price-high' || sort === 'price_desc') {
+      orderBy = 'p.rent_amount DESC, p.created_on DESC';
     } else {
       orderBy = 'p.created_on DESC';
     }
   } else if (sort === 'oldest') {
     orderBy = 'p.created_on ASC';
+  } else if (sort === 'price_low' || sort === 'price-low' || sort === 'price_asc') {
+    orderBy = 'p.rent_amount ASC, p.created_on DESC';
+  } else if (sort === 'price_high' || sort === 'price-high' || sort === 'price_desc') {
+    orderBy = 'p.rent_amount DESC, p.created_on DESC';
+  } else {
+    orderBy = 'p.created_on DESC';
   }
 
   const countRows = await sqlQuery<{ total: number }>(

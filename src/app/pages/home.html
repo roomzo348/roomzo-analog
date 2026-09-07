@@ -1,72 +1,83 @@
 <app-hero></app-hero>
 
+<section class="explore-category-section">
+  <div class="container">
+    <div class="section-header-row">
+      <h3>Explore by Category</h3>
+      <a routerLink="/explore-listing" class="section-view-all">View All <mat-icon>arrow_forward</mat-icon></a>
+    </div>
+
+    <div class="categories-container">
+      <button type="button" class="category-card cat-flatmates" (click)="navigateToCategory('flatmate')">
+        <span class="category-icon-slot" aria-hidden="true">
+          <mat-icon class="category-icon">groups</mat-icon>
+        </span>
+        <span class="category-name">Flatmates</span>
+        <span class="category-desc">Find your perfect match</span>
+        <span class="category-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+      </button>
+
+      <button type="button" class="category-card cat-rooms" (click)="navigateToCategory('room')">
+        <span class="category-icon-slot" aria-hidden="true">
+          <mat-icon class="category-icon">home</mat-icon>
+        </span>
+        <span class="category-name">Rooms</span>
+        <span class="category-desc">Single &amp; Sharing Rooms</span>
+        <span class="category-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+      </button>
+
+      <button type="button" class="category-card cat-pg" (click)="navigateToCategory('pg')">
+        <span class="category-icon-slot" aria-hidden="true">
+          <mat-icon class="category-icon">bed</mat-icon>
+        </span>
+        <span class="category-name">PG / Hostels</span>
+        <span class="category-desc">Comfortable &amp; Affordable</span>
+        <span class="category-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+      </button>
+
+      <button type="button" class="category-card cat-flats" (click)="navigateToCategory('flat')">
+        <span class="category-icon-slot" aria-hidden="true">
+          <mat-icon class="category-icon">apartment</mat-icon>
+        </span>
+        <span class="category-name">Flats</span>
+        <span class="category-desc">1 BHK, 2 BHK &amp; more</span>
+        <span class="category-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+      </button>
+    </div>
+  </div>
+</section>
+
 <section class="popular-cities-section">
   <div class="container">
-    <div class="section-header-mobile">
-      <h3>EXPLORE CITIES</h3>
+    <div class="section-header-row">
+      <h3>Explore Cities</h3>
+      <a routerLink="/explore-city" class="section-view-all">View All <mat-icon>arrow_forward</mat-icon></a>
     </div>
-    
-<div class="cities-container">
-      <div 
-        class="city-wrapper" 
-        *ngFor="let city of popularCities" 
+
+    <div class="cities-container">
+      <div
+        class="city-wrapper"
+        *ngFor="let city of popularCities"
         [class.inactive]="!city.active"
-        (click)="city.active ? exploreCity(city.name, city.state) : null"> <div class="city-circle">
+        (click)="city.active ? exploreCity(city.name, city.state) : null">
+        <div class="city-circle">
           <img [src]="city.image" [alt]="city.name">
-          
           <div class="coming-soon-overlay" *ngIf="!city.active">
-             <span>Coming<br>Soon</span>
+            <span>Coming<br>Soon</span>
           </div>
         </div>
-        
         <span class="city-name-outside">{{ city.name }}</span>
       </div>
     </div>
   </div>
 </section>
-<section class="explore-category-section">
-  <div class="container">
-    <div class="section-header-mobile">
-      <h3>EXPLORE BY CATEGORY</h3>
-    </div>
 
-    <div class="categories-container">
-      <div class="category-item" (click)="navigateToCategory('flatmate')">
-        <div class="category-logo icon-orange">
-          <mat-icon>groups</mat-icon>
-        </div>
-        <span class="category-name">Flatmates</span>
-      </div>
-
-      <div class="category-item" (click)="navigateToCategory('room')">
-        <div class="category-logo icon-blue">
-          <mat-icon>home</mat-icon>
-        </div>
-        <span class="category-name">Rooms</span>
-      </div>
-
-      <div class="category-item" (click)="navigateToCategory('pg')">
-        <div class="category-logo icon-green">
-          <mat-icon>bed</mat-icon>
-        </div>
-        <span class="category-name">PG / Hostels</span>
-      </div>
-
-      <div class="category-item" (click)="navigateToCategory('flat')">
-        <div class="category-logo icon-purple">
-          <mat-icon>apartment</mat-icon>
-        </div>
-        <span class="category-name">Flats</span>
-      </div>
-    </div>
-  </div>
-</section>
 <section class="featured-section">
   <div class="container">
     
-    <div class="section-header-mobile">
-      <h3>FEATURED PROPERTIES</h3>
-      <p class="section-subtitle">Hand-picked listings promoted on Roomzo</p>
+    <div class="section-header-row">
+      <h3>Featured Properties</h3>
+      <a routerLink="/explore-listing" class="section-view-all">View All <mat-icon>arrow_forward</mat-icon></a>
     </div>
 
     <div class="loader-container" *ngIf="isLoadingFeatured">
@@ -80,13 +91,16 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <div class="listings-grid" #featuredCarouselGrid (scroll)="onFeaturedScroll()">
+      <div class="listings-grid featured-grid" #featuredCarouselGrid (scroll)="onFeaturedScroll()">
         <app-listing-card
           *ngFor="let item of featuredListings; let i = index"
           [listing]="item"
-          [availabilityLabel]="'Featured'"
-          [locationIcon]="'fiber_manual_record'"
+          [compact]="true"
+          [showActions]="true"
+          [showSpecs]="false"
+          [showAvailabilityBadge]="true"
           [showPostedDate]="false"
+          [priceUnit]="' / month'"
           [contactLoading]="contactLoadingId === item.id"
           (view)="viewDetails($event.id)"
           (call)="handleCardContactAction($event, 'call')"
@@ -100,13 +114,6 @@
       </button>
     </div>
 
-    <div class="carousel-dots" *ngIf="!isLoadingFeatured && featuredListings.length > 0">
-      <div class="dot" *ngFor="let item of featuredListings; let i = index" 
-           [ngClass]="{ 'active': getFeaturedVisibleIndices().includes(i) }"
-           (click)="scrollFeaturedToIndex(i)">
-      </div>
-    </div>
-
     <div class="section-empty" *ngIf="!isLoadingFeatured && featuredListings.length === 0">
       <mat-icon>star_border</mat-icon>
       <p>Featured picks will appear here soon.</p>
@@ -118,9 +125,9 @@
 <section class="featured-section recent-section">
   <div class="container">
 
-    <div class="section-header-mobile">
-      <h3>RECENT PROPERTIES</h3>
-      <p class="section-subtitle">Latest owner listings added on Roomzo</p>
+    <div class="section-header-row">
+      <h3>Recent Properties</h3>
+      <a routerLink="/explore-listing" class="section-view-all">View All <mat-icon>arrow_forward</mat-icon></a>
     </div>
 
     <div class="loader-container" *ngIf="isLoadingRecent">
@@ -134,13 +141,16 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <div class="listings-grid" #recentCarouselGrid (scroll)="onRecentScroll()">
+      <div class="listings-grid featured-grid" #recentCarouselGrid (scroll)="onRecentScroll()">
         <app-listing-card
           *ngFor="let item of recentListings; let i = index"
           [listing]="item"
-          [availabilityLabel]="'Owner listing'"
-          [locationIcon]="'fiber_manual_record'"
+          [compact]="true"
+          [showActions]="true"
+          [showSpecs]="false"
+          [showAvailabilityBadge]="true"
           [showPostedDate]="false"
+          [priceUnit]="' / month'"
           [contactLoading]="contactLoadingId === item.id"
           (view)="viewDetails($event.id)"
           (call)="handleCardContactAction($event, 'call')"
@@ -154,13 +164,6 @@
       </button>
     </div>
 
-    <div class="carousel-dots" *ngIf="!isLoadingRecent && recentListings.length > 0">
-      <div class="dot" *ngFor="let item of recentListings; let i = index" 
-           [ngClass]="{ 'active': getRecentVisibleIndices().includes(i) }"
-           (click)="scrollRecentToIndex(i)">
-      </div>
-    </div>
-
     <div class="section-empty" *ngIf="!isLoadingRecent && recentListings.length === 0">
       <mat-icon>home_work</mat-icon>
       <p>No recent listings yet. Check back soon or browse all rentals.</p>
@@ -170,11 +173,57 @@
   </div>
 </section>
 
+<!-- Owner CTA — between Recent and Nearby (CSS design, not screenshot) -->
+<section class="owner-list-cta-section" aria-label="List your property">
+  <div class="container">
+    <div class="owner-list-cta">
+      <div class="owner-list-cta-copy">
+        <h3 class="owner-list-cta-title">
+          Looking for Tenants
+          <span class="owner-list-cta-q">?</span>
+        </h3>
+        <ul class="owner-list-cta-points">
+          <li>
+            <mat-icon class="cta-point-icon">bolt</mat-icon>
+            <span>Faster &amp; Verified Tenants</span>
+          </li>
+          <li>
+            <span class="owner-list-cta-zero" aria-hidden="true">0</span>
+            <span>Pay <strong>ZERO</strong> brokerage</span>
+          </li>
+        </ul>
+        <a routerLink="/list-property" class="owner-list-cta-btn">Post FREE Property Ad</a>
+      </div>
+
+      <div class="owner-list-cta-art" aria-hidden="true">
+        <div class="cta-hand-key">
+          <span class="cta-hand"></span>
+          <span class="cta-key"></span>
+        </div>
+        <div class="cta-house">
+          <span class="cta-roof"></span>
+          <span class="cta-chimney"></span>
+          <span class="cta-body">
+            <span class="cta-window"></span>
+            <span class="cta-window"></span>
+            <span class="cta-door"></span>
+          </span>
+        </div>
+        <div class="cta-tree">
+          <span class="cta-foliage"></span>
+          <span class="cta-trunk"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="featured-section nearby-section" *ngIf="nearbySectionVisible && (isLoadingNearby || nearbyListings.length > 0)">
   <div class="container">
 
-    <div class="section-header-mobile">
-      <h3>PROPERTIES NEAR YOU</h3>
+    <div class="section-header-row">
+      <h3>Properties Near You</h3>
+      <a routerLink="/explore-listing" class="section-view-all">View All <mat-icon>arrow_forward</mat-icon></a>
     </div>
 
     <div class="loader-container" *ngIf="isLoadingNearby">
@@ -188,13 +237,16 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <div class="listings-grid" #nearbyCarouselGrid (scroll)="onNearbyScroll()">
+      <div class="listings-grid featured-grid" #nearbyCarouselGrid (scroll)="onNearbyScroll()">
         <app-listing-card
           *ngFor="let item of nearbyListings"
           [listing]="item"
-          [availabilityLabel]="'Owner listing'"
-          [locationIcon]="'location_on'"
+          [compact]="true"
+          [showActions]="true"
+          [showSpecs]="false"
+          [showAvailabilityBadge]="true"
           [showPostedDate]="false"
+          [priceUnit]="' / month'"
           [contactLoading]="contactLoadingId === item.id"
           (view)="viewDetails($event.id)"
           (call)="handleCardContactAction($event, 'call')"
@@ -213,100 +265,105 @@
 
 <section class="trust-features-section">
   <div class="container">
-    <div class="section-header-mobile">
-      <h3>WHY CHOOSE ROOMZO?</h3>
+    <div class="why-header">
+      <h3>Why Choose Roomzo?</h3>
+      <p class="why-subtitle">A simpler, safer and smarter way to find your next home</p>
     </div>
-    
-    <div class="trust-features-container">
-      <div class="trust-feature-card">
-        <div class="trust-icon-wrapper trust-icon-green">
-          <mat-icon>shield</mat-icon>
+
+    <div class="why-grid">
+      <article class="why-card why-card-green">
+        <div class="why-card-top">
+          <span class="why-icon" aria-hidden="true"><mat-icon>verified_user</mat-icon></span>
+          <span class="why-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
         </div>
-        <div class="trust-text">
-          <span class="trust-title">Safety reminders</span>
-          <span class="trust-subtitle">Visit before you pay</span>
+        <h4 class="why-card-title">Safety First</h4>
+        <p class="why-card-desc">Safety reminders and verified listings</p>
+      </article>
+
+      <article class="why-card why-card-blue">
+        <div class="why-card-top">
+          <span class="why-icon" aria-hidden="true"><mat-icon>chat</mat-icon></span>
+          <span class="why-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+        </div>
+        <h4 class="why-card-title">Direct Contact</h4>
+        <p class="why-card-desc">Call or WhatsApp owners directly</p>
+      </article>
+
+      <article class="why-card why-card-yellow">
+        <div class="why-card-top">
+          <span class="why-icon" aria-hidden="true"><mat-icon>currency_rupee</mat-icon></span>
+          <span class="why-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+        </div>
+        <h4 class="why-card-title">No Roomzo Brokerage</h4>
+        <p class="why-card-desc">For browse &amp; contact</p>
+      </article>
+
+      <article class="why-card why-card-purple">
+        <div class="why-card-top">
+          <span class="why-icon" aria-hidden="true"><mat-icon>location_on</mat-icon></span>
+          <span class="why-go" aria-hidden="true"><mat-icon>chevron_right</mat-icon></span>
+        </div>
+        <h4 class="why-card-title">City-Focused</h4>
+        <p class="why-card-desc">Prayagraj, Varanasi, Pune &amp; more</p>
+      </article>
+    </div>
+
+    <div class="home-stats-strip why-stats">
+      <div class="stat-item">
+        <mat-icon class="stat-icon">home</mat-icon>
+        <div class="stat-text">
+          <span class="stat-number">500+</span>
+          <span class="stat-label">Listings</span>
         </div>
       </div>
-
-      <div class="trust-feature-card">
-        <div class="trust-icon-wrapper trust-icon-blue">
-          <mat-icon>chat</mat-icon>
-        </div>
-        <div class="trust-text">
-          <span class="trust-title">Direct contact</span>
-          <span class="trust-subtitle">Call or WhatsApp owners</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <mat-icon class="stat-icon">group</mat-icon>
+        <div class="stat-text">
+          <span class="stat-number">1000+</span>
+          <span class="stat-label">Users</span>
         </div>
       </div>
-
-      <div class="trust-feature-card">
-        <div class="trust-icon-wrapper trust-icon-yellow">
-          <mat-icon>currency_rupee</mat-icon>
-        </div>
-        <div class="trust-text">
-          <span class="trust-title">No Roomzo brokerage</span>
-          <span class="trust-subtitle">For browse &amp; contact</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <mat-icon class="stat-icon">location_city</mat-icon>
+        <div class="stat-text">
+          <span class="stat-number">4+</span>
+          <span class="stat-label">Cities</span>
         </div>
       </div>
-
-      <div class="trust-feature-card">
-        <div class="trust-icon-wrapper trust-icon-purple">
-          <mat-icon>location_on</mat-icon>
-        </div>
-        <div class="trust-text">
-          <span class="trust-title">City-focused</span>
-          <span class="trust-subtitle">Prayagraj, Varanasi, Pune &amp; more</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <mat-icon class="stat-icon">trending_up</mat-icon>
+        <div class="stat-text">
+          <span class="stat-number">50K+</span>
+          <span class="stat-label">Visitors / mo</span>
         </div>
       </div>
     </div>
+
+    <article class="rent-smarter-banner">
+      <div class="rent-smarter-copy">
+        <span class="rent-smarter-kicker">Rent smarter</span>
+        <h2>How RoomZo helps you rent without the hassle</h2>
+        <p>Genuine listings. Direct owners. Happier renting.</p>
+        <a routerLink="/about" class="rent-smarter-btn">
+          Learn More <mat-icon>arrow_forward</mat-icon>
+        </a>
+      </div>
+      <div class="rent-smarter-media" aria-hidden="true">
+        <img
+          src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
+          alt=""
+          loading="lazy"
+          decoding="async">
+      </div>
+    </article>
   </div>
 </section>
 
 <section class="home-bottom-section">
   <div class="container">
-    <article class="home-editorial">
-      <div class="editorial-inner">
-        <span class="editorial-kicker">Rent smarter</span>
-        <h2>How Roomzo helps you rent with more clarity</h2>
-        <p class="editorial-lead">
-          Browse owner-listed rooms, PGs, and flats, read city guides, contact the owner,
-          then visit in person before paying any deposit — a clearer path from search to keys.
-        </p>
-
-        <div class="editorial-steps">
-          <div class="editorial-step">
-            <span class="step-num">01</span>
-            <div>
-              <h3>Explore cities &amp; types</h3>
-              <p>Use city pages and filters to shortlist what fits your budget and locality.</p>
-            </div>
-          </div>
-          <div class="editorial-step">
-            <span class="step-num">02</span>
-            <div>
-              <h3>Contact owners directly</h3>
-              <p>Unlock owner details with a contact plan, then call or WhatsApp after a short safety reminder — no traditional brokerage cut.</p>
-            </div>
-          </div>
-          <div class="editorial-step">
-            <span class="step-num">03</span>
-            <div>
-              <h3>Visit before you pay</h3>
-              <p>Verify the property offline, and report anything that looks wrong.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="editorial-chips">
-          <a routerLink="/city/prayagraj" class="editorial-chip">Prayagraj guide</a>
-          <a routerLink="/city/varanasi" class="editorial-chip">Varanasi guide</a>
-          <a routerLink="/city/pune" class="editorial-chip">Pune guide</a>
-          <a routerLink="/blog" class="editorial-chip">Blog tips</a>
-          <a routerLink="/faq" class="editorial-chip">FAQ</a>
-          <a routerLink="/about" class="editorial-chip chip-muted">About</a>
-        </div>
-      </div>
-    </article>
-
     <div class="bottom-features-row">
       <div class="feature-box">
         <mat-icon class="feature-icon">menu_book</mat-icon>
@@ -329,16 +386,25 @@
       </div>
     </div>
 
-
-    <div class="ad-banner-container">
-      <picture>
-        <source media="(max-width: 768px)" srcset="rz-banner-phone.png">
-        <img src="rz-banner-desktop.png" alt="Looking for Room & PG with Pocket-Friendly price" class="promo-banner-img">
-      </picture>
-    </div>
-
+    <!-- Promo — CSS themed -->
+    <a routerLink="/list-property" class="home-promo-band">
+      <div class="home-promo-copy">
+        <span class="home-promo-kicker">For owners</span>
+        <h3>Looking for Room &amp; PG tenants at pocket-friendly rates?</h3>
+        <p>List free on Roomzo and reach verified seekers in your city.</p>
+        <span class="home-promo-btn">List your property <mat-icon>arrow_forward</mat-icon></span>
+      </div>
+      <div class="home-promo-visual" aria-hidden="true">
+        <span class="home-promo-orb"></span>
+        <span class="home-promo-orb home-promo-orb-2"></span>
+        <mat-icon class="home-promo-house">home</mat-icon>
+      </div>
+    </a>
   </div>
-  <app-contact></app-contact>
+
+  <div class="home-contact-embed">
+    <app-contact [embedded]="true"></app-contact>
+  </div>
 
   <app-safety-consent-bottom-sheet
     [isOpen]="isConsentModalOpen()"

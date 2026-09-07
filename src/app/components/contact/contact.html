@@ -1,9 +1,12 @@
-<div class="page-wrapper">
+<div class="page-wrapper" [class.is-embedded]="embedded">
   <div class="container">
     
     <header class="page-header">
-      <h1>Contact Roomzo</h1>
-      <p>Have questions about a listing, need help reporting an issue, or want to list your property? Fill out the form below or email support@roomzo.in.</p>
+      <span class="page-kicker" *ngIf="embedded">Get in touch</span>
+      <h1>{{ embedded ? 'Still have questions?' : 'Contact Roomzo' }}</h1>
+      <p>{{ embedded
+        ? 'Ask about a listing, report an issue, or get help listing your property — we usually reply within 24 hours.'
+        : 'Have questions about a listing, need help reporting an issue, or want to list your property? Fill out the form below or email support@roomzo.in.' }}</p>
     </header>
 
     <div class="contact-grid">

@@ -133,7 +133,7 @@ h1, h2, h3, p { margin: 0; }
   border-radius: 16px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
   overflow: hidden;
-  z-index: 1000;
+  z-index: 1200;
   border: 1px solid #e2e8f0;
   animation: dropdownPop 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform-origin: top right;
@@ -297,8 +297,13 @@ h1, h2, h3, p { margin: 0; }
 ======================================================== */
 .listings-grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.listings-grid-layout app-listing-card {
+  min-width: 0;
+  height: 100%;
 }
 
 .refined-property-card {
@@ -411,7 +416,7 @@ h1, h2, h3, p { margin: 0; }
 
 @media (max-width: 768px) {
   .header-container { padding: 12px 16px; }
-  .header-typography h2 { font-size: 1.1rem; }
+  .header-typography h2 { font-size: 1rem !important; }
   
   /* Show filter icon alongside sort icon */
   .mobile-filter-trigger { display: flex; }
@@ -424,13 +429,56 @@ h1, h2, h3, p { margin: 0; }
   .sort-label-text { display: none; }
   .sort-trigger-pill mat-icon { margin: 0; }
 
-  .city-hero-banner { height: 190px; padding: 24px 16px; }
-  .banner-text-block h1 { font-size: 2.1rem; }
-  .banner-text-block p { font-size: 0.95rem; }
+  .city-hero-banner { height: 170px; padding: 20px 16px; }
+  .premium-tag {
+    font-size: 0.62rem !important;
+    padding: 3px 10px;
+    margin-bottom: 8px;
+  }
+  .banner-text-block h1 {
+    font-size: 1.35rem !important;
+    letter-spacing: -0.4px;
+    margin-bottom: 4px !important;
+  }
+  .banner-text-block p {
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+  }
 
   .feed-layout-area { padding-top: 12px; padding-bottom: 20px; }
-  .listings-grid-layout { gap: 20px; grid-template-columns: 1fr; }
-  .premium-load-more-action { width: 100%; }
+
+  .filter-section-title {
+    font-size: 0.82rem !important;
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .zone-name { font-size: 0.78rem !important; }
+  .zone-monogram {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem !important;
+  }
+  .type-pill {
+    font-size: 0.8rem !important;
+    padding: 8px 12px;
+  }
+
+  .listings-grid-layout {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .premium-load-more-action {
+    width: 100%;
+    font-size: 0.9rem !important;
+    height: 46px;
+    padding: 10px 24px;
+  }
+
+  .premium-empty-state { padding: 64px 20px; }
+  .premium-empty-state h3 { font-size: 1.1rem !important; }
+  .premium-empty-state p { font-size: 0.85rem !important; }
+  .feed-loader-box { font-size: 0.88rem !important; padding: 48px 0; }
 
   /* Mobile Property Types Bottom Sheet Animation */
   .city-exploration-filters { display: none; }
@@ -465,7 +513,7 @@ h1, h2, h3, p { margin: 0; }
     border: none;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 0.95rem !important;
   }
 
   @keyframes slideUpModal {

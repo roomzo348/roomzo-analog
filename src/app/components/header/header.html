@@ -1,9 +1,17 @@
-<header class="rz-header" [class.scrolled]="isScrolled || !isHomePage">
+<header
+  #rzHeader
+  class="rz-header"
+  [class.scrolled]="isScrolled || !isHomePage"
+  [class.home-hero-header]="isHomePage">
   <div class="container">
-    
+
     <div class="brand">
       <a routerLink="/" class="logo">
-        <mat-icon>home</mat-icon> RoomZo
+        <mat-icon>home</mat-icon>
+        <span class="logo-text-wrap">
+          <span class="logo-name">RoomZo</span>
+          <span class="logo-tagline" *ngIf="isHomePage">Find Your Next Home</span>
+        </span>
       </a>
     </div>
 
@@ -12,9 +20,8 @@
       <a routerLink="/flatmates">Flatmates</a>
       <a routerLink="/list-property">List Property</a>
       <a routerLink="/about">About</a>
-      <a routerLink="/blog">Blog</a> <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
-      
-     
+      <a routerLink="/blog">Blog</a>
+      <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
     </nav>
 
     <div class="actions">
@@ -37,11 +44,6 @@
         <button class="mobile-chat-btn mobile-only" (click)="openFavorites()" type="button" aria-label="Open favorites">
           <mat-icon>favorite</mat-icon>
         </button>
-
-        <!-- <button class="mobile-chat-btn mobile-only" (click)="openChatDrawer()" type="button" aria-label="Open chat">
-          <mat-icon>chat_bubble_outline</mat-icon>
-          <span class="unread-badge" *ngIf="hasUnreadMessages"></span>
-        </button> -->
       </ng-container>
     </div>
   </div>
@@ -70,7 +72,7 @@
         <div class="mini-fab-icon"><mat-icon>person_add</mat-icon></div>
         <span class="mini-fab-label">Flatmate</span>
       </button>
-      
+
       <button class="mini-fab property-btn" (click)="handleListProperty()">
         <div class="mini-fab-icon"><mat-icon>home_work</mat-icon></div>
         <span class="mini-fab-label">Property</span>

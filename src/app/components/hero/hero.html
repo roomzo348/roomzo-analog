@@ -1,66 +1,30 @@
 <section class="hero-full">
   <div class="hero-overlay"></div>
-  <div class="container hero-content-center">
-
-    <!-- Heading -->
-    <h1 #heroText>
-      Find Rooms, PGs &amp; Flats<br>
-      <span class="hero-accent">Without Brokerage</span>
-    </h1>
-
-    <!-- Sub-headline -->
-    <p class="hero-sub">Direct Owner Contact. No Brokerage.</p>
-
-    <!-- Trust badges -->
-    <div class="hero-badges">
-      <div class="badge-pill">
-        <mat-icon>home_work</mat-icon>
-        <span>Owner listings</span>
-      </div>
-      <span class="badge-sep">|</span>
-      <div class="badge-pill">
-        <mat-icon>security</mat-icon>
-        <span>Safety tips built-in</span>
-      </div>
+  <div class="hero-inner">
+    <div class="hero-text-block" #heroText>
+      <h1>Rooms, Flats &amp; PGs<br>Direct from Owners</h1>
+      <p class="hero-sub">No Brokerage. No Middlemen. Just Homes.</p>
+      <p class="hero-script" aria-hidden="true">
+        Good Spaces<br>Better Lives
+        <span class="hero-script-marks"></span>
+      </p>
     </div>
 
-    <!-- Search bar -->
     <app-search-bar></app-search-bar>
+  </div>
 
+  <div class="hero-trust">
+    <div class="trust-item">
+      <mat-icon>verified_user</mat-icon>
+      <span>Verified Listings</span>
+    </div>
+    <div class="trust-item">
+      <mat-icon>group</mat-icon>
+      <span>Direct Owner Contact</span>
+    </div>
+    <div class="trust-item">
+      <mat-icon>bolt</mat-icon>
+      <span>Safe &amp; Simple</span>
+    </div>
   </div>
 </section>
-
-<!-- Stats strip — sits just below hero -->
-<div class="hero-stats-strip">
-  <div class="stat-item">
-    <mat-icon class="stat-icon">home</mat-icon>
-    <div class="stat-text">
-      <span class="stat-number">500+</span>
-      <span class="stat-label">Listings</span>
-    </div>
-  </div>
-  <div class="stat-divider"></div>
-  <div class="stat-item">
-    <mat-icon class="stat-icon">group</mat-icon>
-    <div class="stat-text">
-      <span class="stat-number">1000+</span>
-      <span class="stat-label">Users</span>
-    </div>
-  </div>
-  <div class="stat-divider"></div>
-  <div class="stat-item">
-    <mat-icon class="stat-icon">location_city</mat-icon>
-    <div class="stat-text">
-      <span class="stat-number">4+</span>
-      <span class="stat-label">Cities</span>
-    </div>
-  </div>
-  <div class="stat-divider"></div>
-  <div class="stat-item">
-    <mat-icon class="stat-icon">trending_up</mat-icon>
-    <div class="stat-text">
-      <span class="stat-number">50K+</span>
-      <span class="stat-label">Visitors / mo</span>
-    </div>
-  </div>
-</div>

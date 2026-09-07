@@ -459,7 +459,9 @@ input:focus, textarea:focus {
   
   .container { padding: 100px 16px 40px; }
   .main-card { padding: 32px 20px; border-radius: 20px; margin-bottom: 20px; }
-  .section-title { font-size: 1.75rem; }
+  .section-title { font-size: 1.25rem !important; }
+  .section-subtitle { font-size: 0.88rem !important; margin-bottom: 24px; }
+  .subsection-title { font-size: 1rem !important; }
   
   .property-type-grid { grid-template-columns: 1fr; }
   .type-card { aspect-ratio: auto; padding: 20px; flex-direction: row; justify-content: flex-start; gap: 16px; text-align: left; }

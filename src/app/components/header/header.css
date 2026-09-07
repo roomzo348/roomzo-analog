@@ -15,15 +15,24 @@
 /* --- THE SCOLL STATE (Solid Background) --- */
 .rz-header.scrolled {
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  padding: 6px 0; /* Shrinks slightly on scroll */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  padding: 0;
+  height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.rz-header.scrolled .container {
+  height: 100%;
+  align-items: center;
 }
 
 .rz-header .container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 20px !important;
   max-width: var(--rz-max-width, 1200px);
   margin: 0 auto;
 }
@@ -183,13 +192,39 @@
 @media (max-width: 900px) {
   .nav-desktop, .login-link, .list-btn { display: none !important; }
   
-  .rz-header {
-    background: transparent;
-    padding: 12px 0;
-  }
+  /* All pages: keep a real tap-friendly header height (not only home) */
+  .rz-header,
   .rz-header.scrolled {
     background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    padding: 10px 0;
+    height: auto !important;
+    min-height: 56px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+
+  .rz-header .container,
+  .rz-header.scrolled .container {
+    padding: 0 14px !important;
+    min-height: 36px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .rz-header .brand .logo {
+    color: var(--rz-primary);
+    font-size: 1.1rem;
+    gap: 6px;
+    align-items: center;
+    line-height: 1.15;
+  }
+
+  .rz-header .brand .logo mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
   }
 
   /* Rest of your Mobile Nav CSS goes here exactly as before */
@@ -551,4 +586,140 @@
   .desktop-chat-link {
     display: none;
   }
+}
+
+/* Home header — tagline + city + heart (screenshot) */
+.logo-text-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.logo-name { display: block; }
+
+.logo-tagline {
+  display: none;
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+  margin-top: 1px;
+}
+
+.header-city-pill {
+  display: none;
+  align-items: center;
+  gap: 1px;
+  text-decoration: none;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 3px 6px 3px 4px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.header-city-pill mat-icon {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+  color: #196153;
+}
+
+.header-city-pill .pill-chevron {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #64748b;
+}
+
+.header-fav-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #eef2f7;
+  cursor: pointer;
+  padding: 0;
+}
+
+.header-fav-btn mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: #196153;
+}
+
+.mobile-only { display: none; }
+
+@media (max-width: 768px) {
+  .mobile-only { display: inline-flex !important; }
+  .desktop-only { display: none !important; }
+
+  .rz-header.home-hero-header,
+  .rz-header.home-hero-header.scrolled {
+    padding: 10px 0 !important;
+    min-height: 56px !important;
+    height: auto !important;
+    box-sizing: border-box;
+  }
+
+  .rz-header.home-hero-header .container {
+    padding: 0 14px !important;
+    min-height: 40px !important;
+    align-items: center;
+  }
+
+  .rz-header.home-hero-header .logo-tagline {
+    display: block !important;
+    font-size: 0.55rem !important;
+    margin-top: 2px !important;
+    line-height: 1.15 !important;
+  }
+
+  .rz-header.home-hero-header .header-city-pill { display: inline-flex !important; }
+  .rz-header.home-hero-header .header-fav-btn { display: inline-flex !important; }
+
+  .rz-header.home-hero-header .brand .logo,
+  .rz-header.scrolled.home-hero-header .brand .logo {
+    font-size: 1.1rem !important;
+    gap: 6px !important;
+    align-items: center !important;
+    line-height: 1.15 !important;
+  }
+
+  .rz-header.home-hero-header .brand .logo mat-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin-top: 0 !important;
+  }
+
+  .rz-header.home-hero-header .header-city-pill {
+    padding: 6px 10px 6px 7px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .rz-header.home-hero-header .header-city-pill mat-icon {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .rz-header.home-hero-header .header-fav-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .rz-header.home-hero-header .header-fav-btn mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .rz-header.home-hero-header .actions { gap: 8px !important; }
 }

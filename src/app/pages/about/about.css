@@ -149,6 +149,9 @@ p { margin-bottom: 24px; color: var(--text-muted); line-height: 1.6; }
 
 /* Responsive */
 @media (max-width: 900px) {
+  .hero-content h1 { font-size: 1.45rem !important; margin-bottom: 10px !important; }
+  .hero-content p { font-size: 0.9rem !important; margin-bottom: 20px !important; }
+  h2 { font-size: 1.2rem !important; }
   .values-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .split-layout { grid-template-columns: 1fr; }

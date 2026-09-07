@@ -1,6 +1,6 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID,OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, HostListener, Inject, PLATFORM_ID, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink, RouterLinkActive, Router, RouterModule, NavigationEnd } from '@angular/router'; 
+import { RouterLink, RouterLinkActive, Router, RouterModule, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { FlatmateService } from '../../services/flatmate.service';
@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -15,31 +16,44 @@ import { Subscription } from 'rxjs';
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
-export default class HeaderComponent implements OnInit {
+export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoggedIn = false;
-  isOwner = false; 
+  isOwner = false;
   isMenuOpen = false;
   userMobile = '';
   isScrolled = false;
   isHomePage = true;
   isPostMenuOpen = false;
-hasUnreadMessages = false; 
+  hasUnreadMessages = false;
   profilePhotoUrl = '';
   userInitial = 'U';
   private subs = new Subscription();
+  private resizeObserver?: ResizeObserver;
+
+  @ViewChild('rzHeader', { static: true }) rzHeader?: ElementRef<HTMLElement>;
+
   constructor(
-    private router: Router, 
+    private router: Router,
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object ,
+    @Inject(PLATFORM_ID) private platformId: Object,
     private flatmateService: FlatmateService,
-    private toastr: ToastrService ,
-    private chatService: ChatService // ✅ Inject the ChatService here
+    private toastr: ToastrService,
+    private chatService: ChatService
   ) {
     this.isHomePage = this.router.url === '/' || this.router.url.startsWith('/#');
+    // Non-home pages always use solid scrolled chrome
+    this.isScrolled = !this.isHomePage;
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.isHomePage = event.urlAfterRedirects === '/' || event.urlAfterRedirects.startsWith('/#');
+      if (!this.isHomePage) {
+        this.isScrolled = true;
+      } else if (isPlatformBrowser(this.platformId)) {
+        this.isScrolled = window.scrollY > 50;
+      }
+      // Home header chrome changes height — remeasure after view updates
+      setTimeout(() => this.syncHeaderHeight(), 0);
     });
   }
 
@@ -50,12 +64,16 @@ hasUnreadMessages = false;
     }
   }
 
+  @HostListener('window:resize', [])
+  onWindowResize() {
+    this.syncHeaderHeight();
+  }
 
   ngOnInit() {
     this.authService.refreshSessionIfNeeded();
     this.authService.isLoggedIn$.subscribe((status) => {
       this.isLoggedIn = status;
-      
+
       if (status && isPlatformBrowser(this.platformId)) {
         this.isOwner = localStorage.getItem('userVerifiedWithOtp') === 'true';
         this.userMobile = localStorage.getItem('userEmail') || 'User';
@@ -67,6 +85,7 @@ hasUnreadMessages = false;
         this.userInitial = 'U';
         this.isMenuOpen = false;
       }
+      setTimeout(() => this.syncHeaderHeight(), 0);
     });
     this.subs.add(
       this.chatService.incomingMessage$.subscribe(() => {
@@ -74,8 +93,35 @@ hasUnreadMessages = false;
       })
     );
   }
-ngOnDestroy() {
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.syncHeaderHeight();
+    const el = this.rzHeader?.nativeElement;
+    if (el && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.syncHeaderHeight());
+      this.resizeObserver.observe(el);
+    }
+  }
+
+  ngOnDestroy() {
     this.subs.unsubscribe();
+    this.resizeObserver?.disconnect();
+  }
+
+  /** Exact flush on mobile; desktop uses fixed 52px CSS. Never allow collapsed height. */
+  private syncHeaderHeight(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const el = this.rzHeader?.nativeElement;
+    if (!el) return;
+    // Desktop uses fixed CSS height — skip JS override to avoid gap
+    if (window.innerWidth > 768) {
+      document.documentElement.style.setProperty('--rz-header-height', '52px');
+      return;
+    }
+    const measured = Math.ceil(el.getBoundingClientRect().height);
+    const h = Math.max(measured, 56);
+    document.documentElement.style.setProperty('--rz-header-height', `${h}px`);
   }
 
   private syncUserAvatar(): void {
@@ -130,21 +176,26 @@ ngOnDestroy() {
 
   handleListFlatmate() {
     this.isPostMenuOpen = false;
-    
+
     if (!this.isLoggedIn) {
       this.toastr.warning('Please log in to post a flatmate requirement.', 'Authentication Required');
-      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' }});
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' } });
       return;
     }
-    this.router.navigate(['/post-flatmate']); 
+    this.router.navigate(['/post-flatmate']);
   }
+
   openFavorites() {
     this.closeMenu();
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/my-listings?tab=favorites' } });
+      return;
+    }
     this.router.navigate(['/my-listings'], { queryParams: { tab: 'favorites' } });
   }
- openChatDrawer() {
-    console.log("💬 Header Chat Button Clicked!");
-    this.hasUnreadMessages = false; // ✅ 5. Clear the red dot when they open chats
+
+  openChatDrawer() {
+    this.hasUnreadMessages = false;
     this.chatService.toggleChatDrawer(true);
     this.closeMenu();
   }

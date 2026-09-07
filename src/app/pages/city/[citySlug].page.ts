@@ -2,7 +2,8 @@ import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID, signal, OnDe
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -18,17 +19,10 @@ import {
 import { RelatedSearchesComponent } from '../../components/related-searches/related-searches';
 import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
 import { ContentGuideComponent } from '../../components/content-guide/content-guide';
-import { PropertyMediaCarouselComponent } from '../../components/property-media-carousel/property-media-carousel';
+import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { ContactAccessService } from '../../services/contact-access.service';
 import { paymentReturnNotice } from '../../utils/billing-return';
 import { CityGuide, getCityGuide } from '../../content/city-guides';
-import {
-  generatePropertyAltText,
-  getListingImageUrl,
-  optimizeImageUrl,
-} from '../../utils/image-seo.util';
-
-// Import the JSON data for city zones
 import cityZonesData from '../../../../public/data/city-zones.json';
 
 @Component({
@@ -41,7 +35,7 @@ import cityZonesData from '../../../../public/data/city-zones.json';
     RelatedSearchesComponent,
     SeoBreadcrumbComponent,
     ContentGuideComponent,
-    PropertyMediaCarouselComponent,
+    ListingCardComponent,
   ],
   templateUrl: '../explore-city/explore-city.html',
   styleUrls: ['../explore-city/explore-city.css'],
@@ -78,10 +72,10 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   pendingAction = signal<PendingAction | any>(null);
   contactLoadingId: number | null = null;
   private paywallOpenedSub: Subscription | null = null;
-
-  readonly generatePropertyAltText = generatePropertyAltText;
-  readonly getListingImageUrl = getListingImageUrl;
-  readonly optimizeImageUrl = optimizeImageUrl;
+  private routeSub: Subscription | null = null;
+  private listingsSub: Subscription | null = null;
+  /** When true, next query-param emission was caused by our own navigate (avoid double fetch). */
+  private skipNextQueryLoad = false;
 
   breadcrumbItems: { label: string; path?: string }[] = [];
   cityGuide: CityGuide | null = null;
@@ -100,57 +94,63 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const slug = params.get('citySlug') ?? '';
-      this.cityConfig = getCityBySlug(slug);
+    this.routeSub = combineLatest([this.route.paramMap, this.route.queryParamMap])
+      .pipe(
+        map(([params, query]) => ({
+          slug: params.get('citySlug') ?? '',
+          zone: query.get('zone'),
+          propertyType: query.get('propertyType'),
+          sortBy: query.get('sortBy'),
+        })),
+        distinctUntilChanged(
+          (a, b) =>
+            a.slug === b.slug &&
+            a.zone === b.zone &&
+            a.propertyType === b.propertyType &&
+            a.sortBy === b.sortBy
+        ),
+        switchMap((routeState) => {
+          this.cityConfig = getCityBySlug(routeState.slug);
+          if (!this.cityConfig) {
+            this.router.navigate(['/explore-listing'], { replaceUrl: true });
+            return of(null);
+          }
 
-      if (!this.cityConfig) {
-        this.router.navigate(['/explore-listing'], { replaceUrl: true });
-        return;
-      }
+          const cityChanged = this.city !== this.cityConfig.name;
+          this.city = this.cityConfig.name;
+          this.state = this.cityConfig.state;
+          this.cityGuide = getCityGuide(this.cityConfig.slug);
+          this.breadcrumbItems = [
+            { label: 'Home', path: '/' },
+            { label: 'Explore', path: '/explore-listing' },
+            { label: this.city },
+          ];
 
-      this.city = this.cityConfig.name;
-      this.state = this.cityConfig.state;
-      this.cityGuide = getCityGuide(this.cityConfig.slug);
-      this.breadcrumbItems = [
-        { label: 'Home', path: '/' },
-        { label: 'Explore', path: '/explore-listing' },
-        { label: this.city },
-      ];
+          if (cityChanged) {
+            this.applyCitySeo();
+            this.loadCityZones(this.city);
+            this.sortBy = 'latest';
+            this.selectedZone = null;
+            this.selectedPropertyType = null;
+          }
 
-      this.applyCitySeo();
-      
-      // Load zones for the current city and reset filters
-      this.loadCityZones(this.city);
-      
-      // 2. Apply zone + propertyType from URL (related searches / deep links)
-      this.route.queryParams.subscribe(queryParams => {
-        const requestedZone = queryParams['zone'];
-        
-        if (requestedZone && this.cityZones && this.cityZones.length > 0) {
-          const matchedZone = this.cityZones.find(z => 
-            z.name.toLowerCase() === requestedZone.toLowerCase()
-          );
-          this.selectedZone = matchedZone ? matchedZone.name : null;
-        } else {
-          this.selectedZone = null;
+          this.applyFiltersFromRoute(routeState.zone, routeState.propertyType, routeState.sortBy);
+
+          if (this.skipNextQueryLoad) {
+            this.skipNextQueryLoad = false;
+            return of(null);
+          }
+
+          this.listings = [];
+          this.currentPage = 0;
+          return of('load');
+        })
+      )
+      .subscribe((action) => {
+        if (action === 'load') {
+          this.loadCityData();
         }
-
-        const requestedType = queryParams['propertyType'];
-        const allowedTypes = ['Room', 'PG', 'Flat'];
-        if (requestedType && allowedTypes.includes(requestedType)) {
-          this.selectedPropertyType = requestedType;
-        } else {
-          this.selectedPropertyType = null;
-        }
-
-        this.listings = [];
-        this.currentPage = 0;
-        this.loadCityData();
       });
-
-   
-    });
 
     this.checkReturnFromLogin();
     this.paywallOpenedSub = this.contactAccess.paywallOpened$.subscribe(() => {
@@ -161,6 +161,40 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.seo.removeJsonLd();
     this.paywallOpenedSub?.unsubscribe();
+    this.routeSub?.unsubscribe();
+    this.listingsSub?.unsubscribe();
+  }
+
+  private applyFiltersFromRoute(
+    requestedZone: string | null,
+    requestedType: string | null,
+    requestedSort: string | null
+  ): void {
+    if (requestedZone && this.cityZones?.length) {
+      const matchedZone = this.cityZones.find(
+        (z) => z.name.toLowerCase() === requestedZone.toLowerCase()
+      );
+      this.selectedZone = matchedZone ? matchedZone.name : null;
+    } else if (requestedZone) {
+      this.selectedZone = requestedZone;
+    } else {
+      this.selectedZone = null;
+    }
+
+    const allowedTypes = ['Room', 'PG', 'Flat'];
+    if (requestedType && allowedTypes.includes(requestedType)) {
+      this.selectedPropertyType = requestedType;
+    } else {
+      this.selectedPropertyType = null;
+    }
+
+    const allowedSorts = ['latest', 'oldest', 'price_low', 'price_high'];
+    if (requestedSort && allowedSorts.includes(requestedSort)) {
+      this.sortBy = requestedSort;
+    } else if (!requestedSort) {
+      // Keep current sort unless URL explicitly clears it via absence after sync
+      // Default remains latest on first load.
+    }
   }
 
   // --- NEW: Load Zones from JSON ---
@@ -169,27 +203,50 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     this.cityZones = allZones[cityName] || [];
   }
 
-  // --- NEW: Filter Actions ---
+  // --- Filter Actions: update state + reload immediately, then sync URL ---
   selectZone(zoneName: string | null) {
     if (this.selectedZone === zoneName) return;
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        zone: zoneName || null,
-        propertyType: this.selectedPropertyType || null,
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
+    this.selectedZone = zoneName;
+    this.currentPage = 0;
+    this.listings = [];
+    this.syncFiltersToUrl();
+    this.loadCityData();
   }
 
   selectPropertyType(typeValue: string | null) {
-    if (this.selectedPropertyType === typeValue) return;
+    if (this.selectedPropertyType === typeValue) {
+      if (this.isFilterMenuOpen) {
+        this.isFilterMenuOpen = false;
+        this.cd.detectChanges();
+      }
+      return;
+    }
+    this.selectedPropertyType = typeValue;
+    this.isFilterMenuOpen = false;
+    this.currentPage = 0;
+    this.listings = [];
+    this.syncFiltersToUrl();
+    this.loadCityData();
+  }
+
+  private syncFiltersToUrl(): void {
+    const nextZone = this.selectedZone || null;
+    const nextType = this.selectedPropertyType || null;
+    const nextSort = this.sortBy && this.sortBy !== 'latest' ? this.sortBy : null;
+    const q = this.route.snapshot.queryParamMap;
+    const same =
+      (q.get('zone') || null) === nextZone &&
+      (q.get('propertyType') || null) === nextType &&
+      (q.get('sortBy') || null) === nextSort;
+    if (same) return;
+
+    this.skipNextQueryLoad = true;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
-        zone: this.selectedZone || null,
-        propertyType: typeValue || null,
+        zone: nextZone,
+        propertyType: nextType,
+        sortBy: nextSort,
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
@@ -242,14 +299,15 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     }
     this.cd.detectChanges();
 
-    this.propertyService
+    this.listingsSub?.unsubscribe();
+    this.listingsSub = this.propertyService
       .exploreByExactCity(
-        this.city, 
-        this.state, 
-        this.selectedZone, 
-        this.selectedPropertyType, 
-        this.sortBy, 
-        this.currentPage, 
+        this.city,
+        this.state,
+        this.selectedZone,
+        this.selectedPropertyType,
+        this.sortBy,
+        this.currentPage,
         this.pageSize
       )
       .subscribe({
@@ -265,12 +323,19 @@ export default class CityListingsPage implements OnInit, OnDestroy {
             if (!isLoadMore) {
               this.refreshListSchema();
             }
+          } else if (!isLoadMore) {
+            this.listings = [];
+            this.totalPages = 0;
+            this.totalItems = 0;
           }
           this.isLoading = false;
           this.isLoadingMore = false;
           this.cd.detectChanges();
         },
         error: () => {
+          if (!isLoadMore) {
+            this.listings = [];
+          }
           this.isLoading = false;
           this.isLoadingMore = false;
           this.cd.detectChanges();
@@ -284,25 +349,38 @@ export default class CityListingsPage implements OnInit, OnDestroy {
       this.loadCityData(true);
     }
   }
-toggleMobileFilters(event: Event): void {
-    event?.preventDefault(); // Stop default button behavior
-    event?.stopPropagation(); // Prevent the body click listener from catching this
-    
+
+  toggleMobileFilters(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     this.isFilterMenuOpen = !this.isFilterMenuOpen;
-    this.cd.detectChanges(); // CRITICAL: Forces Angular to update the UI instantly
+    if (this.isFilterMenuOpen) {
+      this.isSortMenuOpen = false;
+    }
+    this.cd.detectChanges();
   }
+
   toggleSortMenu(event?: Event) {
     event?.preventDefault();
     event?.stopPropagation();
     this.isSortMenuOpen = !this.isSortMenuOpen;
+    if (this.isSortMenuOpen) {
+      this.isFilterMenuOpen = false;
+    }
     this.cd.detectChanges();
   }
 
   applySort(newSort: string, event?: Event) {
     event?.preventDefault();
     event?.stopPropagation();
+    if (this.sortBy === newSort) {
+      this.isSortMenuOpen = false;
+      this.cd.detectChanges();
+      return;
+    }
     this.sortBy = newSort;
     this.isSortMenuOpen = false;
+    this.syncFiltersToUrl();
     this.resetAndLoadData();
   }
 
@@ -325,8 +403,49 @@ toggleMobileFilters(event: Event): void {
     this.location.back();
   }
 
-  viewDetails(id: string) {
+  viewDetails(id: string | number) {
     this.router.navigate(['/room', id]);
+  }
+
+  toggleSavedListing(item: any): void {
+    const isLoggedIn = this.isUserLoggedIn() || this.isOwnerLoggedIn();
+    if (!isLoggedIn) {
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('pendingFavoritePropertyId', String(item.id));
+      }
+      const shouldNavigate = isPlatformBrowser(this.platformId)
+        ? window.confirm('Please log in to save this property. Would you like to go to the login page now?')
+        : false;
+      if (shouldNavigate) {
+        this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: this.router.url } });
+      }
+      return;
+    }
+
+    const nextValue = !item.isFavorite;
+    const propertyId = String(item.id);
+    item.isFavorite = nextValue;
+
+    const request = nextValue
+      ? this.propertyService.saveFavoriteProperty(propertyId)
+      : this.propertyService.removeFavoriteProperty(propertyId);
+
+    request.subscribe({
+      next: (res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          this.toastr.success(nextValue ? 'Property saved to favorites.' : 'Property removed from favorites.');
+        } else {
+          item.isFavorite = !nextValue;
+          this.toastr.error(res?.message || 'Could not update favorites.');
+        }
+        this.cd.detectChanges();
+      },
+      error: () => {
+        item.isFavorite = !nextValue;
+        this.toastr.error('Could not update favorites.');
+        this.cd.detectChanges();
+      },
+    });
   }
 
   formatPrice(price: number): string {
@@ -508,10 +627,11 @@ toggleMobileFilters(event: Event): void {
     return this.isUserLoggedIn();
   }
 
-  // --- NEW: Global click listener to close menus ---
+  // --- Global click listener to close menus ---
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    if (this.isSortMenuOpen) {
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (this.isSortMenuOpen && !target?.closest('.sort-action-container')) {
       this.isSortMenuOpen = false;
       this.cd.detectChanges();
     }

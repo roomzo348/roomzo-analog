@@ -257,7 +257,14 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .page-wrapper { padding: 30px 0 60px; } /* Remove side padding, let container handle it */
-  .page-header h1 { font-size: 2rem; }
+  .page-header h1 { font-size: 1.3rem !important; margin-bottom: 8px !important; }
+  .page-header p { font-size: 0.88rem !important; }
+  .form-card h2 { font-size: 1.1rem !important; margin-bottom: 16px !important; }
+  .info-card h3,
+  .faq-content h3 { font-size: 0.95rem !important; }
+  .faq-content p { font-size: 0.85rem !important; }
+  .form-group label { font-size: 0.85rem !important; }
+  .btn-white { font-size: 0.9rem !important; }
   .contact-grid { grid-template-columns: 1fr; gap: 24px; }
   .form-row { grid-template-columns: 1fr; gap: 0; }
   
@@ -272,6 +279,7 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   .browse-listings-btn {
     width: 100%;
     padding: 14px 18px;
+    font-size: 0.9rem !important;
   }
   
   .faq-banner { 
@@ -281,4 +289,122 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
     padding: 24px;
   }
   .btn-white { width: 100%; } /* Full width button */
+}
+
+/* ========================================================
+   EMBEDDED ON HOME — match Roomzo landing theme
+======================================================== */
+.page-wrapper.is-embedded {
+  padding: 28px 0 48px;
+  background: linear-gradient(180deg, #f3faf6 0%, #ffffff 28%, #ffffff 100%);
+}
+
+.page-wrapper.is-embedded .page-header {
+  text-align: left;
+  margin-bottom: 22px;
+  animation: contactEmbedIn 0.5s ease both;
+}
+
+.page-wrapper.is-embedded .page-kicker {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #196153;
+  margin-bottom: 8px;
+}
+
+.page-wrapper.is-embedded .page-header h1 {
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px !important;
+  color: #0f172a !important;
+  line-height: 1.25 !important;
+}
+
+.page-wrapper.is-embedded .page-header p {
+  font-size: 0.92rem !important;
+  color: #64748b !important;
+  max-width: 52ch;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.page-wrapper.is-embedded .form-card,
+.page-wrapper.is-embedded .info-card,
+.page-wrapper.is-embedded .service-areas-card {
+  border-radius: 16px;
+  border: 1px solid #e2efe8;
+  box-shadow: 0 4px 18px rgba(25, 97, 83, 0.06);
+  animation: contactEmbedIn 0.55s ease both;
+}
+
+.page-wrapper.is-embedded .info-card { animation-delay: 0.06s; }
+.page-wrapper.is-embedded .service-areas-card { animation-delay: 0.12s; }
+
+.page-wrapper.is-embedded .form-card h2,
+.page-wrapper.is-embedded .info-card h3,
+.page-wrapper.is-embedded .service-areas-body h3 {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.page-wrapper.is-embedded .submit-btn {
+  background: #196153;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 13px 22px;
+}
+
+.page-wrapper.is-embedded .submit-btn:hover {
+  background: #144a40;
+}
+
+.page-wrapper.is-embedded .faq-banner {
+  border-radius: 16px;
+  background: linear-gradient(135deg, #196153 0%, #0f766e 100%);
+  color: #fff;
+  border: none;
+  animation: contactEmbedIn 0.6s ease both;
+  animation-delay: 0.16s;
+}
+
+.page-wrapper.is-embedded .faq-banner h3 {
+  color: #fff !important;
+  font-size: 1.05rem !important;
+}
+
+.page-wrapper.is-embedded .faq-banner p {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.page-wrapper.is-embedded .faq-banner .btn-white {
+  background: #ffffff;
+  color: #196153;
+  border: none;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+@keyframes contactEmbedIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .page-wrapper.is-embedded {
+    padding: 20px 0 36px;
+  }
+
+  .page-wrapper.is-embedded .page-header h1 {
+    font-size: 1.2rem !important;
+  }
+
+  .page-wrapper.is-embedded .page-header p {
+    font-size: 0.84rem !important;
+  }
 }

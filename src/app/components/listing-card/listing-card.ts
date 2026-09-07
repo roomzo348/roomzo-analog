@@ -35,11 +35,13 @@ export class ListingCardComponent implements OnInit, OnChanges {
   @Input() showActions = true;
   @Input() showSpecs = true;
   @Input() showAvailabilityBadge = true;
+  /** Compact home/featured layout: image + type/city pills + title + price. */
+  @Input() compact = false;
   /** Hidden by default so public feeds don't look "old". Sorting still uses postedDate. */
   @Input() showPostedDate = false;
   @Input() priceUnit = '/month';
   @Input() locationIcon = 'location_on';
-  @Input() availabilityLabel = 'Available';
+  @Input() availabilityLabel = 'Verified Listing';
   @Input() imageFallback = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
   /** True while consent/unlock is in flight for this card. */
   @Input() contactLoading = false;
@@ -128,7 +130,35 @@ export class ListingCardComponent implements OnInit, OnChanges {
     if (Number(this.listing?.['isRented']) === 1) {
       return 'Rented';
     }
-    return this.availabilityLabel;
+    const label = (this.availabilityLabel || 'Verified Listing').trim();
+    // Normalize legacy / common labels
+    if (/^owner listing$/i.test(label) || /^verified listing$/i.test(label)) {
+      return 'Verified Listing';
+    }
+    return label;
+  }
+
+  getPropertyTypeLabel(): string {
+    const raw =
+      this.listing?.['propertyType'] ||
+      this.listing?.['property_type'] ||
+      this.listing?.badge?.text ||
+      'Room';
+    const s = String(raw).trim();
+    if (!s) return 'Room';
+    // Keep short labels like Room / Flat / PG
+    if (/flatmate/i.test(s)) return 'Flatmate';
+    if (/\bpg\b|paying\s*guest|hostel/i.test(s)) return 'PG';
+    if (/flat|apartment|bhk/i.test(s)) return 'Flat';
+    if (/room/i.test(s)) return 'Room';
+    return s.length > 12 ? s.slice(0, 12) : s;
+  }
+
+  getCityLabel(): string {
+    const city = this.listing?.['city'];
+    if (city) return String(city).trim();
+    const loc = this.getLocation();
+    return loc.split(',')[0]?.trim() || '';
   }
 
   showContactActions(): boolean {
@@ -136,7 +166,8 @@ export class ListingCardComponent implements OnInit, OnChanges {
   }
 
   formatPrice(price: number): string {
-    return price >= 10000 ? '₹' + (price / 1000).toFixed(0) + 'k' : '₹' + price.toLocaleString();
+    const n = Number(price) || 0;
+    return '₹' + n.toLocaleString('en-IN');
   }
 
   formatPostedDate(dateString?: string): string {

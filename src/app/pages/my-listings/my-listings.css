@@ -489,7 +489,7 @@ h1, h2, h3, h4, p { margin: 0; }
   }
 
   .dashboard-header h1 {
-    font-size: 1.35rem;
+    font-size: 1.2rem !important;
     color: #ffffff;
     margin-bottom: 0;
   }
@@ -553,8 +553,8 @@ h1, h2, h3, h4, p { margin: 0; }
   
   .card-content { padding: 16px; }
 
-  .header-row h3 { font-size: 1.05rem; }
-  .price { font-size: 1.05rem; }
+  .header-row h3 { font-size: 0.95rem !important; }
+  .price { font-size: 0.95rem !important; }
 
   .stats-row {
     font-size: 0.8rem;
@@ -582,7 +582,7 @@ h1, h2, h3, h4, p { margin: 0; }
     min-height: 40vh;
   }
 
-  .empty-state h3 { font-size: 1.25rem; }
+  .empty-state h3 { font-size: 1.1rem !important; }
 }
 
 .custom-status-select {
