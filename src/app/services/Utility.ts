@@ -14,7 +14,16 @@ export interface Listing {
 }
 
 export function mapBackendListingsToUi(list: any[]): Listing[] {
-  return list.map(item => ({
+  return list.map(item => {
+    const city = item.city ?? '';
+    const landmark = String(item.landmark || '').trim();
+    const zone = String(item.zone || '').trim();
+    const street = String(item.street || '').trim();
+    const localLabel =
+      [landmark, zone, street].find((v) => v && v.toLowerCase() !== String(city).toLowerCase()) ||
+      city;
+
+    return {
     ...item,
     id: item.id,
 
@@ -22,7 +31,7 @@ export function mapBackendListingsToUi(list: any[]): Listing[] {
       ? (item.propertyName ?? item.property_name)
       : item.propertyType?.toUpperCase() || 'Property',
 
-    location: `${item.city}, ${item.state}`,
+    location: localLabel,
 
     price: item.rentAmount ?? item.rent_amount ?? 0,
     priceUnit: '/month',
@@ -52,7 +61,8 @@ export function mapBackendListingsToUi(list: any[]): Listing[] {
     
     // Include posted date from backend
     postedDate: item.dateCreated || item.createdOn || item.created_on || new Date().toISOString()
-  }));
+  };
+  });
 }
 
 export function getAmenitiesMap() {

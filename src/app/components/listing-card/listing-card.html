@@ -80,9 +80,9 @@
 
       <!-- Title & Location -->
       <h3 class="property-title" [title]="getTitle()">{{ getTitle() }}</h3>
-      <p class="property-location" [title]="getCityLabel() || getLocation()">
+      <p class="property-location" [title]="getLocalityLabel()">
         <mat-icon>location_on</mat-icon>
-        <span class="location-text">{{ getCityLabel() || getLocation() }}</span>
+        <span class="location-text">{{ getLocalityLabel() }}</span>
       </p>
 
       <!-- Specs: Bed / Bath / Kitchen -->

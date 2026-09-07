@@ -97,6 +97,44 @@ export class ListingCardComponent implements OnInit, OnChanges {
     return parts.length ? parts.join(', ') : 'Location unavailable';
   }
 
+  /** Local area for card labels — street / landmark / zone, not the city name. */
+  getLocalityLabel(): string {
+    const city = String(this.listing?.['city'] || '').trim();
+    const normalize = (value: unknown): string => String(value || '').trim();
+    const isCityOnly = (value: string): boolean => {
+      if (!value) return true;
+      if (!city) return false;
+      const v = value.toLowerCase();
+      const c = city.toLowerCase();
+      return v === c || v.startsWith(`${c},`) || v.endsWith(`, ${c}`);
+    };
+
+    const candidates = [
+      this.listing?.['landmark'],
+      this.listing?.['zone'],
+      this.listing?.['street'],
+      this.listing?.['locality'],
+      this.listing?.['area'],
+    ];
+
+    for (const candidate of candidates) {
+      const label = normalize(candidate);
+      if (!label || isCityOnly(label)) continue;
+      // Prefer a short street/area name (first segment if long address)
+      const short = label.split(',')[0]?.trim() || label;
+      if (short && !isCityOnly(short)) return short;
+    }
+
+    // Mapped UI location may already be "City, State" — skip that.
+    const mapped = normalize(this.listing?.['location']);
+    if (mapped && !isCityOnly(mapped)) {
+      const short = mapped.split(',')[0]?.trim() || mapped;
+      if (short && !isCityOnly(short)) return short;
+    }
+
+    return city || 'Location unavailable';
+  }
+
   getPrice(): number {
     return this.listing?.['price'] ?? this.listing?.['rentAmount'] ?? this.listing?.['rent_amount'] ?? 0;
   }
