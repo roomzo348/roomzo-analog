@@ -158,6 +158,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
         name: ['', [Validators.required, Validators.maxLength(200)]],
         description: ['', [Validators.required, Validators.maxLength(1000)]],
         rentAmount: ['', Validators.required],
+        electricityIncluded: [false],
         images: [[]]
       })
     });
@@ -269,6 +270,9 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
 
   get detailsGroup(): FormGroup { return this.listingForm.get('details') as FormGroup; }
   get amenitiesGroup(): FormGroup { return this.listingForm.get('amenities') as FormGroup; }
+  get amenitiesKitchenControl(): FormControl {
+    return this.amenitiesGroup.get('kitchen') as FormControl;
+  }
   get conditionsGroup(): FormGroup { return this.listingForm.get('conditions') as FormGroup; }
   get guidebookGroup(): FormGroup { return this.listingForm.get('guidebook') as FormGroup; }
   get finalGroup(): FormGroup { return this.listingForm.get('final') as FormGroup; }
@@ -517,6 +521,11 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
      // 3. Send to Service
       this.propertyService.saveListing(payload).subscribe({
         next: (response: any) => {
+          if (response?.status === 0) {
+            this.toastr.error(response?.message || 'Failed to save listing.', 'Error');
+            this.isSubmitting = false;
+            return;
+          }
           this.toastr.success('Listing uploaded successfully!', 'Success');
           this.isSubmitting = false;
           
@@ -533,8 +542,13 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
         },
         error: (error) => {
           console.error('Error:', error);
-          this.toastr.error('Failed to save listing.', 'Error');
-          this.isSubmitting = false; 
+          const message =
+            error?.message ||
+            error?.error?.message ||
+            error?.error?.statusMessage ||
+            'Failed to save listing. If photos did not upload, the listing was not created.';
+          this.toastr.error(message, 'Error');
+          this.isSubmitting = false;
         }
       });
     } else {

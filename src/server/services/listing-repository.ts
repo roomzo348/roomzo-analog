@@ -2,6 +2,31 @@ import type { ResultSetHeader } from 'mysql2';
 import { sqlExecute, sqlQuery } from '../db/mysql';
 import { getServerRuntime } from '../utils/runtime-config';
 
+let listingSchemaReady = false;
+
+/** Ensure optional listing columns exist (safe to call repeatedly). */
+export async function ensureListingSchema(): Promise<void> {
+  if (listingSchemaReady) return;
+  const rows = await sqlQuery<{ COLUMN_NAME: string }>(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'property_listings'
+       AND COLUMN_NAME IN ('electricity_included', 'has_kitchen')`
+  );
+  const existing = new Set(rows.map((r) => r.COLUMN_NAME));
+  if (!existing.has('has_kitchen')) {
+    await sqlExecute(
+      `ALTER TABLE property_listings ADD COLUMN has_kitchen TINYINT(1) NOT NULL DEFAULT 0`
+    );
+  }
+  if (!existing.has('electricity_included')) {
+    await sqlExecute(
+      `ALTER TABLE property_listings ADD COLUMN electricity_included TINYINT(1) NOT NULL DEFAULT 0`
+    );
+  }
+  listingSchemaReady = true;
+}
+
 export interface ListingSearchInput {
   page: number;
   size: number;
@@ -19,6 +44,7 @@ export interface ListingSearchInput {
 }
 
 export async function getListingById(id: number): Promise<any | null> {
+  await ensureListingSchema();
   const rows = await sqlQuery<any>(
     `SELECT * FROM property_listings WHERE id = ? LIMIT 1`,
     [id]
@@ -130,6 +156,7 @@ export async function searchListings(filters: ListingSearchInput): Promise<{
   totalPages: number;
   currentPage: number;
 }> {
+  await ensureListingSchema();
   const page = Math.max(0, Number(filters.page || 0));
   const size = Math.max(1, Math.min(100, Number(filters.size || 6)));
   const offset = page * size;
@@ -226,6 +253,7 @@ export async function getRecentListings(limit: number): Promise<any[]> {
 }
 
 export async function createListing(payload: any): Promise<number> {
+  await ensureListingSchema();
   const details = payload?.details ?? {};
   const address = details?.address ?? {};
   const amenities = payload?.amenities ?? {};
@@ -237,9 +265,10 @@ export async function createListing(payload: any): Promise<number> {
       owner_id, property_name, property_type, property_size, bedrooms, bathrooms,
       street, city, state, zip_code, landmark, latitude, longitude,
       has_bed, has_almirah, has_study_table, has_fan_light, has_ro_water, has_inverter, has_cooling, has_geyser, has_wifi, has_parking, has_cctv, has_washing_machine, has_kitchen,
+      electricity_included,
       couple_friendly, for_boys, for_girls, water24x7, veg_only, family_friendly, students_only, working_professionals,
       rent_amount, description, is_rented, temp_contact_no, zone
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       Number(payload?.ownerId),
       details?.propertyName ?? finalInfo?.name ?? null,
@@ -266,7 +295,8 @@ export async function createListing(payload: any): Promise<number> {
       bool(amenities?.hasParking ?? amenities?.parking),
       bool(amenities?.hasCctv ?? amenities?.cctv),
       bool(amenities?.hasWashingMachine ?? amenities?.washingMachine),
-      bool(amenities?.hasKitchen ?? amenities?.kitchen),
+      bool(amenities?.hasKitchen ?? amenities?.kitchen ?? details?.hasKitchen),
+      bool(finalInfo?.electricityIncluded ?? finalInfo?.electricity_included),
       bool(conditions?.coupleFriendly),
       bool(conditions?.forBoys),
       bool(conditions?.forGirls),
@@ -290,6 +320,7 @@ export async function createListing(payload: any): Promise<number> {
 }
 
 export async function updateListing(id: number, payload: any): Promise<boolean> {
+  await ensureListingSchema();
   const details = payload?.details ?? {};
   const address = details?.address ?? {};
   const amenities = payload?.amenities ?? {};
@@ -300,6 +331,7 @@ export async function updateListing(id: number, payload: any): Promise<boolean> 
       property_name = ?, property_type = ?, property_size = ?, bedrooms = ?, bathrooms = ?,
       street = ?, city = ?, state = ?, zip_code = ?, landmark = ?, latitude = ?, longitude = ?,
       has_bed = ?, has_almirah = ?, has_study_table = ?, has_fan_light = ?, has_ro_water = ?, has_inverter = ?, has_cooling = ?, has_geyser = ?, has_wifi = ?, has_parking = ?, has_cctv = ?, has_washing_machine = ?, has_kitchen = ?,
+      electricity_included = ?,
       couple_friendly = ?, for_boys = ?, for_girls = ?, water24x7 = ?, veg_only = ?, family_friendly = ?, students_only = ?, working_professionals = ?,
       rent_amount = ?, description = ?, temp_contact_no = ?, zone = ?
      WHERE id = ?`,
@@ -328,7 +360,8 @@ export async function updateListing(id: number, payload: any): Promise<boolean> 
       bool(amenities?.hasParking ?? amenities?.parking),
       bool(amenities?.hasCctv ?? amenities?.cctv),
       bool(amenities?.hasWashingMachine ?? amenities?.washingMachine),
-      bool(amenities?.hasKitchen ?? amenities?.kitchen),
+      bool(amenities?.hasKitchen ?? amenities?.kitchen ?? details?.hasKitchen),
+      bool(finalInfo?.electricityIncluded ?? finalInfo?.electricity_included ?? payload?.electricityIncluded),
       bool(conditions?.coupleFriendly),
       bool(conditions?.forBoys),
       bool(conditions?.forGirls),
@@ -435,6 +468,7 @@ function mapListingRow(row: Record<string, unknown>): Record<string, unknown> {
     hasCctv: boolish(row.has_cctv ?? row.hasCctv),
     hasWashingMachine: boolish(row.has_washing_machine ?? row.hasWashingMachine),
     hasKitchen: boolish(row.has_kitchen ?? row.hasKitchen),
+    electricityIncluded: boolish(row.electricity_included ?? row.electricityIncluded),
     coupleFriendly: boolish(row.couple_friendly ?? row.coupleFriendly),
     forBoys: boolish(row.for_boys ?? row.forBoys),
     forGirls: boolish(row.for_girls ?? row.forGirls),
@@ -457,6 +491,7 @@ function mapListingRow(row: Record<string, unknown>): Record<string, unknown> {
 }
 
 async function hydrateListings(listings: any[]): Promise<any[]> {
+  await ensureListingSchema();
   if (!listings.length) return [];
   const ids = listings.map((l) => Number(l.id)).filter(Boolean);
   if (!ids.length) return [];

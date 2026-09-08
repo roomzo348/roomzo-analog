@@ -598,12 +598,74 @@
 .logo-name { display: block; }
 
 .logo-tagline {
-  display: none;
+  display: block;
   font-size: 0.58rem;
   font-weight: 500;
   color: #94a3b8;
   letter-spacing: 0.01em;
   margin-top: 1px;
+  line-height: 1.15;
+}
+
+.rz-header:not(.scrolled) .logo-tagline {
+  color: #64748b;
+}
+
+.rz-header.scrolled .logo-tagline {
+  color: #64748b;
+}
+
+/* Desktop home (before scroll): solid frosted bar, same height as scrolled — no banner overlap */
+@media (min-width: 901px) {
+  .rz-header.home-hero-header:not(.scrolled) {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    padding: 0;
+    height: 52px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .container {
+    height: 100%;
+    align-items: center;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .brand .logo {
+    color: var(--rz-primary);
+    text-shadow: none;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .logo-tagline {
+    color: #64748b;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .nav-desktop a {
+    color: #0f172a;
+    text-shadow: none;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .nav-desktop a:hover {
+    color: var(--rz-primary);
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .login-link {
+    color: #0f172a;
+    text-shadow: none;
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .login-link:hover {
+    color: var(--rz-primary);
+  }
+
+  .rz-header.home-hero-header:not(.scrolled) .profile-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #e5e7eb;
+    color: var(--rz-text-main);
+  }
 }
 
 .header-city-pill {
@@ -674,6 +736,8 @@
     align-items: center;
   }
 
+  .rz-header .logo-tagline,
+  .rz-header.scrolled .logo-tagline,
   .rz-header.home-hero-header .logo-tagline {
     display: block !important;
     font-size: 0.55rem !important;

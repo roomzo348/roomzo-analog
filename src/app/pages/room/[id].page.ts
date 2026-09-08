@@ -1114,6 +1114,11 @@ private setContactLoading(loading: boolean): void {
     return Number(this.property?.isRented) === 1;
   }
 
+  isFlatProperty(): boolean {
+    const type = String(this.property?.propertyType || '').toLowerCase();
+    return type.includes('flat') || type.includes('apartment') || type.includes('bhk');
+  }
+
   isContactAvailable(): boolean {
     return !!this.property && Number(this.property.isRented) === 0;
   }

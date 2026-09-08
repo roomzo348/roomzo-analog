@@ -85,11 +85,19 @@
         <span class="location-text">{{ getLocalityLabel() }}</span>
       </p>
 
-      <!-- Specs: Bed / Bath / Kitchen -->
+      <!-- Specs: Bed / Bath / Kitchen or Sqft -->
       <div class="specs-ribbon" *ngIf="showSpecs">
         <div class="spec-item"><mat-icon>bed</mat-icon> <span>{{ getBeds() || 1 }} Bed</span></div>
         <div class="spec-item"><mat-icon>bathtub</mat-icon> <span>{{ getBaths() || 1 }} Bath</span></div>
-        <div class="spec-item"><mat-icon>kitchen</mat-icon> <span>Kitchen</span></div>
+        <div class="spec-item" *ngIf="shouldShowKitchenSpec(); else areaSpec">
+          <mat-icon>kitchen</mat-icon> <span>Kitchen</span>
+        </div>
+        <ng-template #areaSpec>
+          <div class="spec-item">
+            <mat-icon>square_foot</mat-icon>
+            <span>{{ getArea() ? (getArea() + ' sqft') : '—' }}</span>
+          </div>
+        </ng-template>
       </div>
 
       <!-- Call + WhatsApp -->

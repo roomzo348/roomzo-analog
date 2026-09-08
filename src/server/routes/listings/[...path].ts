@@ -67,7 +67,14 @@ export default defineEventHandler(async (event) => {
   if (segments[0] === 'add' && method === 'POST') {
     const user = await requireAuth(event);
     const payload = await readBody(event);
-    const listingId = await createListing({ ...payload, ownerId: user.id });
+    const photos = Array.isArray(payload?.photos) ? payload.photos.filter(Boolean) : [];
+    if (photos.length < 2) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'At least 2 uploaded photos are required. Listing was not created.',
+      });
+    }
+    const listingId = await createListing({ ...payload, photos, ownerId: user.id });
     const listing = await getListingById(listingId);
     await notifyNewProperty(listingId, listing?.propertyName ?? 'New listing');
     return { status: 1, message: 'Listing added successfully', data: { listingId, listing } };

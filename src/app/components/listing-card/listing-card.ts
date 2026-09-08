@@ -160,6 +160,21 @@ export class ListingCardComponent implements OnInit, OnChanges {
     return this.listing?.['specs']?.['area'] ?? this.listing?.['propertySize'] ?? this.listing?.['property_size'] ?? 0;
   }
 
+  /** Flat always shows Kitchen; otherwise show Kitchen only when hasKitchen is true. */
+  shouldShowKitchenSpec(): boolean {
+    const type = String(
+      this.listing?.['propertyType'] || this.listing?.['property_type'] || this.getPropertyTypeLabel() || ''
+    ).toLowerCase();
+    if (type.includes('flat') || type.includes('apartment') || type.includes('bhk')) {
+      return true;
+    }
+    return !!(
+      this.listing?.['hasKitchen'] ||
+      this.listing?.['has_kitchen'] ||
+      this.listing?.['kitchen']
+    );
+  }
+
   getPostedDate(): string | undefined {
     return this.listing?.['postedDate'] ?? this.listing?.['createdOn'] ?? this.listing?.['created_on'] ?? this.listing?.['dateCreated'];
   }

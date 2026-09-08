@@ -199,6 +199,7 @@ export default class EditListingComponent implements OnInit {
         contactNo: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         description: ['', [Validators.required, Validators.maxLength(1000)]],
         rentAmount: ['', Validators.required],
+        electricityIncluded: [false],
       }),
     });
   }
@@ -327,6 +328,7 @@ export default class EditListingComponent implements OnInit {
       contactNo,
       description,
       rentAmount: data.rentAmount ?? '',
+      electricityIncluded: !!(data.electricityIncluded ?? data.electricity_included),
     });
 
     this.existingPhotoUrls = Array.isArray(data.photos)
@@ -473,6 +475,7 @@ export default class EditListingComponent implements OnInit {
         name: raw.final.name,
         contactNo: raw.final.contactNo,
         rentAmount: raw.final.rentAmount,
+        electricityIncluded: !!raw.final.electricityIncluded,
         description: raw.final.description
           ? raw.final.description
               .split(/\r?\n/)
@@ -497,9 +500,11 @@ export default class EditListingComponent implements OnInit {
           }
           this.cd.detectChanges();
         },
-        error: () => {
+        error: (err) => {
           this.isSaving = false;
-          this.toastr.error('Server error during update');
+          this.toastr.error(
+            err?.message || err?.error?.message || 'Server error during update'
+          );
           this.cd.detectChanges();
         },
       });

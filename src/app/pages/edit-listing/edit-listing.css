@@ -253,6 +253,36 @@ input:focus, textarea:focus {
 .counter-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
 .divider-thin { height: 1px; background: var(--rz-border, #e2e8f0); }
 
+.feature-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1.5px solid var(--rz-border, #e2e8f0);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.feature-check input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.feature-check mat-icon { color: #94a3b8; flex-shrink: 0; }
+.feature-check.selected {
+  border-color: var(--rz-primary, #196153);
+  background: rgba(25, 97, 83, 0.06);
+}
+.feature-check.selected mat-icon { color: var(--rz-primary, #196153); }
+.feature-check strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--rz-text-main, #0f172a);
+}
+.feature-check span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--rz-text-muted, #64748b);
+  margin-top: 2px;
+}
+
 /* Amenities */
 .amenities-grid {
   display: flex;

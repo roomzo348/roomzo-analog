@@ -57,6 +57,15 @@
           <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('pattern') && finalGroup.get('contactNo')?.touched">Must be exactly 10 digits.</span>
         </div>
       </div>
+
+      <label class="feature-check" formGroupName="final" [class.selected]="finalGroup.get('electricityIncluded')?.value">
+        <input type="checkbox" formControlName="electricityIncluded" />
+        <mat-icon>{{ finalGroup.get('electricityIncluded')?.value ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+        <div>
+          <strong>Electricity bill included in rent</strong>
+          <span>Tick if tenants do not pay electricity separately</span>
+        </div>
+      </label>
     </section>
 
     <!-- Location -->
@@ -133,6 +142,15 @@
           </div>
         </div>
       </div>
+
+      <label class="feature-check" [formGroup]="amenitiesGroup" [class.selected]="amenitiesGroup.get('kitchen')?.value">
+        <input type="checkbox" formControlName="kitchen" />
+        <mat-icon>{{ amenitiesGroup.get('kitchen')?.value ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+        <div>
+          <strong>Kitchen available</strong>
+          <span>Tick if tenants can use a kitchen (default: not present)</span>
+        </div>
+      </label>
 
       <div class="form-group">
         <label>Total Size (Sq Ft) <span class="req">*</span></label>

@@ -8,8 +8,8 @@
   flex-direction: column;
   justify-content: flex-start;
   min-height: 0;
-  /* Desktop flush: matches .rz-header.scrolled height: 52px */
-  margin-top: 52px;
+  /* Clear fixed header (52px desktop scrolled / home frosted bar) */
+  margin-top: var(--rz-header-height, 52px);
   overflow: hidden;
   background: url('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1400&q=85')
               center 32% / cover no-repeat;

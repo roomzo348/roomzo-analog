@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { forkJoin, Observable, of, switchMap } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { forkJoin, Observable, of, switchMap, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ListingFilter {
@@ -183,45 +183,92 @@ export class PropertyService {
   }
 
 saveListing(formData: any): Observable<any> {
-    const files: File[] = formData.final.images || [];
+    const files: File[] = (formData.final?.images || []).filter((f: unknown) => f instanceof File);
+    const watermarked = files.filter((f) => !this.isOriginalBackupFile(f));
+    const originals = files.filter((f) => this.isOriginalBackupFile(f));
 
-    const uploadObservables = files.length > 0
-      ? files.map((file, index) =>
-          this.uploadImageToHostinger(file).pipe(
-            tap(res => console.log(`[File ${index + 1}] Upload Response:`, res)),
-            catchError(err => {
-              console.error(`[File ${index + 1}] Upload FAILED:`, err);
-              return of(null);
-            })
-          )
-        )
-      : [of(null)];
+    if (watermarked.length < 2) {
+      return throwError(() => new Error('Please upload at least two images before publishing.'));
+    }
 
-    return forkJoin(uploadObservables).pipe(
-      switchMap((responses: any[]) => {
-        
-        // Upload API returns public symlink URL: https://roomzo.in/images/file.jpg
-        const photoUrls = responses
-          .filter(res => res && res.status === 1 && res.url && !String(res.url).includes('-org'))
-          .map(res => this.toPublicImageUrl(res.url));
-
-        // If files were provided but none uploaded successfully, abort – don't save to DB
-        if (files.length > 0 && photoUrls.length === 0) {
-          throw new Error('Image upload failed. Please check your internet connection and try again.');
+    // Upload display photos first — every one must succeed or we abort (no DB insert).
+    return forkJoin(watermarked.map((file, i) => this.uploadImageStrict(file, i + 1))).pipe(
+      switchMap((photoUrls: string[]) => {
+        const validUrls = photoUrls.filter(Boolean);
+        if (validUrls.length < watermarked.length) {
+          return throwError(
+            () =>
+              new Error(
+                `Image upload incomplete (${validUrls.length}/${watermarked.length}). Listing was not created. Please try again.`
+              )
+          );
         }
 
-        const user = JSON.parse(localStorage.getItem("user") || '{}');
-        const { final, ...rest } = formData;
-        const { images, ...finalWithoutImages } = final;
+        // Originals are optional backup copies — failures here must not create a listing either
+        // if we already have display URLs; still try them but don't block on soft failure.
+        const orgUploads$ =
+          originals.length > 0
+            ? forkJoin(
+                originals.map((file, i) =>
+                  this.uploadImageStrict(file, i + 1).pipe(
+                    catchError((err) => {
+                      console.error('Original image backup upload failed:', err);
+                      return of(null);
+                    })
+                  )
+                )
+              )
+            : of([]);
 
-        const finalPayload = {
-          ...rest,
-          final: finalWithoutImages, 
-          photos: photoUrls, // Backend only sees the watermarked URLs
-          ownerId: user.id
-        };
+        return orgUploads$.pipe(
+          switchMap(() => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const { final, ...rest } = formData;
+            const { images, ...finalWithoutImages } = final || {};
 
-        return this.http.post(`${this.baseUrl}/api/listings/add`, finalPayload);
+            const finalPayload = {
+              ...rest,
+              final: finalWithoutImages,
+              photos: validUrls,
+              ownerId: user.id,
+            };
+
+            return this.http.post(`${this.baseUrl}/api/listings/add`, finalPayload);
+          })
+        );
+      }),
+      catchError((err) => {
+        const message =
+          err?.message ||
+          err?.error?.message ||
+          'Image upload failed. Listing was not created.';
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  /** True for renamed un-watermarked backups (`name-org.jpg`). */
+  private isOriginalBackupFile(file: File): boolean {
+    return /-org\.[^.]+$/i.test(file.name);
+  }
+
+  private uploadImageStrict(file: File, index: number): Observable<string> {
+    return this.uploadImageToHostinger(file).pipe(
+      map((res: any) => {
+        if (!res || Number(res.status) !== 1 || !res.url) {
+          throw new Error(
+            res?.message || `Photo ${index} upload failed. Listing was not created.`
+          );
+        }
+        return this.toPublicImageUrl(String(res.url));
+      }),
+      catchError((err) => {
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          `Photo ${index} upload failed. Listing was not created.`;
+        console.error(`[File ${index}] Upload FAILED:`, err);
+        return throwError(() => new Error(msg));
       })
     );
   }
@@ -308,32 +355,45 @@ return this.http.get(`${this.baseUrl}/api/listings/owner/${ownerId}`);
       return this.http.put(`${this.baseUrl}/api/listings/update/${id}`, payload);
     }
 
-    const uploadObservables = filesToUpload.map((file) =>
-      this.uploadImageToHostinger(file).pipe(
-        catchError((err) => {
-          console.error('Image upload failed:', err);
-          return of(null);
-        })
-      )
-    );
+    const watermarked = filesToUpload.filter((f) => !this.isOriginalBackupFile(f));
+    const originals = filesToUpload.filter((f) => this.isOriginalBackupFile(f));
+    const displayFiles = watermarked.length > 0 ? watermarked : filesToUpload;
 
-    return forkJoin(uploadObservables).pipe(
-      switchMap((responses: any[]) => {
-        const uploadedUrls = responses
-          .filter((res) => res && res.status === 1 && res.url && !String(res.url).includes('-org'))
-          .map((res) => this.toPublicImageUrl(res.url));
-
-        if (filesToUpload.length > 0 && uploadedUrls.length === 0) {
-          throw new Error('Image upload failed. Please try again.');
+    return forkJoin(displayFiles.map((file, i) => this.uploadImageStrict(file, i + 1))).pipe(
+      switchMap((uploadedUrls: string[]) => {
+        if (uploadedUrls.length < displayFiles.length) {
+          return throwError(
+            () =>
+              new Error(
+                `Image upload incomplete (${uploadedUrls.length}/${displayFiles.length}). Changes were not saved.`
+              )
+          );
         }
 
-        const existingUrls: string[] = payload.photos || [];
-        const finalPayload = {
-          ...payload,
-          photos: [...existingUrls, ...uploadedUrls],
-        };
+        const orgUploads$ =
+          originals.length > 0
+            ? forkJoin(
+                originals.map((file, i) =>
+                  this.uploadImageStrict(file, i + 1).pipe(catchError(() => of(null)))
+                )
+              )
+            : of([]);
 
-        return this.http.put(`${this.baseUrl}/api/listings/update/${id}`, finalPayload);
+        return orgUploads$.pipe(
+          switchMap(() => {
+            const existingUrls: string[] = payload.photos || [];
+            const finalPayload = {
+              ...payload,
+              photos: [...existingUrls, ...uploadedUrls],
+            };
+            return this.http.put(`${this.baseUrl}/api/listings/update/${id}`, finalPayload);
+          })
+        );
+      }),
+      catchError((err) => {
+        const message =
+          err?.message || err?.error?.message || 'Image upload failed. Changes were not saved.';
+        return throwError(() => new Error(message));
       })
     );
   }

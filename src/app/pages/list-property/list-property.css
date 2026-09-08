@@ -295,6 +295,48 @@ input:focus, textarea:focus {
 .unselected-icon { color: #94a3b8; }
 .amenity-pill.selected .unselected-icon { color: white; opacity: 0.9; }
 
+.feature-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--rz-border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.feature-check input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.feature-check-icon {
+  color: #94a3b8;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.feature-check.selected {
+  border-color: var(--rz-primary);
+  background: rgba(25, 97, 83, 0.06);
+}
+.feature-check.selected .feature-check-icon { color: var(--rz-primary); }
+.feature-check-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.feature-check-copy strong {
+  font-size: 0.95rem;
+  color: var(--rz-text-main);
+  font-weight: 600;
+}
+.feature-check-copy span {
+  font-size: 0.8rem;
+  color: var(--rz-text-muted);
+  line-height: 1.35;
+}
+
 /* --- 9. Map & Integrated Actions --- */
 .map-picker-container { border: 1px solid var(--rz-border); border-radius: 16px; padding: 16px; background: white; }
 

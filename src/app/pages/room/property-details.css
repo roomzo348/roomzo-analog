@@ -880,15 +880,44 @@ div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient:
     border-bottom: 1px dashed #e8edf0;
   }
 
-  .rent-label {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: #94a3b8;
-    margin-bottom: 3px;
-  }
+.rent-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  margin-bottom: 3px;
+}
+
+.elec-rent-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(25, 97, 83, 0.08);
+  color: #196153;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.elec-rent-note mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+.elec-rent-note.compact {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  padding: 4px 8px;
+}
+.meta-pill.elec-included {
+  background: rgba(25, 97, 83, 0.1);
+  color: #196153;
+  border-color: rgba(25, 97, 83, 0.2);
+}
 
   .price-highlight {
     font-size: 1.35rem;

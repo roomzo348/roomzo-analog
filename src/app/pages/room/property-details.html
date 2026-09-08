@@ -152,6 +152,10 @@
         <div class="summary-price">
           <span class="rent-label">Monthly rent</span>
           <div class="price-highlight">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
+          <div class="elec-rent-note compact" *ngIf="property.electricityIncluded">
+            <mat-icon>bolt</mat-icon>
+            <span>Elec. bill included in rent</span>
+          </div>
         </div>
         <div class="summary-top-right">
           <span class="rating-pill" *ngIf="reviewCount > 0">
@@ -169,7 +173,10 @@
         <span class="meta-pill"><mat-icon>bed</mat-icon>{{ property.bedrooms }} BHK</span>
         <span class="meta-pill"><mat-icon>square_foot</mat-icon>{{ property.propertySize | number }} sq ft</span>
         <span class="meta-pill"><mat-icon>bathtub</mat-icon>{{ property.bathrooms || 1 }} Bath</span>
-        <span class="meta-pill"><mat-icon>directions_car</mat-icon>{{ property.parking || 1 }} Parking</span>
+        <span class="meta-pill" *ngIf="property.hasKitchen || isFlatProperty()"><mat-icon>kitchen</mat-icon>Kitchen</span>
+        <span class="meta-pill elec-included" *ngIf="property.electricityIncluded">
+          <mat-icon>bolt</mat-icon>Elec. bill included in rent
+        </span>
       </div>
     </section>
 
@@ -430,6 +437,11 @@
         <div class="booking-card">
           <div class="price-header">
             <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
+          </div>
+
+          <div class="elec-rent-note" *ngIf="property.electricityIncluded">
+            <mat-icon>bolt</mat-icon>
+            <span>Electricity bill included in rent</span>
           </div>
           
           <div class="status-tag" [ngClass]="{'available': !isPropertyRented(), 'rented': isPropertyRented()}">

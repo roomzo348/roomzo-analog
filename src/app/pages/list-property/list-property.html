@@ -154,6 +154,15 @@
             </div>
           </div>
 
+          <label class="feature-check" [class.selected]="amenitiesGroup.get('kitchen')?.value === true">
+            <input type="checkbox" [formControl]="amenitiesKitchenControl" />
+            <mat-icon class="feature-check-icon">{{ amenitiesGroup.get('kitchen')?.value ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+            <div class="feature-check-copy">
+              <strong>Kitchen available</strong>
+              <span>Tick if tenants can use a kitchen (default: not present)</span>
+            </div>
+          </label>
+
           <div class="input-group mt-24">
             <label class="input-label">Total Size (Sq Ft) <span class="req-star">*</span></label>
             <input type="number" formControlName="propertySize" placeholder="e.g. 1200">
@@ -279,6 +288,15 @@
                   <span class="error-text" *ngIf="finalGroup.get('contactNo')?.hasError('pattern') && finalGroup.get('contactNo')?.touched">Must be exactly 10 digits.</span>
                 </div>
               </div>
+
+              <label class="feature-check mt-16" [class.selected]="finalGroup.get('electricityIncluded')?.value === true">
+                <input type="checkbox" formControlName="electricityIncluded" />
+                <mat-icon class="feature-check-icon">{{ finalGroup.get('electricityIncluded')?.value ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                <div class="feature-check-copy">
+                  <strong>Electricity bill included in rent</strong>
+                  <span>Tick if tenants do not pay electricity separately (default: not included)</span>
+                </div>
+              </label>
 
               <h2 class="subsection-title mt-32">Photos <span class="req-star">*</span></h2>
               <div class="photo-upload-container" (click)="fileInput.click()" [class.map-error]="imagePreviews.length > 0 && imagePreviews.length < 2">
