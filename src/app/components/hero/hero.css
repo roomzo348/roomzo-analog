@@ -61,14 +61,14 @@
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.4px;
-  color: #0f172a;
+  color: var(--rz-text-main);
   margin: 0 0 6px;
   text-shadow: none;
 }
 
 .hero-sub {
   font-family: 'Outfit', sans-serif;
-  color: #475569;
+  color: var(--rz-text-muted);
   font-size: 1rem;
   font-weight: 400;
   margin: 0;
@@ -84,7 +84,7 @@
   font-family: 'Caveat', cursive;
   font-size: clamp(1.15rem, 1.9vw, 1.5rem);
   font-weight: 600;
-  color: #196153;
+  color: var(--rz-primary);
   line-height: 1.05;
   text-align: right;
   transform: rotate(-6deg);
@@ -97,7 +97,7 @@
   width: 36px;
   height: 2px;
   margin: 4px 0 0 auto;
-  background: #196153;
+  background: var(--rz-primary);
   border-radius: 2px;
   transform: rotate(-4deg);
   opacity: 0.9;
@@ -121,7 +121,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #1e293b;
+  color: var(--rz-text-main);
   font-family: 'Outfit', sans-serif;
   font-size: 0.88rem;
   font-weight: 500;
@@ -131,7 +131,83 @@
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #196153;
+  color: var(--rz-primary);
+}
+
+/* ============================================================
+   DARK MODE — cinematic banner (teal glow + deep navy wash)
+============================================================ */
+:host-context([data-theme='dark']) .hero-full {
+  background-color: #070b14;
+  background-image:
+    linear-gradient(120deg, rgba(7, 11, 20, 0.55) 0%, transparent 50%),
+    url('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1400&q=85');
+  background-position: center 32%;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+:host-context([data-theme='dark']) .hero-overlay {
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 28%, rgba(20, 184, 166, 0.28), transparent 58%),
+    radial-gradient(ellipse 50% 40% at 88% 12%, rgba(56, 189, 248, 0.12), transparent 55%),
+    linear-gradient(
+      112deg,
+      rgba(7, 11, 20, 0.94) 0%,
+      rgba(11, 18, 32, 0.78) 42%,
+      rgba(11, 18, 32, 0.42) 72%,
+      rgba(7, 11, 20, 0.55) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(7, 11, 20, 0.35) 0%,
+      transparent 38%,
+      rgba(7, 11, 20, 0.72) 82%,
+      rgba(7, 11, 20, 0.92) 100%
+    );
+}
+
+:host-context([data-theme='dark']) .hero-text-block h1 {
+  color: #f8fafc !important;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.45);
+}
+
+:host-context([data-theme='dark']) .hero-sub {
+  color: #cbd5e1 !important;
+}
+
+:host-context([data-theme='dark']) .hero-script {
+  color: #5eead4;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+:host-context([data-theme='dark']) .hero-script-marks {
+  background: #5eead4;
+  box-shadow: 0 0 12px rgba(94, 234, 212, 0.45);
+}
+
+:host-context([data-theme='dark']) .hero-trust {
+  background: rgba(7, 11, 20, 0.78);
+  border-top: 1px solid rgba(45, 212, 191, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+}
+
+:host-context([data-theme='dark']) .trust-item {
+  color: #e2e8f0;
+}
+
+:host-context([data-theme='dark']) .trust-item mat-icon {
+  color: #2dd4bf;
+  filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.35));
+}
+
+:host-context([data-theme='dark']) .rz-search-pill,
+:host-context([data-theme='dark']) ::ng-deep .rz-search-pill {
+  background: rgba(21, 29, 46, 0.92) !important;
+  border: 1px solid rgba(45, 212, 191, 0.22) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
 }
 
 /* ---- Mobile: tight title → search like screenshot ---- */
@@ -170,7 +246,7 @@
     font-weight: 800 !important;
     line-height: 1.18 !important;
     letter-spacing: -0.25px !important;
-    color: #0f172a !important;
+    color: var(--rz-text-main) !important;
     margin: 0 0 2px !important;
     text-shadow: none !important;
   }
@@ -178,7 +254,7 @@
   .hero-sub {
     font-size: 0.65rem !important;
     line-height: 1.25 !important;
-    color: #475569 !important;
+    color: var(--rz-text-muted) !important;
     margin: 0 !important;
   }
 
@@ -216,5 +292,30 @@
     font-size: 11px;
     width: 11px;
     height: 11px;
+  }
+
+  :host-context([data-theme='dark']) .hero-overlay {
+    background:
+      radial-gradient(ellipse 90% 50% at 50% 0%, rgba(20, 184, 166, 0.22), transparent 60%),
+      linear-gradient(
+        180deg,
+        rgba(7, 11, 20, 0.72) 0%,
+        rgba(7, 11, 20, 0.62) 40%,
+        rgba(7, 11, 20, 0.78) 78%,
+        rgba(7, 11, 20, 0.92) 100%
+      );
+  }
+
+  :host-context([data-theme='dark']) .hero-text-block h1 {
+    color: #f8fafc !important;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  :host-context([data-theme='dark']) .hero-sub {
+    color: #cbd5e1 !important;
+  }
+
+  :host-context([data-theme='dark']) .hero-full {
+    border-radius: 0 0 20px 20px;
   }
 }

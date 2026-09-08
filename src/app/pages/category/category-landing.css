@@ -108,7 +108,7 @@
   color: var(--text-muted);
 }
 
-.chevron { color: #94a3b8; }
+.chevron { color: var(--rz-text-faint); }
 
 /* --- Promo Banner --- */
 .promo-banner {

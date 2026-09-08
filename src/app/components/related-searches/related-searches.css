@@ -2,8 +2,8 @@
   margin-top: 2rem;
   padding: 1.5rem;
   border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--rz-bg-elevated);
+  border: 1px solid var(--rz-border);
 }
 
 .related-searches.compact {
@@ -15,12 +15,12 @@
   font-size: 1.125rem;
   font-weight: 700;
   margin: 0 0 0.5rem;
-  color: #0f172a;
+  color: var(--rz-text-main) !important;
 }
 
 .related-desc {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--rz-text-muted) !important;
   margin: 0 0 1rem;
   line-height: 1.5;
 }
@@ -37,29 +37,29 @@
   display: inline-block;
   padding: 0.4rem 0.75rem;
   font-size: 0.8125rem;
-  color: #0f766e;
-  background: #fff;
-  border: 1px solid #99f6e4;
+  color: var(--rz-primary);
+  background: var(--rz-bg-card);
+  border: 1px solid color-mix(in srgb, var(--rz-primary) 35%, var(--rz-border));
   border-radius: 999px;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .related-chip:hover,
 .city-chip:hover {
-  background: #ecfdf5;
-  border-color: #0f766e;
+  background: var(--rz-primary-soft);
+  border-color: var(--rz-primary);
 }
 
 .city-quick-links {
   margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--rz-border);
 }
 
 .city-quick-links h3 {
   font-size: 0.9375rem;
   font-weight: 600;
   margin: 0 0 0.75rem;
-  color: #334155;
+  color: var(--rz-text-muted) !important;
 }

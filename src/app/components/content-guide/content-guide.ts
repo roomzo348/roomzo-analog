@@ -33,17 +33,17 @@ import { GuideSection } from '../../content/city-guides';
         max-width: 920px;
         margin: 48px auto 24px;
         padding: 28px 24px;
-        background: #fff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: var(--rz-bg-card);
+        border: 1px solid var(--rz-border);
         border-radius: 16px;
-        color: #0f172a;
+        color: var(--rz-text-main);
         line-height: 1.7;
       }
       .guide-kicker {
         font-size: 0.75rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #64748b;
+        color: var(--rz-text-muted);
         margin: 0 0 8px;
         font-weight: 600;
       }
@@ -51,36 +51,37 @@ import { GuideSection } from '../../content/city-guides';
         font-size: 1.5rem;
         margin: 0 0 8px;
         line-height: 1.3;
+        color: var(--rz-text-main);
       }
       .guide-tagline {
-        color: #475569;
+        color: var(--rz-text-muted);
         margin: 0 0 12px;
         font-size: 1.05rem;
       }
       .guide-intro {
         margin: 0;
-        color: #334155;
+        color: var(--rz-text-muted);
         font-size: 1.02rem;
       }
       .guide-section {
         margin-top: 28px;
         padding-top: 8px;
-        border-top: 1px solid rgba(15, 23, 42, 0.06);
+        border-top: 1px solid var(--rz-border);
       }
       .guide-section h3 {
         font-size: 1.15rem;
         margin: 0 0 10px;
-        color: #0f172a;
+        color: var(--rz-text-main);
       }
       .guide-section p {
         margin: 0 0 12px;
-        color: #475569;
+        color: var(--rz-text-muted);
         font-size: 1rem;
       }
       .guide-section ul {
         margin: 8px 0 0;
         padding-left: 1.2rem;
-        color: #475569;
+        color: var(--rz-text-muted);
       }
       .guide-section li {
         margin-bottom: 8px;

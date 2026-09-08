@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
+  color: var(--rz-text-main);
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
 }
@@ -182,7 +182,7 @@
 .live-stat-card .stat-number {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--rz-text-main);
   line-height: 1.1;
 }
 
@@ -238,7 +238,7 @@
 }
 
 .plans-live-copy strong {
-  color: #0f172a;
+  color: var(--rz-text-main);
   font-size: 0.82rem;
   line-height: 1.25;
 }

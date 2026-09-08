@@ -7,7 +7,7 @@
   margin: 0 0 0.75rem;
   padding: 0;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .seo-breadcrumb a {
@@ -21,10 +21,10 @@
 
 .seo-breadcrumb .sep {
   margin: 0 0.25rem;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
 }
 
 .seo-breadcrumb [aria-current='page'] {
-  color: #334155;
+  color: var(--rz-text-muted);
   font-weight: 500;
 }

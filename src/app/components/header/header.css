@@ -12,9 +12,9 @@
   padding: 12px 0; /* Slightly taller when transparent */
 }
 
-/* --- THE SCOLL STATE (Solid Background) --- */
+/* --- THE SCROLL STATE (Solid Background) --- */
 .rz-header.scrolled {
-  background: #ffffff;
+  background: var(--rz-bg-card);
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   padding: 0;
   height: 52px;
@@ -85,7 +85,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
 .login-link {
@@ -170,8 +170,8 @@
   padding: 8px 0;
 }
 .user-info { padding: 12px 16px; display: flex; flex-direction: column; }
-.user-info strong { font-size: 14px; color: #111827; }
-.user-info span { font-size: 12px; color: #6b7280; }
+.user-info strong { font-size: 14px; color: var(--rz-text-main); }
+.user-info span { font-size: 12px; color: var(--rz-text-muted); }
 .divider { height: 1px; background: #e5e7eb; margin: 4px 0; }
 .menu-item {
   display: flex; align-items: center; gap: 12px;
@@ -195,7 +195,7 @@
   /* All pages: keep a real tap-friendly header height (not only home) */
   .rz-header,
   .rz-header.scrolled {
-    background: #ffffff;
+    background: var(--rz-bg-card);
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     padding: 10px 0;
     height: auto !important;
@@ -234,7 +234,7 @@
     bottom: 0; 
     left: 0; 
     width: 100%;
-    background: #ffffff;
+    background: var(--rz-bg-card);
     box-shadow: 0 -4px 20px rgba(0,0,0,0.08); /* Stronger shadow to separate from content */
     z-index: 1000;
     justify-content: space-between;
@@ -245,7 +245,7 @@
   }
   .nav-item {
     display: flex; flex-direction: column; align-items: center;
-    text-decoration: none; color: #6b7280; font-size: 11px; font-weight: 600; flex: 1; gap: 4px; cursor: pointer;
+    text-decoration: none; color: var(--rz-text-muted); font-size: 11px; font-weight: 600; flex: 1; gap: 4px; cursor: pointer;
   }
   .nav-item mat-icon { font-size: 26px; width: 26px; height: 26px; }
   .nav-item.active-link { color: var(--rz-primary); }
@@ -256,7 +256,7 @@
     width: 56px; height: 56px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
-    box-shadow: 0 4px 12px rgba(25, 97, 83, 0.3); border: 5px solid #ffffff; transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(25, 97, 83, 0.3); border: 5px solid var(--rz-bg-card); transition: transform 0.2s;
   }
   .fab-button mat-icon { font-size: 32px; width: 32px; height: 32px; }
   .fab-button:active { transform: translateX(-50%) scale(0.95); }
@@ -264,7 +264,7 @@
   /* Mobile dropdown overlay rules... */
   .mobile-dropdown-overlay { display: block; position: fixed; bottom: 80px; left: 0; width: 100%; z-index: 999; }
   .overlay-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 1000; }
-  .mobile-dropdown { background: white; margin: 0 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; z-index: 1001; padding: 12px 0; animation: slideUp 0.3s ease-out; }
+  .mobile-dropdown { background: var(--rz-bg-card); margin: 0 16px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; z-index: 1001; padding: 12px 0; animation: slideUp 0.3s ease-out; color: var(--rz-text-main); }
   @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 }
 
@@ -601,27 +601,27 @@
   display: block;
   font-size: 0.58rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   letter-spacing: 0.01em;
   margin-top: 1px;
   line-height: 1.15;
 }
 
 .rz-header:not(.scrolled) .logo-tagline {
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .rz-header.scrolled .logo-tagline {
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 /* Desktop home (before scroll): solid frosted bar, same height as scrolled — no banner overlap */
 @media (min-width: 901px) {
   .rz-header.home-hero-header:not(.scrolled) {
-    background: rgba(255, 255, 255, 0.96);
+    background: color-mix(in srgb, var(--rz-bg-card) 96%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    border-bottom: 1px solid var(--rz-border);
     padding: 0;
     height: 52px;
     box-sizing: border-box;
@@ -640,11 +640,11 @@
   }
 
   .rz-header.home-hero-header:not(.scrolled) .logo-tagline {
-    color: #64748b;
+    color: var(--rz-text-muted);
   }
 
   .rz-header.home-hero-header:not(.scrolled) .nav-desktop a {
-    color: #0f172a;
+    color: var(--rz-text-main);
     text-shadow: none;
   }
 
@@ -653,7 +653,7 @@
   }
 
   .rz-header.home-hero-header:not(.scrolled) .login-link {
-    color: #0f172a;
+    color: var(--rz-text-main);
     text-shadow: none;
   }
 
@@ -662,8 +662,8 @@
   }
 
   .rz-header.home-hero-header:not(.scrolled) .profile-btn {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: #e5e7eb;
+    background: var(--rz-bg-elevated);
+    border-color: var(--rz-border);
     color: var(--rz-text-main);
   }
 }
@@ -674,7 +674,7 @@
   gap: 1px;
   text-decoration: none;
   background: #f1f5f9;
-  color: #0f172a;
+  color: var(--rz-text-main);
   border-radius: 999px;
   padding: 3px 6px 3px 4px;
   font-size: 0.64rem;
@@ -686,14 +686,14 @@
   font-size: 12px;
   width: 12px;
   height: 12px;
-  color: #196153;
+  color: var(--rz-primary);
 }
 
 .header-city-pill .pill-chevron {
   font-size: 14px;
   width: 14px;
   height: 14px;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .header-fav-btn {
@@ -713,7 +713,7 @@
   font-size: 15px;
   width: 15px;
   height: 15px;
-  color: #196153;
+  color: var(--rz-primary);
 }
 
 .mobile-only { display: none; }

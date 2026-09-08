@@ -248,7 +248,7 @@
   border: 1px solid var(--rz-border, #e5e7eb);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
-.btn-delete mat-icon { color: #94a3b8; transition: color 0.2s ease; }
+.btn-delete mat-icon { color: var(--rz-text-faint); transition: color 0.2s ease; }
 .btn-delete:hover {
   background: #fef2f2;
   border-color: #fca5a5;

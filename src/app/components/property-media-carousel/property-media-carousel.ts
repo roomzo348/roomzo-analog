@@ -105,7 +105,7 @@ import { getListingPhotoUrls, ListingPhotoInput, optimizeImageUrl } from '../../
         border: none;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.92);
-        color: #0f172a;
+        color: var(--rz-text-main);
         display: flex;
         align-items: center;
         justify-content: center;

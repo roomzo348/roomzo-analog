@@ -36,7 +36,7 @@
 
 .paywall-close:hover {
   background: #e2e8f0;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .paywall-close mat-icon {
@@ -212,7 +212,7 @@
   font-size: 1.32rem;
   font-weight: 700;
   line-height: 1.25;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .main-sub {
@@ -328,7 +328,7 @@
   gap: 7px;
   font-size: 0.98rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .plan-badge {
@@ -378,7 +378,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 1px;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .plan-price del {

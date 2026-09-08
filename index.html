@@ -5,6 +5,23 @@
   <title>Roomzo — Rooms, PG &amp; Flats for Rent | Direct Owner Contact</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('roomzo-theme');
+          var theme =
+            stored === 'dark' || stored === 'light'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/src/styles.css" />
     <meta name="description" content="Browse owner-listed rooms, PGs, and flats on Roomzo. Unlock owner contact with a plan in Prayagraj, Varanasi, Pune, Lucknow and more — always visit before you pay.">

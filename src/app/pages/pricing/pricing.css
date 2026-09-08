@@ -20,7 +20,7 @@ h1 {
   max-width: 720px;
   font-size: clamp(1.7rem, 4vw, 2.4rem);
   line-height: 1.25;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .wallet-chip {
@@ -55,7 +55,7 @@ h1 {
 }
 
 .plan.popular {
-  border-color: #196153;
+  border-color: var(--rz-primary);
   transform: translateY(-4px);
 }
 
@@ -88,7 +88,7 @@ h1 {
 .price-wrap del {
   display: block;
   margin-bottom: -5px;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -118,13 +118,13 @@ h1 {
   margin: 8px 0 4px;
   font-size: 2.2rem;
   font-weight: 800;
-  color: #196153;
+  color: var(--rz-primary);
 }
 
 .price span {
   font-size: 1rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .cta,
