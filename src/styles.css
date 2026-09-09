@@ -237,6 +237,22 @@ body.hide-global-bottom-nav .mobile-bottom-nav {
   display: none !important;
 }
 
+@media (max-width: 768px) {
+  html:has(body.fm-single-view),
+  body.fm-single-view {
+    overflow: hidden;
+    height: 100%;
+  }
+  body.fm-single-view {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
+  body.fm-single-view app-footer {
+    display: none !important;
+  }
+}
+
 /* Immersive detail pages (e.g. property details): full-bleed hero image on mobile.
    Hide the fixed global header so it does not overlap the top of the image. */
 @media (max-width: 900px) {
@@ -245,7 +261,8 @@ body.hide-global-bottom-nav .mobile-bottom-nav {
   }
 }
 
-body.zoom-viewer-open {
+body.zoom-viewer-open,
+body.fm-gallery-open {
   overflow: hidden;
   position: fixed;
   width: 100%;

@@ -5,6 +5,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PropertyService } from '../../services/property.service';
+import { FlatmateService } from '../../services/flatmate.service';
 import { ToastrService } from 'ngx-toastr';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSelectModule } from '@angular/material/select';
@@ -65,14 +66,17 @@ export default class MyListingsComponent implements OnInit {
 
   listings: any[] = [];
   favoriteListings: any[] = [];
+  favoriteFlatmates: any[] = [];
   isLoading = true; 
   ownerId: number | null = null;
   activeTab: 'my-properties' | 'favorites' = 'my-properties';
+  savedKind: 'properties' | 'flatmates' = 'properties';
   listingInsights: Record<number, ListingInsights> = {};
   listingIdSearch = '';
 
   constructor(
     private propertyService: PropertyService,
+    private flatmateService: FlatmateService,
     private activityService: ActivityService,
     private router: Router,
     private route: ActivatedRoute,
@@ -84,8 +88,14 @@ export default class MyListingsComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const tab = params.get('tab');
-      if (tab === 'favorites') {
+      const saved = params.get('saved');
+      if (tab === 'favorites' || saved === 'flatmates' || saved === 'flatmate') {
         this.activeTab = 'favorites';
+      }
+      if (saved === 'flatmates' || saved === 'flatmate') {
+        this.savedKind = 'flatmates';
+      } else if (saved === 'properties' || saved === 'property') {
+        this.savedKind = 'properties';
       }
     });
 
@@ -94,6 +104,7 @@ export default class MyListingsComponent implements OnInit {
       this.ownerId = parseInt(storedUser.id, 10);
       this.loadMyListings();
       this.loadFavoriteListings();
+      this.loadFavoriteFlatmates();
     } else {
       this.toastr.error('User not logged in');
       this.isLoading = false; 
@@ -142,8 +153,41 @@ export default class MyListingsComponent implements OnInit {
     });
   }
 
+  loadFavoriteFlatmates(): void {
+    this.flatmateService.getFavoritePosts().subscribe({
+      next: (res: any) => {
+        const payload = res?.data ?? res?.favorites ?? res ?? [];
+        const favorites = Array.isArray(payload) ? payload : [];
+        this.favoriteFlatmates = favorites
+          .map((item: any) => item?.flatmate ?? item?.post ?? item)
+          .filter((item: any) => item && item.id);
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.favoriteFlatmates = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  get savedCount(): number {
+    return this.favoriteListings.length + this.favoriteFlatmates.length;
+  }
+
+  getFlatmateImage(mate: any): string {
+    const first = mate?.images?.[0] || '';
+    return this.flatmateService.resolveImageUrl(first);
+  }
+
   switchTab(tab: 'my-properties' | 'favorites'): void {
     this.activeTab = tab;
+  }
+
+  switchSavedKind(kind: 'properties' | 'flatmates'): void {
+    this.savedKind = kind;
+    if (this.activeTab !== 'favorites') {
+      this.activeTab = 'favorites';
+    }
   }
 
   get filteredListings(): any[] {

@@ -1,0 +1,100 @@
+<div class="unlocked-page">
+  <header class="unlocked-top">
+    <button type="button" class="back-btn" (click)="goBack()" aria-label="Back to unlocked list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>Unlocked listing</h1>
+      <p *ngIf="formatUnlockedAt(unlockedAt)">Opened {{ formatUnlockedAt(unlockedAt) }}</p>
+    </div>
+  </header>
+
+  <div class="loading-block" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading owner details…</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && listing">
+    <div class="photo-row">
+      <img *ngFor="let photo of photos; let i = index" [src]="photo" [alt]="title + ' photo ' + (i + 1)" />
+    </div>
+
+    <section class="detail-card">
+      <div class="title-row">
+        <div>
+          <p class="type-chip">{{ listing.propertyType || 'Property' }}</p>
+          <h2>{{ title }}</h2>
+        </div>
+        <strong class="price">{{ formatPrice(listing.rentAmount) }}/mo</strong>
+      </div>
+      <p class="location">
+        <mat-icon>location_on</mat-icon>
+        <span>{{ location }}</span>
+      </p>
+      <div class="specs">
+        <span *ngIf="listing.bedrooms"><mat-icon>bed</mat-icon> {{ listing.bedrooms }} Bed</span>
+        <span *ngIf="listing.bathrooms"><mat-icon>bathtub</mat-icon> {{ listing.bathrooms }} Bath</span>
+        <span *ngIf="listing.propertySize"><mat-icon>square_foot</mat-icon> {{ listing.propertySize }} SqFt</span>
+      </div>
+    </section>
+
+    <section class="detail-card contact-card" *ngIf="contact">
+      <div class="owner-row">
+        <span class="owner-avatar">{{ (contact.name || 'O').charAt(0) }}</span>
+        <div>
+          <strong>{{ contact.name || 'Property Owner' }}</strong>
+          <span>Owner contact is unlocked for you</span>
+        </div>
+      </div>
+
+      <div class="contact-actions">
+        <button type="button" class="contact-btn call" [disabled]="!phone" (click)="callOwner()">
+          <mat-icon>call</mat-icon>
+          Call
+        </button>
+        <button type="button" class="contact-btn wa" [disabled]="!phone" (click)="whatsappOwner()">
+          <mat-icon>chat</mat-icon>
+          WhatsApp
+        </button>
+        <button type="button" class="contact-btn mail" *ngIf="contact.email" (click)="emailOwner()">
+          <mat-icon>email</mat-icon>
+          Email
+        </button>
+      </div>
+
+      <p class="phone-line" *ngIf="phone">{{ phone }}</p>
+      <p class="phone-line" *ngIf="contact.email">{{ contact.email }}</p>
+      <p class="safety">Never pay an advance without visiting the property and meeting the owner.</p>
+    </section>
+
+    <section class="detail-card" *ngIf="listing.description">
+      <h3>About this place</h3>
+      <p class="bio">{{ listing.description }}</p>
+    </section>
+
+    <section class="detail-card" *ngIf="amenities.length">
+      <h3>Amenities</h3>
+      <div class="chip-wrap">
+        <span class="chip" *ngFor="let item of amenities">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </span>
+      </div>
+    </section>
+
+    <section class="detail-card" *ngIf="conditions.length">
+      <h3>House rules</h3>
+      <div class="chip-wrap">
+        <span class="chip" *ngFor="let item of conditions">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </span>
+      </div>
+    </section>
+
+    <a class="full-listing" [routerLink]="['/room', listing.id]">
+      Open public listing
+      <mat-icon>open_in_new</mat-icon>
+    </a>
+  </ng-container>
+</div>

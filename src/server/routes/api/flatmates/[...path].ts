@@ -6,6 +6,11 @@ import {
   getFlatmateNearby,
   hasActivePost,
 } from '../../../services/flatmate-repository';
+import {
+  addFlatmateFavourite,
+  getFlatmateFavouritesByUser,
+  removeFlatmateFavourite,
+} from '../../../services/flatmate-favourite-repository';
 import { apiResponse } from '../../../utils/api-response';
 import { requireAuth } from '../../../utils/auth-session';
 
@@ -41,6 +46,31 @@ export default defineEventHandler(async (event) => {
   if (segments[0] === 'check-status' && method === 'GET') {
     const user = await requireAuth(event);
     return { status: 1, data: await hasActivePost(Number(user.id)) };
+  }
+
+  if (segments[0] === 'favourites' && segments[1] === 'save' && method === 'POST') {
+    const user = await requireAuth(event);
+    const body = await readBody(event);
+    const postId = Number(body?.postId ?? body?.flatmatePostId);
+    if (!Number.isFinite(postId) || postId <= 0) {
+      return apiResponse(0, 'A valid flatmate post id is required');
+    }
+    await addFlatmateFavourite(Number(user.id), postId);
+    return apiResponse(1, 'Saved to favourites');
+  }
+
+  if (segments[0] === 'favourites' && segments[1] === 'remove' && method === 'DELETE') {
+    const user = await requireAuth(event);
+    const body = await readBody(event);
+    const postId = Number(body?.postId ?? body?.flatmatePostId);
+    const ok = await removeFlatmateFavourite(Number(user.id), postId);
+    return apiResponse(ok ? 1 : 0, ok ? 'Removed from favourites' : 'Favourite not found');
+  }
+
+  if (segments[0] === 'favourites' && method === 'GET') {
+    const user = await requireAuth(event);
+    const data = await getFlatmateFavouritesByUser(Number(user.id));
+    return apiResponse(1, 'Favourites fetched successfully', data);
   }
 
   if (segments[0] && method === 'DELETE') {

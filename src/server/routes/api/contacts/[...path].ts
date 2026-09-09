@@ -5,7 +5,9 @@ import { listContactPlans } from '../../../config/plans';
 import { getServerRuntime } from '../../../utils/runtime-config';
 import { getWallet, serializeWallet } from '../../../services/billing-repository';
 import {
+  getUnlockedListingDetail,
   hasUnlockedListing,
+  listUnlockedListings,
   unlockListingContact,
 } from '../../../services/contact-access-repository';
 import { getListingById } from '../../../services/listing-repository';
@@ -46,6 +48,17 @@ export default defineEventHandler(async (event) => {
       };
     }
     return apiResponse(result.status, result.message, result.data);
+  }
+
+  if (segments[0] === 'unlocked' && method === 'GET') {
+    const user = await requireAuth(event);
+    const listingId = Number(segments[1]);
+    if (Number.isFinite(listingId) && listingId > 0) {
+      const result = await getUnlockedListingDetail(Number(user.id), listingId);
+      return apiResponse(result.status, result.message, result.data);
+    }
+    const items = await listUnlockedListings(Number(user.id));
+    return apiResponse(1, 'Unlocked listings', items);
   }
 
   if (segments[0] === 'status' && method === 'GET') {

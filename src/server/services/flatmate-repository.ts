@@ -118,6 +118,20 @@ export async function createFlatmatePost(post: any, userId: number): Promise<any
   return (await hydrate(rows))[0];
 }
 
+export async function getFlatmatePostsByIds(ids: number[]): Promise<any[]> {
+  const uniqueIds = [...new Set(ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))];
+  if (!uniqueIds.length) return [];
+  const marks = uniqueIds.map(() => '?').join(',');
+  const rows = await sqlQuery<any>(
+    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, flat_address as flatAddress, city, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
+     FROM flatmate_posts WHERE is_active = 1 AND id IN (${marks})`,
+    uniqueIds
+  );
+  const hydrated = await hydrate(rows);
+  const byId = new Map(hydrated.map((post) => [Number(post.id), post]));
+  return uniqueIds.map((id) => byId.get(id)).filter(Boolean);
+}
+
 export async function hasActivePost(userId: number): Promise<boolean> {
   const rows = await sqlQuery<any>(
     `SELECT id FROM flatmate_posts WHERE user_id = ? AND is_active = 1 LIMIT 1`,

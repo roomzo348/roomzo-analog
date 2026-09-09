@@ -11,6 +11,8 @@ describe('backend migration manifest', () => {
     expect(endpointManifest).toContain('POST /listings/add');
     expect(endpointManifest).toContain('POST /api/auth/login');
     expect(endpointManifest).toContain('GET /api/auth/owner-info/:ownerId');
+    expect(endpointManifest).toContain('GET /api/contacts/unlocked');
+    expect(endpointManifest).toContain('GET /api/contacts/unlocked/:listingId');
   });
 
   it('defines websocket compatibility surface', () => {

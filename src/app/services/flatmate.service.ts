@@ -9,8 +9,11 @@ import {
 
 import {
   Observable,
-  forkJoin
+  forkJoin,
+  of
 } from 'rxjs';
+
+import { tap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
@@ -51,6 +54,10 @@ export class FlatmateService {
 
   private uploadUrl =
     `${environment.apiUrl || ''}/api/upload`;
+
+  private favoriteIdsStorageKey = 'roomzo_flatmate_favorite_ids';
+  readonly sampleImageUrl =
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80';
 
   constructor(
     private http: HttpClient
@@ -262,5 +269,100 @@ export class FlatmateService {
     return this.http.delete(`${this.baseUrl}/${postId}`, {
       headers: this.getHeaders()
     });
+  }
+
+  getFavoritePostIds(): string[] {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return [];
+    }
+    const stored = window.localStorage.getItem(this.favoriteIdsStorageKey);
+    if (!stored) return [];
+    try {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed.map((id: any) => String(id)) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  extractFavoriteIdsFromPayload(payload: any): string[] {
+    const list = payload?.data ?? payload?.favorites ?? payload?.items ?? payload ?? [];
+    const favorites = Array.isArray(list) ? list : list?.flatmates ?? [];
+    return favorites
+      .map((item: any) => {
+        const post = item?.flatmate ?? item?.post ?? item;
+        return post?.id ?? item?.postId ?? item?.flatmatePostId ?? item?.id;
+      })
+      .filter((id: any) => id != null && id !== '')
+      .map((id: any) => String(id));
+  }
+
+  private setFavoritePostIds(ids: string[]): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(this.favoriteIdsStorageKey, JSON.stringify(ids));
+    }
+  }
+
+  isFavoritePost(postId: string | number): boolean {
+    return this.getFavoritePostIds().includes(String(postId));
+  }
+
+  saveFavoritePost(postId: string | number): Observable<any> {
+    if (!this.getStoredUserId()) {
+      return of({ status: 0, message: 'User not logged in' });
+    }
+    return this.http.post(`${this.baseUrl}/favourites/save`, { postId }).pipe(
+      tap((res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          const next = Array.from(new Set([...this.getFavoritePostIds(), String(postId)]));
+          this.setFavoritePostIds(next);
+        }
+      })
+    );
+  }
+
+  removeFavoritePost(postId: string | number): Observable<any> {
+    if (!this.getStoredUserId()) {
+      return of({ status: 0, message: 'User not logged in' });
+    }
+    return this.http.delete(`${this.baseUrl}/favourites/remove`, {
+      body: { postId }
+    }).pipe(
+      tap((res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          this.setFavoritePostIds(this.getFavoritePostIds().filter((id) => id !== String(postId)));
+        }
+      })
+    );
+  }
+
+  getFavoritePosts(): Observable<any> {
+    if (!this.getStoredUserId()) {
+      return of({ status: 0, message: 'User not logged in', data: [] });
+    }
+    return this.http.get(`${this.baseUrl}/favourites`).pipe(
+      tap((res: any) => {
+        const ids = this.extractFavoriteIdsFromPayload(res);
+        this.setFavoritePostIds(ids);
+      })
+    );
+  }
+
+  resolveImageUrl(dbPath: string): string {
+    if (!dbPath) return this.sampleImageUrl;
+    if (dbPath.startsWith('http')) return dbPath;
+    const baseUrl = environment.hostingerUploadUrl || 'https://roomzo.in';
+    const cleanBase = baseUrl.replace(/\/+$/, '');
+    const cleanPath = dbPath.replace(/^\/+/, '');
+    return `${cleanBase}/${cleanPath}`;
+  }
+
+  private getStoredUserId(): string | number | null {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      return user?.id || localStorage.getItem('userId') || null;
+    } catch {
+      return localStorage.getItem('userId');
+    }
   }
 }

@@ -10,9 +10,10 @@ import { Subscription } from 'rxjs';
 import { authGuard } from '../../auth.guard';
 import { UserProfileService, UserProfile } from '../../services/user-profile.service';
 import { PropertyService } from '../../services/property.service';
+import { FlatmateService } from '../../services/flatmate.service';
 import { AuthService } from '../../services/auth.service';
 import { BillingService, BillingWallet } from '../../services/billing.service';
-import { ContactAccessService } from '../../services/contact-access.service';
+import { ContactAccessService, UnlockedListingItem } from '../../services/contact-access.service';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 import { mapBackendListingsToUi } from '../../services/Utility';
 import { environment } from '../../../environments/environment';
@@ -44,11 +45,15 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   isSaving = false;
   isUploadingPhoto = false;
   profileLoadWarning = '';
-  viewMode: 'hub' | 'saved' = 'hub';
+  viewMode: 'hub' | 'saved' | 'unlocked' = 'hub';
   isEditSidebarOpen = false;
 
   profile: UserProfile | null = null;
   favoriteListings: any[] = [];
+  favoriteFlatmates: any[] = [];
+  savedKind: 'properties' | 'flatmates' = 'properties';
+  unlockedItems: UnlockedListingItem[] = [];
+  unlockedLoading = false;
   isOwner = false;
   wallet: BillingWallet | null = null;
   openingPaywall = false;
@@ -64,6 +69,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private profileService: UserProfileService,
     private propertyService: PropertyService,
+    private flatmateService: FlatmateService,
     private authService: AuthService,
     private billing: BillingService,
     private contactAccess: ContactAccessService,
@@ -184,7 +190,13 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
     });
 
     this.loadFavorites();
+    this.loadFavoriteFlatmates();
+    this.loadUnlockedListings();
     this.loadWallet();
+
+    const view = this.route.snapshot.queryParamMap.get('view');
+    if (view === 'unlocked') this.viewMode = 'unlocked';
+    if (view === 'saved') this.viewMode = 'saved';
   }
 
   private loadWallet(): void {
@@ -281,6 +293,31 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
         this.cd.detectChanges();
       },
     });
+  }
+
+  loadFavoriteFlatmates(): void {
+    this.flatmateService.getFavoritePosts().subscribe({
+      next: (res: any) => {
+        const payload = res?.data ?? [];
+        const favorites = Array.isArray(payload) ? payload : [];
+        this.favoriteFlatmates = favorites
+          .map((item: any) => item?.flatmate ?? item?.post ?? item)
+          .filter((item: any) => item?.id);
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.favoriteFlatmates = [];
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  get savedCount(): number {
+    return this.favoriteListings.length + this.favoriteFlatmates.length;
+  }
+
+  getFlatmateImage(mate: any): string {
+    return this.flatmateService.resolveImageUrl(mate?.images?.[0] || '');
   }
 
   get displayName(): string {
@@ -391,9 +428,65 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
   openSavedView(): void {
     this.viewMode = 'saved';
+    this.savedKind = this.favoriteListings.length || !this.favoriteFlatmates.length ? 'properties' : 'flatmates';
     if (isPlatformBrowser(this.platformId)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }
+
+  openUnlockedView(): void {
+    this.viewMode = 'unlocked';
+    this.loadUnlockedListings();
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  loadUnlockedListings(): void {
+    this.unlockedLoading = true;
+    this.contactAccess.getUnlockedListings().subscribe({
+      next: (res) => {
+        const payload = res?.data ?? [];
+        this.unlockedItems = Array.isArray(payload) ? payload.filter((item) => item?.listingId || item?.listing?.id) : [];
+        this.unlockedLoading = false;
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.unlockedItems = [];
+        this.unlockedLoading = false;
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  get unlockedCount(): number {
+    return this.unlockedItems.length;
+  }
+
+  getUnlockedImage(item: UnlockedListingItem): string {
+    const listing = item?.listing || {};
+    return listing?.photos?.[0]?.photoUrl || listing?.photos?.[0]?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
+  }
+
+  getUnlockedTitle(item: UnlockedListingItem): string {
+    const listing = item?.listing || {};
+    return listing.propertyName || listing.propertyType || 'Unlocked property';
+  }
+
+  formatUnlockedAt(value?: string | null): string {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  openUnlockedDetails(item: UnlockedListingItem): void {
+    const id = item?.listingId || item?.listing?.id;
+    if (id) this.router.navigate(['/unlocked', id]);
+  }
+
+  switchSavedKind(kind: 'properties' | 'flatmates'): void {
+    this.savedKind = kind;
   }
 
   openEditSidebar(): void {
