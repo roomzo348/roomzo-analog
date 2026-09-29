@@ -229,3 +229,81 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
+
+.fm-suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background: #ffffff;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius, 12px);
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.fm-suggestions-list li {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--rz-text-main);
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+.fm-suggestions-list li:last-child {
+  border-bottom: none;
+}
+
+.fm-suggestions-list li:hover {
+  background: rgba(37, 99, 235, 0.06);
+  color: var(--rz-primary);
+}
+
+/* ── Autosuggest Dropdown Fix ── */
+.fm-suggestions-list {
+  position: absolute;
+  top: calc(100% + 4px); /* Pushes it exactly below the input box */
+  left: 0;
+  right: 0;
+  z-index: 9999; /* Forces it above all other cards */
+  background: #ffffff;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius, 12px);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+}
+
+.fm-suggestions-list li {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start; /* Keeps icon at the top if text wraps */
+  gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--rz-text-main);
+  cursor: pointer;
+  background: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+.fm-suggestions-list li:last-child {
+  border-bottom: none;
+}
+
+.fm-suggestions-list li:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--rz-primary);
+}

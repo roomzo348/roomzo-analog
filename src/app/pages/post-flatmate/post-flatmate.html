@@ -8,7 +8,7 @@
 
     <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
 
-      <div class="fm-card fade-in-up" style="animation-delay: 0.1s;">
+      <div class="fm-card fade-in-up" style="animation-delay: 0.1s; position: relative; z-index: 10;">
         <h4 class="fm-card-title"><mat-icon>person</mat-icon> The Host & Location</h4>
         
         <div class="row g-3">
@@ -58,17 +58,56 @@
             </div>
           </div>
 
-          <div class="col-12 mt-2">
-            <label class="fm-label">Flat Address</label>
-            <div class="fm-input-group" [class.is-invalid]="isInvalid('flatAddress')">
-              <input type="text" class="fm-control" formControlName="flatAddress" placeholder="e.g. 404, Sunshine Apts...">
-              <button type="button" class="fm-append-btn" (click)="detectLocation()" [disabled]="isDetectingLocation">
-                <mat-icon *ngIf="!isDetectingLocation">my_location</mat-icon>
-                <span class="d-none d-sm-inline" *ngIf="!isDetectingLocation">Pin Location</span>
-                <div class="spinner-border spinner-border-sm" *ngIf="isDetectingLocation"></div>
-              </button>
+          <!-- 1. Flat / Locality Address First -->
+          <div class="col-12 mt-4">
+            <label class="fm-label">Flat No, Building & Area</label>
+            <div class="position-relative">
+              <div class="fm-input-group" [class.is-invalid]="isInvalid('flatAddress')">
+                <input type="text" class="fm-control" formControlName="flatAddress" 
+                      placeholder="e.g. Flat 302, Sunshine Heights, Andheri West"
+                      (input)="onAddressSearch($event)" autocomplete="off">
+                <button type="button" class="fm-append-btn" (click)="detectLocation()" [disabled]="isDetectingLocation">
+                  <mat-icon *ngIf="!isDetectingLocation">my_location</mat-icon>
+                  <span class="d-none d-sm-inline" *ngIf="!isDetectingLocation">Pin Location</span>
+                  <div class="spinner-border spinner-border-sm" *ngIf="isDetectingLocation"></div>
+                </button>
+              </div>
+
+              <!-- Autosuggest Dropdown -->
+              <ul class="fm-suggestions-list" *ngIf="addressSuggestions.length > 0">
+                <li *ngFor="let item of addressSuggestions" (click)="selectSuggestion(item)">
+                  <mat-icon class="text-muted">location_on</mat-icon>
+                  <span>{{ item.display_name }}</span>
+                </li>
+              </ul>
             </div>
           </div>
+
+          <!-- 2. Pincode, City & State Row Below Address -->
+          <div class="col-md-4 col-12 mt-3">
+            <label class="fm-label">Pincode</label>
+            <div class="fm-input-group" [class.is-invalid]="isInvalid('pincode')">
+              <input type="text" maxlength="6" class="fm-control" formControlName="pincode" 
+                    placeholder="e.g. 400053" (input)="onPincodeChange()">
+              <div class="fm-prefix-icon pe-3" *ngIf="isLoadingPincode">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            </div>
+            <small class="text-danger mt-1 d-block" *ngIf="isInvalid('pincode')">Enter valid 6-digit PIN</small>
+          </div>
+
+          <div class="col-md-4 col-6 mt-3">
+            <label class="fm-label">City</label>
+            <input type="text" class="fm-control" formControlName="city" placeholder="e.g. Mumbai"
+                   [class.is-invalid]="isInvalid('city')">
+          </div>
+
+          <div class="col-md-4 col-6 mt-3">
+            <label class="fm-label">State</label>
+            <input type="text" class="fm-control" formControlName="state" placeholder="e.g. Maharashtra"
+                   [class.is-invalid]="isInvalid('state')">
+          </div>
+
         </div>
       </div>
 

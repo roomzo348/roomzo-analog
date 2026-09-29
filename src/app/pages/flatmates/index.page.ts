@@ -204,7 +204,7 @@ export default class FlatmatesComponent implements OnInit, OnDestroy {
 
   getImageUrl(dbPath: string): string {
     if (!dbPath) return this.flatmateService.sampleImageUrl;
-    if (dbPath.startsWith('http')) return dbPath;
+    if (dbPath.startsWith('http') || dbPath.startsWith('https')) return dbPath;
 
     const baseUrl = environment.hostingerUploadUrl || 'https://roomzo.in';
     const cleanBase = baseUrl.replace(/\/+$/, '');
@@ -596,4 +596,5 @@ export default class FlatmatesComponent implements OnInit, OnDestroy {
       }
     });
   }
+  
 }
