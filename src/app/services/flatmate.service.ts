@@ -10,10 +10,11 @@ import {
 import {
   Observable,
   forkJoin,
-  of
+  of,
+  throwError
 } from 'rxjs';
 
-import { tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
@@ -123,82 +124,39 @@ export class FlatmateService {
 
   uploadImagesToHostinger(
     files: File[]
-  ): Observable<any> {
-
-    if (
-      !files ||
-      files.length === 0
-    ) {
-
-      return new Observable(observer => {
-
-        observer.next([]);
-
-        observer.complete();
-      });
+  ): Observable<{ urls: string[] }> {
+    if (!files?.length) {
+      return of({ urls: [] });
     }
 
-    // Atomic uploads
-    const uploadObservables =
-      files.map(file =>
-        this.uploadImageToHostinger(file)
-      );
-
-    return new Observable(observer => {
-
-      if (
-        uploadObservables.length > 0
-      ) {
-
-        forkJoin(uploadObservables)
-          .subscribe({
-
-            next: (results: any[]) => {
-
-              const imageUrls =
-                results.map(
-                  res => res.url || res
-                );
-
-              observer.next({
-                urls: imageUrls
-              });
-
-              observer.complete();
-            },
-
-            error: (err) =>
-              observer.error(err)
-          });
-      }
-    });
+    return forkJoin(files.map((file, i) => this.uploadImageStrict(file, i + 1))).pipe(
+      map((urls) => ({ urls }))
+    );
   }
 
-  // =========================================
-  // SINGLE IMAGE UPLOAD
-  // =========================================
-
-  private uploadImageToHostinger(
-    file: File
-  ) {
-
-    const formData =
-      new FormData();
-
-    formData.append(
-      'file',
-      file
+  private uploadImageStrict(file: File, index: number): Observable<string> {
+    return this.uploadImageToHostinger(file).pipe(
+      map((res: any) => {
+        if (!res || Number(res.status) !== 1 || !res.url) {
+          throw new Error(res?.message || `Photo ${index} upload failed.`);
+        }
+        return this.resolveImageUrl(String(res.url));
+      }),
+      catchError((err) => {
+        const msg =
+          err?.error?.message ||
+          err?.message ||
+          `Photo ${index} upload failed.`;
+        return throwError(() => new Error(msg));
+      })
     );
+  }
 
-    formData.append(
-      'secret_key',
-      environment.uploadSecretKey
-    );
-
-    return this.http.post<any>(
-      this.uploadUrl,
-      formData
-    );
+  private uploadImageToHostinger(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('secret_key', environment.uploadSecretKey);
+    return this.http.post<any>(this.uploadUrl, formData);
   }
 
   // =========================================

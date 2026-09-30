@@ -276,7 +276,7 @@ saveListing(formData: any): Observable<any> {
   private uploadImageToHostinger(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('secret_key', environment. );
+    formData.append('secret_key', environment.uploadSecretKey);
 
     // DO NOT set headers manually; Angular will set multipart/form-data automatically
     return this.http.post<any>(this.uploadUrl, formData);

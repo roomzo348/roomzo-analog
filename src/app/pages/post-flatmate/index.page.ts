@@ -308,9 +308,12 @@ export default class PostFlatmateComponent implements OnInit, OnDestroy {
           const imageUrls = uploadRes.urls || uploadRes; 
           this.submitFinalData(imageUrls);
         },
-        error: () => {
+        error: (err) => {
           this.isSubmitting = false;
-          this.toastr.error('Failed to upload images to server.', 'Upload Error');
+          this.toastr.error(
+            err?.error?.message || err?.message || 'Failed to upload images to server.',
+            'Upload Error'
+          );
         }
       });
     } else {
@@ -349,9 +352,11 @@ export default class PostFlatmateComponent implements OnInit, OnDestroy {
           this.toastr.error(res.message || 'Upload Failed', 'Error');
         }
       },
-      error: () => {
+      error: (err) => {
         this.isSubmitting = false;
-        this.toastr.error('Server error. Please try again.');
+        this.toastr.error(
+          err?.error?.message || err?.message || 'Server error. Please try again.'
+        );
       }
     });
   }
