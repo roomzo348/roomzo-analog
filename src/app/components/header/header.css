@@ -15,7 +15,7 @@
 /* --- THE SCROLL STATE (Solid Background) --- */
 .rz-header.scrolled {
   background: var(--rz-bg-card);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: var(--rz-shadow-sm);
   padding: 0;
   height: 52px;
   box-sizing: border-box;
@@ -279,7 +279,7 @@
   border-radius: 50px;
   transition: background 0.2s;
 }
-.user-profile-container:hover { background: #f1f5f9; }
+.user-profile-container:hover { background: var(--rz-bg-hover); }
 
 .avatar-circle {
   width: 40px; height: 40px;
@@ -305,8 +305,8 @@
 /* The Floating Menu */
 .dropdown-menu {
   position: absolute; top: calc(100% + 10px); right: 0;
-  background: white; width: 240px; border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  background: var(--rz-bg-card); width: 240px; border-radius: 16px;
+  box-shadow: var(--rz-shadow-lg);
   border: 1px solid var(--rz-border);
   opacity: 0; visibility: hidden; transform: translateY(-10px);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -328,7 +328,7 @@
   cursor: pointer; transition: 0.2s; font-family: inherit;
 }
 .dropdown-item mat-icon { font-size: 20px; width: 20px; height: 20px; color: var(--rz-text-muted); }
-.dropdown-item:hover { background: #f8fafc; color: var(--rz-primary); }
+.dropdown-item:hover { background: var(--rz-bg-hover); color: var(--rz-primary); }
 .dropdown-item:hover mat-icon { color: var(--rz-primary); }
 
 .text-danger { color: #ef4444; }
@@ -431,7 +431,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--rz-bg-card);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -673,7 +673,7 @@
   align-items: center;
   gap: 1px;
   text-decoration: none;
-  background: #f1f5f9;
+  background: var(--rz-bg-elevated);
   color: var(--rz-text-main);
   border-radius: 999px;
   padding: 3px 6px 3px 4px;

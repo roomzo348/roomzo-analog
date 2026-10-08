@@ -1120,7 +1120,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--rz-primary);
-  background: #fff;
+  background: var(--rz-bg-card);
   border: 1px solid rgba(25, 97, 83, 0.18);
   border-radius: 999px;
   width: 36px;
@@ -1162,7 +1162,7 @@
   transform: translateY(-1px);
 }
 .editorial-chip.chip-muted {
-  background: #fff;
+  background: var(--rz-bg-card);
   color: var(--rz-primary) !important;
   border: 1px solid rgba(25, 97, 83, 0.25);
 }

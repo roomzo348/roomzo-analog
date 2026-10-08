@@ -630,3 +630,8 @@ input:focus, textarea:focus {
   color: var(--rz-text-main) !important;
   background: transparent !important;
 }
+
+:host-context([data-theme='dark']) .card {
+  box-shadow: var(--rz-shadow-md) !important;
+  border-color: var(--rz-border) !important;
+}

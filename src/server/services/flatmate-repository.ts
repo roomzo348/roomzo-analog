@@ -10,10 +10,12 @@ function mapFlatmate(base: any, preferences: string[], images: string[]): any {
     profession: base.profession,
     budget: base.budget,
     bio: base.bio,
-    flatAddress: base.flatAddress,
+    pincode: base.pincode, // Added pincode
     city: base.city,
+    state: base.state,     // Added state
+    flatAddress: base.flatAddress,
     latitude: base.latitude,
-    longitude: base.longitude,
+    longitude: base.longitude,  
     phoneNumber: base.phoneNumber,
     isActive: Number(base.isActive ?? 1) === 1,
     createdAt: base.createdAt,
@@ -46,7 +48,7 @@ async function hydrate(posts: any[]): Promise<any[]> {
 
 export async function getFlatmateMemoryFeed(limit = 25): Promise<any[]> {
   const rows = await sqlQuery<any>(
-    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, flat_address as flatAddress, city, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
+    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, pincode, city, state, flat_address as flatAddress, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
      FROM flatmate_posts WHERE is_active = 1 ORDER BY created_at DESC LIMIT ?`,
     [limit]
   );
@@ -59,7 +61,7 @@ export async function getFlatmateNearby(page: number, size: number): Promise<{ c
   const offset = p * s;
   const countRows = await sqlQuery<{ total: number }>(`SELECT COUNT(*) as total FROM flatmate_posts WHERE is_active = 1`);
   const rows = await sqlQuery<any>(
-    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, flat_address as flatAddress, city, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
+    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, pincode, city, state, flat_address as flatAddress, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
      FROM flatmate_posts WHERE is_active = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?`,
     [s, offset]
   );
@@ -85,8 +87,8 @@ export async function createFlatmatePost(post: any, userId: number): Promise<any
   }
   const result = await sqlExecute(
     `INSERT INTO flatmate_posts (
-      user_id, name, age, gender, profession, budget, bio, flat_address, city, latitude, longitude, phone_number, is_active, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`,
+      user_id, name, age, gender, profession, budget, bio, pincode, city, state, flat_address, latitude, longitude, phone_number, is_active, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`,
     [
       userId,
       post?.name ?? null,
@@ -95,8 +97,10 @@ export async function createFlatmatePost(post: any, userId: number): Promise<any
       post?.profession ?? null,
       post?.budget ?? null,
       post?.bio ?? null,
-      post?.flatAddress ?? null,
+      post?.pincode ?? null, // Added
       post?.city ?? null,
+      post?.state ?? null,   // Added
+      post?.flatAddress ?? null,
       post?.latitude ?? null,
       post?.longitude ?? null,
       post?.phoneNumber ?? null,
@@ -110,12 +114,27 @@ export async function createFlatmatePost(post: any, userId: number): Promise<any
     await sqlExecute(`INSERT INTO flatmate_images (post_id, image_url) VALUES (?, ?)`, [postId, image]);
   }
   await sqlExecute(`UPDATE users SET display_name = ? WHERE id = ?`, [post?.name ?? null, userId]);
+  
   const rows = await sqlQuery<any>(
-    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, flat_address as flatAddress, city, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
+    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, pincode, city, state, flat_address as flatAddress, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
      FROM flatmate_posts WHERE id = ? LIMIT 1`,
     [postId]
   );
   return (await hydrate(rows))[0];
+}
+
+export async function getFlatmatePostsByIds(ids: number[]): Promise<any[]> {
+  const uniqueIds = [...new Set(ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0))];
+  if (!uniqueIds.length) return [];
+  const marks = uniqueIds.map(() => '?').join(',');
+  const rows = await sqlQuery<any>(
+    `SELECT id, user_id as userId, name, age, gender, profession, budget, bio, pincode, city, state, flat_address as flatAddress, latitude, longitude, phone_number as phoneNumber, is_active as isActive, created_at as createdAt, updated_at as updatedAt
+     FROM flatmate_posts WHERE is_active = 1 AND id IN (${marks})`,
+    uniqueIds
+  );
+  const hydrated = await hydrate(rows);
+  const byId = new Map(hydrated.map((post) => [Number(post.id), post]));
+  return uniqueIds.map((id) => byId.get(id)).filter(Boolean);
 }
 
 export async function hasActivePost(userId: number): Promise<boolean> {

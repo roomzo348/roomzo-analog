@@ -31,6 +31,15 @@ export interface UnlockResult {
   message?: string;
 }
 
+export interface UnlockedListingItem {
+  listingId: number;
+  unlockType?: string;
+  unlockedAt?: string | null;
+  listing: any;
+  contact?: OwnerContact;
+  isOwner?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContactAccessService {
   private baseUrl = environment.apiUrl;
@@ -64,6 +73,14 @@ export class ContactAccessService {
 
   getStatus(listingId: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/api/contacts/status`, { params: { listingId } });
+  }
+
+  getUnlockedListings(): Observable<{ status: number; message: string; data: UnlockedListingItem[] }> {
+    return this.http.get<any>(`${this.baseUrl}/api/contacts/unlocked`);
+  }
+
+  getUnlockedListing(listingId: number): Observable<{ status: number; message: string; data: UnlockedListingItem }> {
+    return this.http.get<any>(`${this.baseUrl}/api/contacts/unlocked/${listingId}`);
   }
 
   requestOwnerContact(listingId: number, returnUrl?: string): Observable<UnlockResult | null> {

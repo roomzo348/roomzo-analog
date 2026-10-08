@@ -1,5 +1,5 @@
 import { connExecute, connQuery, sqlQuery, withTransaction } from '../db/mysql';
-import { getListingById } from './listing-repository';
+import { getListingById, getListingsByIds } from './listing-repository';
 import { getOwnerInfo } from './auth-repository';
 import {
   ensureBillingTables,
@@ -7,7 +7,7 @@ import {
   getWallet,
   serializeWallet,
 } from './billing-repository';
-import { decideUnlock, usableCredits } from '../utils/contact-access';
+import { decideUnlock, redactListingContact } from '../utils/contact-access';
 
 export async function hasUnlockedListing(userId: number, listingId: number): Promise<boolean> {
   await ensureBillingTables();
@@ -44,6 +44,90 @@ export async function getRevealableListingIds(userId: number): Promise<Set<numbe
     [userId]
   );
   return new Set(rows.map((row) => Number(row.listing_id)));
+}
+
+export async function listUnlockedListings(userId: number): Promise<Array<{
+  listingId: number;
+  unlockType: string;
+  unlockedAt: string | null;
+  listing: Record<string, unknown>;
+}>> {
+  await ensureBillingTables();
+  const rows = await sqlQuery<{ listing_id: number; unlock_type: string; created_at: Date | string }>(
+    `SELECT listing_id, unlock_type, created_at
+     FROM contact_unlocks
+     WHERE user_id = ? AND unlock_type <> 'free'
+     ORDER BY created_at DESC`,
+    [userId]
+  );
+  if (!rows.length) return [];
+
+  const ids = rows.map((row) => Number(row.listing_id));
+  const listings = await getListingsByIds(ids);
+  const byId = new Map(listings.map((listing) => [Number(listing.id), listing]));
+
+  return rows
+    .map((row) => {
+      const listing = byId.get(Number(row.listing_id));
+      if (!listing) return null;
+      return {
+        listingId: Number(row.listing_id),
+        unlockType: String(row.unlock_type || 'credit'),
+        unlockedAt: toIso(row.created_at),
+        listing: redactListingContact(listing, false),
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+}
+
+export async function getUnlockedListingDetail(userId: number, listingId: number): Promise<{
+  status: 0 | 1;
+  code?: string;
+  message: string;
+  data: Record<string, unknown>;
+}> {
+  await ensureBillingTables();
+  const listing = await getListingById(listingId);
+  if (!listing) {
+    return { status: 0, code: 'NOT_FOUND', message: 'Listing not found', data: {} };
+  }
+
+  const ownerId = Number(listing.ownerId ?? listing.owner_id);
+  const isOwner = Number(userId) === ownerId;
+  const unlockRows = await sqlQuery<{ unlock_type: string; created_at: Date | string }>(
+    `SELECT unlock_type, created_at FROM contact_unlocks
+     WHERE user_id = ? AND listing_id = ? AND unlock_type <> 'free' LIMIT 1`,
+    [userId, listingId]
+  );
+  const unlocked = Boolean(unlockRows[0]);
+  if (!unlocked && !isOwner) {
+    return {
+      status: 0,
+      code: 'FORBIDDEN',
+      message: 'Unlock this listing with contact points to view owner details',
+      data: {},
+    };
+  }
+
+  const owner = ownerId ? await getOwnerInfo(ownerId) : null;
+  return {
+    status: 1,
+    message: 'Unlocked listing',
+    data: {
+      listingId,
+      unlockType: unlocked ? String(unlockRows[0].unlock_type || 'credit') : 'owner',
+      unlockedAt: unlocked ? toIso(unlockRows[0].created_at) : null,
+      isOwner,
+      listing: redactListingContact(listing, true),
+      contact: listingContact(listing, owner),
+    },
+  };
+}
+
+function toIso(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 function listingContact(listing: any, owner: any) {

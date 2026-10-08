@@ -7,7 +7,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 330px minmax(0, 1fr);
-  background: #fff;
+  background: var(--rz-bg-card);
   color: var(--rz-text-main, #111827);
   height: min(88vh, 660px);
   max-height: min(88vh, 660px);
@@ -24,10 +24,10 @@
   z-index: 5;
   width: 34px;
   height: 34px;
-  border: none;
+  border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 50%;
-  background: #f1f5f9;
-  color: #475569;
+  background: #ffffff;
+  color: #0f172a;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -35,14 +35,26 @@
 }
 
 .paywall-close:hover {
-  background: #e2e8f0;
-  color: var(--rz-text-main);
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .paywall-close mat-icon {
   font-size: 19px;
   width: 19px;
   height: 19px;
+  color: inherit;
+}
+
+:host-context([data-theme='dark']) .paywall-close {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+:host-context([data-theme='dark']) .paywall-close mat-icon {
+  color: #0f172a !important;
 }
 
 /* ============================================
@@ -181,7 +193,7 @@
   height: 100%;
   min-height: 0;
   overflow-y: auto;
-  background: #fff;
+  background: var(--rz-bg-card);
 }
 
 .sheet-handle {
@@ -233,7 +245,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #f1f6f4;
+  background: var(--rz-bg-elevated);
   color: #14584a;
   border-radius: 999px;
   padding: 5px 11px;
@@ -264,7 +276,7 @@
   width: 100%;
   text-align: left;
   font-family: inherit;
-  background: #fff;
+  background: var(--rz-bg-card);
   border: 1.5px solid var(--rz-border, #e5e7eb);
   border-radius: 14px;
   padding: 13px 15px;
@@ -274,7 +286,7 @@
 
 .plan-row:hover:not(:disabled) {
   border-color: #a9d2c6;
-  background: #fafdfc;
+  background: var(--rz-bg-hover);
 }
 
 .plan-row.selected {
@@ -409,8 +421,8 @@
 .plan-includes {
   margin: 16px 26px 0;
   padding: 16px 18px 14px;
-  background: #f8faf9;
-  border: 1px solid #e4ede9;
+  background: var(--rz-bg-elevated);
+  border: 1px solid var(--rz-border);
   border-radius: 14px;
 }
 
@@ -471,8 +483,8 @@
   flex: none;
   margin-top: auto;
   padding: 16px 26px 18px;
-  background: #fff;
-  border-top: 1px solid #eef2f6;
+  background: var(--rz-bg-card);
+  border-top: 1px solid var(--rz-border);
 }
 
 .pay-cta {
@@ -546,7 +558,6 @@
     right: 8px;
     width: 30px;
     height: 30px;
-    background: transparent;
   }
 
   .main-head {

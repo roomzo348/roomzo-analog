@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-IN">
+<html lang="en-IN" data-theme="dark">
   <head>
     <meta charset="utf-8" />
   <title>Roomzo — Rooms, PG &amp; Flats for Rent | Direct Owner Contact</title>
@@ -9,16 +9,12 @@
       (function () {
         try {
           var stored = localStorage.getItem('roomzo-theme');
-          var theme =
-            stored === 'dark' || stored === 'light'
-              ? stored
-              : window.matchMedia('(prefers-color-scheme: dark)').matches
-                ? 'dark'
-                : 'light';
+          var theme = stored === 'light' ? 'light' : 'dark';
           document.documentElement.setAttribute('data-theme', theme);
           document.documentElement.style.colorScheme = theme;
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light');
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.style.colorScheme = 'dark';
         }
       })();
     </script>

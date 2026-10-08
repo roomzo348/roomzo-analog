@@ -23,7 +23,7 @@ h1, h2, h3, h4, p { margin: 0; }
   background: var(--rz-bg-card);
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-shadow: var(--rz-shadow-sm);
 }
 
 .back-link {

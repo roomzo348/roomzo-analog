@@ -49,7 +49,6 @@
   --rz-shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.14);
 }
 
-/* Dark theme tokens — components using var(--rz-*) adapt automatically */
 [data-theme='dark'] {
   --rz-primary: #14b8a6;
   --rz-primary-hover: #2dd4bf;
@@ -71,6 +70,19 @@
   --rz-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
   --rz-shadow-md: 0 12px 28px rgba(0, 0, 0, 0.45);
   --rz-shadow-lg: 0 22px 48px rgba(0, 0, 0, 0.55);
+
+  --bs-body-bg: #0b1220;
+  --bs-body-color: #f1f5f9;
+  --bs-secondary-bg: #121a2b;
+  --bs-tertiary-bg: #151d2e;
+  --bs-border-color: #2a3548;
+  --bs-light: #121a2b;
+  --bs-light-rgb: 18, 26, 43;
+  --bs-white: #151d2e;
+  --bs-white-rgb: 21, 29, 46;
+  --bs-dark: #f1f5f9;
+  --bs-emphasis-color: #f1f5f9;
+  --bs-secondary-color: #94a3b8;
 }
 
 * { box-sizing: border-box; }
@@ -122,12 +134,12 @@ p { font-size: 1rem; line-height: 1.6; color: var(--rz-text-muted); }
 
 /* 1. City Search Autocomplete Panel */
 .custom-autocomplete-panel {
-  background-color: var(--rz-bg-card) !important; /* Forces the white background */
+  background-color: var(--rz-bg-card) !important;
   border-radius: 12px !important;
   margin-top: 12px !important;
   box-shadow: var(--rz-shadow-md) !important;
   border: 1px solid var(--rz-border) !important;
-  overflow: hidden !important; /* Keeps rounded corners clean */
+  overflow: hidden !important;
 }
 
 /* Style the text inside the city dropdown */
@@ -142,7 +154,7 @@ p { font-size: 1rem; line-height: 1.6; color: var(--rz-text-muted); }
 /* Hover & Selected state for City Search */
 .custom-autocomplete-panel .mat-mdc-option:hover,
 .custom-autocomplete-panel .mat-mdc-option.mdc-list-item--selected {
-  background-color: var(--rz-primary-soft) !important; /* A very soft teal highlight */
+  background-color: var(--rz-primary-soft) !important;
   color: var(--rz-primary) !important;
   font-weight: 500 !important;
 }
@@ -151,7 +163,7 @@ p { font-size: 1rem; line-height: 1.6; color: var(--rz-text-muted); }
 
 /* 2. Property Type & Budget Select Panels */
 .custom-select-panel {
-  background-color: var(--rz-bg-card) !important; /* Forces the white background */
+  background-color: var(--rz-bg-card) !important;
   border-radius: 12px !important;
   margin-top: 8px !important;
   box-shadow: var(--rz-shadow-md) !important;
@@ -272,6 +284,22 @@ body.hide-global-bottom-nav .mobile-bottom-nav {
   display: none !important;
 }
 
+@media (max-width: 768px) {
+  html:has(body.fm-single-view),
+  body.fm-single-view {
+    overflow: hidden;
+    height: 100%;
+  }
+  body.fm-single-view {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+  }
+  body.fm-single-view app-footer {
+    display: none !important;
+  }
+}
+
 /* Immersive detail pages (e.g. property details): full-bleed hero image on mobile.
    Hide the fixed global header so it does not overlap the top of the image. */
 @media (max-width: 900px) {
@@ -280,7 +308,8 @@ body.hide-global-bottom-nav .mobile-bottom-nav {
   }
 }
 
-body.zoom-viewer-open {
+body.zoom-viewer-open,
+body.fm-gallery-open {
   overflow: hidden;
   position: fixed;
   width: 100%;

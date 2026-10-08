@@ -88,12 +88,20 @@ import { GuideSection } from '../../content/city-guides';
       }
       @media (max-width: 600px) {
         .rz-content-guide {
-          margin: 32px 0 16px;
-          padding: 20px 16px;
-          border-radius: 12px;
+          margin: 24px 0 12px;
+          padding: 16px 14px;
+          border-radius: 16px;
         }
         .guide-header h2 {
-          font-size: 1.25rem;
+          font-size: 1.12rem;
+        }
+        .guide-intro,
+        .guide-section p,
+        .guide-section li {
+          font-size: 0.88rem;
+        }
+        .guide-section {
+          margin-top: 18px;
         }
       }
     `,

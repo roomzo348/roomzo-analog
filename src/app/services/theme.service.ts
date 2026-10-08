@@ -8,17 +8,17 @@ const STORAGE_KEY = 'roomzo-theme';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private readonly modeSubject = new BehaviorSubject<ThemeMode>('light');
+  private readonly modeSubject = new BehaviorSubject<ThemeMode>('dark');
   readonly mode$ = this.modeSubject.asObservable();
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId)) {
+      this.apply('dark', false);
+      return;
+    }
 
     const saved = this.readStored();
-    const initial =
-      saved ??
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    this.apply(initial, false);
+    this.apply(saved ?? 'dark', false);
   }
 
   get mode(): ThemeMode {

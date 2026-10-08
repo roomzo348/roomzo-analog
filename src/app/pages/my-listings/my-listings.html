@@ -4,11 +4,12 @@
         <div class="header-main">
             <div class="header-text">
                 <span class="header-kicker mobile-only">Owner dashboard</span>
-                <h1>{{ activeTab === 'favorites' ? 'Saved Properties' : 'My Properties' }}</h1>
+                <h1>{{ activeTab === 'favorites' ? (savedKind === 'flatmates' ? 'Saved Flatmates' : 'Saved Properties') : 'My Properties' }}</h1>
                 <p class="header-desc">Manage your listings, update statuses, and track performance.</p>
                 <p class="header-meta mobile-only" *ngIf="!isLoading">
                     <ng-container *ngIf="activeTab === 'my-properties'">{{ listings.length }} listing{{ listings.length === 1 ? '' : 's' }}</ng-container>
-                    <ng-container *ngIf="activeTab === 'favorites'">{{ favoriteListings.length }} saved</ng-container>
+                    <ng-container *ngIf="activeTab === 'favorites' && savedKind === 'properties'">{{ favoriteListings.length }} saved</ng-container>
+                    <ng-container *ngIf="activeTab === 'favorites' && savedKind === 'flatmates'">{{ favoriteFlatmates.length }} saved</ng-container>
                 </p>
             </div>
             <a routerLink="/list-property" class="btn-add-listing" aria-label="Add new listing">
@@ -28,6 +29,19 @@
         <mat-icon>favorite</mat-icon>
         <span class="tab-label-full">Favorites</span>
         <span class="tab-label-short">Saved</span>
+      </button>
+    </div>
+
+    <div class="tab-switcher saved-kind-switcher" role="tablist" aria-label="Saved type" *ngIf="activeTab === 'favorites'">
+      <button type="button" class="tab-btn" [class.active]="savedKind === 'properties'" (click)="switchSavedKind('properties')">
+        <mat-icon>apartment</mat-icon>
+        <span>Properties</span>
+        <span class="tab-count" *ngIf="favoriteListings.length">{{ favoriteListings.length }}</span>
+      </button>
+      <button type="button" class="tab-btn" [class.active]="savedKind === 'flatmates'" (click)="switchSavedKind('flatmates')">
+        <mat-icon>groups</mat-icon>
+        <span>Flatmates</span>
+        <span class="tab-count" *ngIf="favoriteFlatmates.length">{{ favoriteFlatmates.length }}</span>
       </button>
     </div>
 
@@ -64,12 +78,20 @@
         <button class="btn-primary mt-4" routerLink="/list-property">List Your Property</button>
     </div>
 
-    <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length === 0">
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && savedKind === 'properties' && favoriteListings.length === 0">
       <div class="empty-icon-circle">
         <mat-icon>favorite_border</mat-icon>
       </div>
-      <h3>No favorites saved yet</h3>
-      <p>Save properties you like and they will appear here for quick access.</p>
+      <h3>No saved properties yet</h3>
+      <p>Save rentals you like and they will appear here for quick access.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && savedKind === 'flatmates' && favoriteFlatmates.length === 0">
+      <div class="empty-icon-circle">
+        <mat-icon>group</mat-icon>
+      </div>
+      <h3>No saved flatmates yet</h3>
+      <p>Save flatmate posts you like and they will appear here.</p>
     </div>
 
     <div
@@ -168,7 +190,8 @@
 
     </div>
 
-    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length > 0">
+    <div class="saved-section" *ngIf="!isLoading && activeTab === 'favorites' && savedKind === 'properties' && favoriteListings.length > 0">
+      <div class="listings-grid">
         <div class="property-card" *ngFor="let prop of favoriteListings">
             <div class="card-image" [routerLink]="['/room', prop.id]" style="cursor: pointer;">
                 <img [src]="(prop.photos && prop.photos.length > 0) ? (prop.photos[0].photoUrl || prop.photos[0].url) : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Saved home">
@@ -203,5 +226,37 @@
                 </div>
             </div>
         </div>
+      </div>
+    </div>
+
+    <div class="saved-section" *ngIf="!isLoading && activeTab === 'favorites' && savedKind === 'flatmates' && favoriteFlatmates.length > 0">
+      <div class="listings-grid">
+        <div class="property-card" *ngFor="let mate of favoriteFlatmates">
+            <div class="card-image" routerLink="/flatmates" style="cursor: pointer;">
+                <img [src]="getFlatmateImage(mate)" alt="{{ mate.name }}">
+            </div>
+            <div class="card-content">
+                <div class="header-row">
+                    <h3>{{ mate.name }}{{ mate.age ? ', ' + mate.age : '' }}</h3>
+                    <span class="price">₹{{ mate.budget || 0 }}/mo</span>
+                </div>
+                <p class="location">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ mate.flatAddress || mate.city || 'Location available' }}</span>
+                </p>
+                <div class="stats-row">
+                    <span><mat-icon>badge</mat-icon> {{ mate.profession || 'Flatmate' }}</span>
+                </div>
+                <div class="action-row">
+                    <span class="favorite-pill">
+                        <mat-icon>favorite</mat-icon> Saved
+                    </span>
+                    <a routerLink="/flatmates" class="btn-icon" title="View flatmates">
+                        <mat-icon>visibility</mat-icon>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </div>
     </div>
 </div>

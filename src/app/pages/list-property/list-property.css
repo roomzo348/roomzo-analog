@@ -134,8 +134,8 @@ h1, h2, h3, h4, p { margin: 0; }
   background: var(--rz-bg-card);
   border-radius: 24px; 
   padding: 48px;
-  border: none; 
-  box-shadow: 0 20px 40px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02); 
+  border: 1px solid var(--rz-border); 
+  box-shadow: var(--rz-shadow-md); 
   margin-bottom: 60px;
 }
 
@@ -199,7 +199,7 @@ input:focus, textarea:focus {
 .type-card:hover { 
   border-color: var(--rz-primary); 
   transform: translateY(-4px); 
-  box-shadow: 0 10px 20px rgba(25, 97, 83, 0.08); 
+  box-shadow: var(--rz-shadow-md); 
 }
 
 .type-card.selected { 
@@ -285,7 +285,7 @@ input:focus, textarea:focus {
 .amenity-pill {
   display: flex; align-items: center; gap: 10px; background: var(--rz-bg-card); border: 1px solid var(--rz-border); color: var(--rz-text-main);
   padding: 14px 24px; border-radius: 100px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; user-select: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: var(--rz-shadow-sm);
 }
 .amenity-pill input { display: none; } 
 .amenity-pill:hover { background: var(--rz-bg-hover); border-color: var(--rz-primary); color: var(--rz-text-main); transform: translateY(-1px); }
@@ -401,7 +401,7 @@ input:focus, textarea:focus {
   border: 1px solid var(--rz-border);
   border-radius: 12px;
   margin-top: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  box-shadow: var(--rz-shadow-md);
   z-index: 1000;
   max-height: 250px;
   overflow-y: auto;
@@ -463,7 +463,7 @@ input:focus, textarea:focus {
 .sticky-sidebar { position: sticky; top: 120px; }
 
 .preview-header { font-size: 1.1rem; color: var(--rz-text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
-.preview-card { background: var(--rz-bg-card); border: 1px solid transparent; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+.preview-card { background: var(--rz-bg-card); border: 1px solid var(--rz-border); border-radius: 20px; overflow: hidden; box-shadow: var(--rz-shadow-md); }
 .preview-image-container { height: 240px; background: var(--rz-bg-hover); position: relative; }
 .preview-image-container img { width: 100%; height: 100%; object-fit: cover; }
 .status-badge { position: absolute; top: 16px; left: 16px; background: #10b981; color: white; padding: 6px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -586,8 +586,8 @@ textarea.ng-invalid.ng-touched {
 :host-context([data-theme='dark']) .map-picker-container,
 :host-context([data-theme='dark']) .autocomplete-dropdown {
   background: var(--rz-bg-card) !important;
-  border-color: var(--rz-border) !important;
-  box-shadow: var(--rz-shadow-md);
+  border: 1px solid var(--rz-border) !important;
+  box-shadow: var(--rz-shadow-lg) !important;
 }
 
 :host-context([data-theme='dark']) .section-title,
@@ -708,6 +708,7 @@ textarea.ng-invalid.ng-touched {
 :host-context([data-theme='dark']) input.ng-invalid.ng-touched,
 :host-context([data-theme='dark']) textarea.ng-invalid.ng-touched {
   background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: #ef4444 !important;
 }
 
 :host-context([data-theme='dark']) .photo-upload-container {
@@ -732,4 +733,19 @@ textarea.ng-invalid.ng-touched {
 
 :host-context([data-theme='dark']) .form-actions {
   border-top-color: var(--rz-border) !important;
+}
+
+:host-context([data-theme='dark']) .btn-icon-danger:hover {
+  background: rgba(239, 68, 68, 0.16) !important;
+}
+
+:host-context([data-theme='dark']) .leaflet-container {
+  background: var(--rz-bg-elevated) !important;
+}
+
+:host-context([data-theme='dark']) .leaflet-control-attribution,
+:host-context([data-theme='dark']) .leaflet-bar a {
+  background: var(--rz-bg-card) !important;
+  color: var(--rz-text-muted) !important;
+  border-color: var(--rz-border) !important;
 }

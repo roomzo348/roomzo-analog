@@ -130,7 +130,16 @@ a { text-decoration: none; color: inherit; }
 .header-content { display: flex; justify-content: space-between; align-items: flex-end; }
 .breadcrumbs { font-size: 0.9rem; color: var(--rz-text-muted); margin-bottom: 12px; }
 .breadcrumbs a:hover { color: var(--rz-primary); text-decoration: underline; }
-h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2; color: var(--rz-text-main); }
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
+  color: var(--rz-text-main);
+  text-shadow: none;
+  filter: none;
+  -webkit-text-stroke: 0;
+}
 .address { color: var(--rz-text-muted); display: flex; align-items: center; gap: 4px; font-size: 1rem; }
 .address mat-icon { font-size: 18px; width: 18px; height: 18px; color: var(--rz-primary); }
 
@@ -781,6 +790,9 @@ div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient:
     letter-spacing: -0.03em;
     color: var(--rz-text-main);
     margin-bottom: 10px;
+    text-shadow: none !important;
+    filter: none;
+    -webkit-text-stroke: 0;
   }
 
   .address {
@@ -1207,10 +1219,10 @@ div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient:
     left: 0;
     right: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.97);
+    background: var(--rz-bg-card);
     backdrop-filter: blur(12px);
     z-index: 1100;
-    border-top: 1px solid #e8edf0;
+    border-top: 1px solid var(--rz-border);
     box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.1);
     display: flex !important;
     gap: 10px;
@@ -1238,16 +1250,16 @@ div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient:
   }
 
   .btn-call {
-    background: var(--rz-bg-card);
-    color: #0d9488;
-    border: 1.5px solid #0d9488;
+    background: var(--rz-primary);
+    color: #ffffff;
+    border: 1.5px solid var(--rz-primary);
   }
 
   .btn-whatsapp {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background: #128c7e;
     color: #ffffff;
-    border: none;
-    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+    border: 1.5px solid #128c7e;
+    box-shadow: none;
   }
 
   .safety-card {
@@ -1627,6 +1639,32 @@ div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient:
 
 :host-context([data-theme='dark']) .roomzo-benefits li {
   color: var(--rz-text-main) !important;
+}
+
+:host-context([data-theme='dark']) .property-header h1,
+:host-context([data-theme='dark']) h1 {
+  text-shadow: none !important;
+  filter: none;
+  color: var(--rz-text-main) !important;
+}
+
+:host-context([data-theme='dark']) .sticky-contact-actions {
+  background: var(--rz-bg-card) !important;
+  border-top: 1px solid var(--rz-border) !important;
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context([data-theme='dark']) .btn-call {
+  background: var(--rz-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--rz-primary) !important;
+}
+
+:host-context([data-theme='dark']) .btn-whatsapp {
+  background: #0f766e !important;
+  color: #ffffff !important;
+  border-color: #14b8a6 !important;
+  box-shadow: none !important;
 }
 
 :host-context([data-theme='dark']) .safety-card {

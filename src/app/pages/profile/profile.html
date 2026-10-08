@@ -94,8 +94,14 @@
 
       <button type="button" class="action-card" (click)="openSavedView()">
         <span class="action-icon"><mat-icon>bookmark</mat-icon></span>
-        <span class="saved-badge" *ngIf="favoriteListings.length">{{ favoriteListings.length }}</span>
+        <span class="saved-badge" *ngIf="savedCount">{{ savedCount }}</span>
         <span class="action-label">Saved</span>
+      </button>
+
+      <button type="button" class="action-card" (click)="openUnlockedView()">
+        <span class="action-icon"><mat-icon>lock_open</mat-icon></span>
+        <span class="saved-badge" *ngIf="unlockedCount">{{ unlockedCount }}</span>
+        <span class="action-label">Unlocked</span>
       </button>
     </div>
 
@@ -121,24 +127,91 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <div>
-        <h2>Saved properties</h2>
-        <p>Properties you've bookmarked for later.</p>
+        <h2>{{ savedKind === 'flatmates' ? 'Saved Flatmates' : 'Saved Properties' }}</h2>
+        <p>Switch between bookmarked rentals and flatmates.</p>
       </div>
     </header>
 
-    <div class="empty-mini" *ngIf="!favoriteListings.length">
+    <div class="saved-kind-switcher" role="tablist" aria-label="Saved type">
+      <button type="button" class="saved-kind-btn" [class.active]="savedKind === 'properties'" (click)="switchSavedKind('properties')">
+        Properties
+        <span class="saved-kind-count" *ngIf="favoriteListings.length">{{ favoriteListings.length }}</span>
+      </button>
+      <button type="button" class="saved-kind-btn" [class.active]="savedKind === 'flatmates'" (click)="switchSavedKind('flatmates')">
+        Flatmates
+        <span class="saved-kind-count" *ngIf="favoriteFlatmates.length">{{ favoriteFlatmates.length }}</span>
+      </button>
+    </div>
+
+    <div class="empty-mini" *ngIf="savedKind === 'properties' && !favoriteListings.length">
       <mat-icon>favorite_border</mat-icon>
-      <p>No saved properties yet. Browse listings and tap the heart to save.</p>
+      <p>No saved properties yet. Browse rentals and tap Save.</p>
       <a routerLink="/explore-listing" class="btn-outline">Browse rentals</a>
     </div>
 
-    <div class="favorites-grid" *ngIf="favoriteListings.length">
-      <app-listing-card
-        *ngFor="let listing of favoriteListings"
-        [listing]="listing"
-        [showActions]="false"
-        (view)="viewProperty($event)">
-      </app-listing-card>
+    <div class="empty-mini" *ngIf="savedKind === 'flatmates' && !favoriteFlatmates.length">
+      <mat-icon>group</mat-icon>
+      <p>No saved flatmates yet. Browse posts and tap Save.</p>
+      <a routerLink="/flatmates" class="btn-outline">Find flatmates</a>
+    </div>
+
+    <div class="saved-block" *ngIf="savedKind === 'properties' && favoriteListings.length">
+      <div class="favorites-grid">
+        <app-listing-card
+          *ngFor="let listing of favoriteListings"
+          [listing]="listing"
+          [showActions]="false"
+          (view)="viewProperty($event)">
+        </app-listing-card>
+      </div>
+    </div>
+
+    <div class="saved-block" *ngIf="savedKind === 'flatmates' && favoriteFlatmates.length">
+      <div class="favorites-grid">
+        <a class="saved-flatmate-card" *ngFor="let mate of favoriteFlatmates" routerLink="/flatmates">
+          <img [src]="getFlatmateImage(mate)" [alt]="mate.name" />
+          <div>
+            <strong>{{ mate.name }}{{ mate.age ? ', ' + mate.age : '' }}</strong>
+            <span>{{ mate.profession || 'Flatmate' }} · ₹{{ mate.budget || 0 }}/month</span>
+            <span>{{ mate.flatAddress || mate.city || 'Location available' }}</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Unlocked view -->
+  <section class="saved-view" *ngIf="!isLoading && viewMode === 'unlocked'">
+    <header class="saved-header">
+      <button type="button" class="back-btn" (click)="viewMode = 'hub'" aria-label="Back to profile">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h2>Unlocked properties</h2>
+        <p>Listings you opened with contact points. Owner details stay available.</p>
+      </div>
+    </header>
+
+    <div class="empty-mini" *ngIf="!unlockedLoading && !unlockedItems.length">
+      <mat-icon>lock_open</mat-icon>
+      <p>No unlocked properties yet. Use contact points to view an owner’s number.</p>
+      <a routerLink="/explore-listing" class="btn-outline">Browse rentals</a>
+    </div>
+
+    <div class="empty-mini" *ngIf="unlockedLoading">
+      <p>Loading unlocked properties…</p>
+    </div>
+
+    <div class="unlocked-list" *ngIf="!unlockedLoading && unlockedItems.length">
+      <button type="button" class="unlocked-card" *ngFor="let item of unlockedItems" (click)="openUnlockedDetails(item)">
+        <img [src]="getUnlockedImage(item)" [alt]="getUnlockedTitle(item)" />
+        <div class="unlocked-card-copy">
+          <strong>{{ getUnlockedTitle(item) }}</strong>
+          <span>₹{{ item.listing?.rentAmount || 0 }}/month · {{ item.listing?.city || 'Location available' }}</span>
+          <span *ngIf="formatUnlockedAt(item.unlockedAt)">Unlocked {{ formatUnlockedAt(item.unlockedAt) }}</span>
+        </div>
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   </section>
 

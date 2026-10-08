@@ -1,8 +1,8 @@
 :host {
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --bg-light: #f9fafb;
-  --border: #e5e7eb;
+  --text-main: var(--rz-text-main);
+  --text-muted: var(--rz-text-muted);
+  --bg-light: var(--rz-bg);
+  --border: var(--rz-border);
   font-family: 'Inter', sans-serif;
   display: block;
 }

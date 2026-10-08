@@ -190,7 +190,7 @@ h1, h2, h3, h4, p { margin: 0; }
   background: var(--rz-bg-card);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--rz-shadow-lg);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1366,4 +1366,83 @@ h1, h2, h3, h4, p { margin: 0; }
   .zone-card-minimal {
     flex: 0 0 200px; /* Fixed width to allow peeking next card */
   }
+}
+
+/* Dark mode: keep explore listing surfaces on theme tokens */
+:host-context([data-theme='dark']) {
+  background-color: var(--rz-bg);
+}
+
+:host-context([data-theme='dark']) .page-wrapper,
+:host-context([data-theme='dark']) .hero-section,
+:host-context([data-theme='dark']) .main-content,
+:host-context([data-theme='dark']) .explore-zones-section,
+:host-context([data-theme='dark']) .listings-area {
+  background-color: var(--rz-bg);
+}
+
+:host-context([data-theme='dark']) .search-card {
+  background: var(--rz-bg-card);
+  border: 1px solid var(--rz-border);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+:host-context([data-theme='dark']) .search-input-group {
+  border-bottom-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .search-input-group .search-icon {
+  color: var(--rz-text-muted);
+}
+
+:host-context([data-theme='dark']) .search-input-group input {
+  color: var(--rz-text-main);
+  background: transparent;
+  color-scheme: dark;
+}
+
+:host-context([data-theme='dark']) .search-input-group input::placeholder {
+  color: var(--rz-text-faint);
+}
+
+:host-context([data-theme='dark']) .search-btn,
+:host-context([data-theme='dark']) .btn-primary.search-btn {
+  background: var(--rz-primary);
+  color: #fff;
+}
+
+:host-context([data-theme='dark']) .chip {
+  background: var(--rz-bg-hover);
+  color: var(--rz-text-main);
+  border-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .dropdown-trigger,
+:host-context([data-theme='dark']) .dropdown-menu,
+:host-context([data-theme='dark']) .mobile-filter-toggle {
+  background: var(--rz-bg-card);
+  color: var(--rz-text-main);
+  border-color: var(--rz-border);
+  box-shadow: var(--rz-shadow-sm);
+}
+
+:host-context([data-theme='dark']) .dropdown-item:hover {
+  background: var(--rz-primary-soft);
+  color: var(--rz-primary);
+}
+
+:host-context([data-theme='dark']) .filters-sidebar {
+  background: var(--rz-bg-card);
+  border-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .filter-pill {
+  background: var(--rz-bg);
+  color: var(--rz-text-muted);
+  border-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .section-title,
+:host-context([data-theme='dark']) .sort-label {
+  color: var(--rz-text-main);
 }
