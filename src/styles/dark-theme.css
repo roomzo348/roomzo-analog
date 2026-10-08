@@ -61,6 +61,24 @@ html[data-theme='dark'] {
   color: var(--rz-text-muted) !important;
 }
 
+[data-theme='dark'] .hero-script {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #99f6e4 !important;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='light'] .hero-script,
+:root:not([data-theme='dark']) .hero-script {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #0f766e !important;
+}
+
 [data-theme='dark'] label {
   color: var(--rz-primary) !important;
 }
