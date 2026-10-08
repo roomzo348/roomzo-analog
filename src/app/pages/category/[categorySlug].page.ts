@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RouteMeta } from '@analogjs/router';
 import { SeoService } from '../../services/seo.service';
 import { getCategoryBySlug, ROOMZO_CATEGORIES } from '../../config/categories.config';
@@ -18,7 +18,7 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-category-landing',
   standalone: true,
-  imports: [CommonModule, RouterLink, RelatedSearchesComponent, SeoBreadcrumbComponent, MatIconModule, ContentGuideComponent],
+  imports: [CommonModule, RelatedSearchesComponent, SeoBreadcrumbComponent, MatIconModule, ContentGuideComponent],
   templateUrl: './category-landing.html',
   styleUrls: ['./category-landing.css'],
 })
@@ -110,12 +110,15 @@ export default class CategoryLandingPage implements OnInit, OnDestroy {
 
     const queryParams: Record<string, string> = {};
 
-    // 2. Map the Property Type
-    if (slug.includes('pg') || slug.includes('hostel') || slug.includes('co-living')) {
+    if (cat.propertyType) {
+      queryParams['propertyType'] = cat.propertyType;
+    } else if (slug.includes('pg') || slug.includes('hostel') || slug.includes('co-living') || slug.includes('student')) {
       queryParams['propertyType'] = 'PG';
+    } else if (slug.includes('flatmate')) {
+      /* handled above */
     } else if (slug.includes('flat') || slug.includes('apartment') || slug.includes('bhk')) {
       queryParams['propertyType'] = 'Flat';
-    } else if (slug.includes('room') || slug.includes('student')) {
+    } else if (slug.includes('room')) {
       queryParams['propertyType'] = 'Room';
     }
 
@@ -132,32 +135,46 @@ export default class CategoryLandingPage implements OnInit, OnDestroy {
     }
   }
 
-  // --- Direct City Click Handler ---
   goToCity(cityName: string): void {
     this.router.navigate(['/city', cityName.toLowerCase()]);
+  }
+
+  goToPost(): void {
+    this.router.navigate(['/list-property']);
   }
 
   // --- UI Helpers ---
   getIconForCategory(slug: string): string {
     const s = slug.toLowerCase();
-    if (s.includes('room')) return 'home';
-    if (s.includes('flat')) return 'apartment';
-    if (s.includes('pg') || s.includes('hostel')) return 'bed';
+    if (s.includes('flatmate')) return 'people';
     if (s.includes('student')) return 'school';
+    if (s.includes('pg') || s.includes('hostel')) return 'bed';
+    if (s.includes('flat')) return 'apartment';
+    if (s.includes('room')) return 'home';
     if (s.includes('broker') || s.includes('free')) return 'percent';
     if (s.includes('99acres')) return 'domain';
-    if (s.includes('flatmate')) return 'people';
-    return 'language'; 
+    return 'language';
   }
 
   getSubtitleForCategory(slug: string): string {
     const s = slug.toLowerCase();
-    if (s.includes('room')) return 'Find private & shared rooms';
-    if (s.includes('flat')) return '1BHK, 2BHK, 3BHK & more';
-    if (s.includes('pg')) return 'Boys PG, Girls PG & Co-living';
-    if (s.includes('student')) return 'Near colleges & coaching hubs';
-    if (s.includes('broker')) return 'No brokerage cut. Unlock owner contact with a plan.';
     if (s.includes('flatmate')) return 'Find like-minded roommates';
+    if (s.includes('student')) return 'Near colleges & coaching hubs';
+    if (s.includes('pg')) return 'Boys PG, Girls PG & Co-living';
+    if (s.includes('flat')) return '1BHK, 2BHK, 3BHK & more';
+    if (s.includes('room')) return 'Find private & shared rooms';
+    if (s.includes('broker')) return 'No brokerage cut. Unlock owner contact with a plan.';
     return 'Owner-listed rentals. Browse free.';
+  }
+
+  getAccentForCategory(slug: string): string {
+    const s = slug.toLowerCase();
+    if (s.includes('flatmate')) return 'flatmates';
+    if (s.includes('student')) return 'student';
+    if (s.includes('pg')) return 'pg';
+    if (s.includes('flat')) return 'flats';
+    if (s.includes('room')) return 'rooms';
+    if (s.includes('broker')) return 'broker';
+    return 'default';
   }
 }

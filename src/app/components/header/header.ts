@@ -7,6 +7,7 @@ import { FlatmateService } from '../../services/flatmate.service';
 import { filter } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from '../../services/chat.service';
+import { ThemeService } from '../../services/theme.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -27,6 +28,7 @@ export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy
   hasUnreadMessages = false;
   profilePhotoUrl = '';
   userInitial = 'U';
+  isDarkMode = false;
   private subs = new Subscription();
   private resizeObserver?: ResizeObserver;
 
@@ -38,7 +40,8 @@ export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy
     @Inject(PLATFORM_ID) private platformId: Object,
     private flatmateService: FlatmateService,
     private toastr: ToastrService,
-    private chatService: ChatService
+    private chatService: ChatService,
+    private themeService: ThemeService
   ) {
     this.isHomePage = this.router.url === '/' || this.router.url.startsWith('/#');
     // Non-home pages always use solid scrolled chrome
@@ -70,6 +73,12 @@ export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ngOnInit() {
+    this.subs.add(
+      this.themeService.mode$.subscribe((mode) => {
+        this.isDarkMode = mode === 'dark';
+      })
+    );
+
     this.authService.refreshSessionIfNeeded();
     this.authService.isLoggedIn$.subscribe((status) => {
       this.isLoggedIn = status;
@@ -134,6 +143,10 @@ export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy
       this.userInitial = 'U';
       this.profilePhotoUrl = '';
     }
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   toggleMenu() {

@@ -71,7 +71,7 @@
   display: flex; align-items: center; gap: 14px; padding: 16px 20px;
   cursor: pointer; transition: background 0.2s;
 }
-.conv-item:hover { background: #f8fafc; }
+.conv-item:hover { background: var(--rz-bg-hover); }
 .avatar {
   width: 46px; height: 46px; border-radius: 50%; background: var(--rz-primary);
   color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;
@@ -104,7 +104,7 @@
   display: flex; 
   flex-direction: column; 
   gap: 12px;
-  background: #f8fafc;
+  background: var(--rz-bg);
   min-height: 0; /* ✅ NEW: Ensures this box scrolls instead of expanding forever */
 }
 .message-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; position: relative; }
@@ -112,14 +112,14 @@
 .message-bubble .time { font-size: 0.7rem; opacity: 0.7; display: block; margin-top: 4px; text-align: right; }
 
 .sent { align-self: flex-end; background: var(--rz-primary); color: white; border-bottom-right-radius: 4px; }
-.received { align-self: flex-start; background: white; border: 1px solid var(--rz-border); border-bottom-left-radius: 4px; color: var(--rz-text-main); }
+.received { align-self: flex-start; background: var(--rz-bg-card); border: 1px solid var(--rz-border); border-bottom-left-radius: 4px; color: var(--rz-text-main); }
 
 /* Input Area */
 .chat-input-area {
   padding: 16px 20px; 
   /* Add safe-area-inset to prevent the iPhone home bar from covering the input */
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  background: white; 
+  background: var(--rz-bg-card); 
   border-top: 1px solid var(--rz-border);
   display: flex; 
   gap: 10px; 
@@ -127,7 +127,7 @@
 }
 .chat-input-area input {
   flex: 1; padding: 12px 16px; border-radius: 50px; border: 1px solid var(--rz-border);
-  outline: none; font-size: 0.95rem; background: #f8fafc;
+  outline: none; font-size: 0.95rem; background: var(--rz-input-bg);
 }
 .chat-input-area input:focus { border-color: var(--rz-primary); }
 .send-btn {

@@ -1,6 +1,6 @@
 :host {
   display: block;
-  background: #f4f7f6;
+  background: var(--rz-bg);
   min-height: 100vh;
 }
 
@@ -20,7 +20,7 @@ h1 {
   max-width: 720px;
   font-size: clamp(1.7rem, 4vw, 2.4rem);
   line-height: 1.25;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .wallet-chip {
@@ -28,8 +28,8 @@ h1 {
   align-items: center;
   gap: 8px;
   margin-top: 18px;
-  background: #fff;
-  border: 1px solid #d1fae5;
+  background: var(--rz-bg-card);
+  border: 1px solid var(--rz-border);
   color: #0f766e;
   border-radius: 999px;
   padding: 8px 14px;
@@ -45,17 +45,17 @@ h1 {
 
 .plan {
   position: relative;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--rz-bg-card);
+  border: 1px solid var(--rz-border);
   border-radius: 22px;
   padding: 28px 24px 22px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--rz-shadow-md);
   display: flex;
   flex-direction: column;
 }
 
 .plan.popular {
-  border-color: #196153;
+  border-color: var(--rz-primary);
   transform: translateY(-4px);
 }
 
@@ -88,7 +88,7 @@ h1 {
 .price-wrap del {
   display: block;
   margin-bottom: -5px;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -118,13 +118,13 @@ h1 {
   margin: 8px 0 4px;
   font-size: 2.2rem;
   font-weight: 800;
-  color: #196153;
+  color: var(--rz-primary);
 }
 
 .price span {
   font-size: 1rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .cta,
@@ -173,4 +173,14 @@ h1 {
   .cta {
     font-size: 0.9rem;
   }
+}
+
+:host-context([data-theme='dark']) .plan {
+  box-shadow: var(--rz-shadow-md);
+}
+
+:host-context([data-theme='dark']) h1,
+:host-context([data-theme='dark']) h2,
+:host-context([data-theme='dark']) .price {
+  color: var(--rz-text-main);
 }

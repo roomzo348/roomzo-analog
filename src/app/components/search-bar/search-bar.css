@@ -6,7 +6,7 @@
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  background: #ffffff;
+  background: var(--rz-bg-card);
   padding: 6px 6px 6px 20px;
   border-radius: 56px;
   box-shadow: 0 12px 32px rgba(0,0,0,0.18);
@@ -14,6 +14,8 @@
   max-width: 860px;
   margin: 0;
   box-sizing: border-box;
+  border: 1px solid var(--rz-border);
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
 
 .input-group {
@@ -30,7 +32,7 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748b;
+  color: var(--rz-text-muted);
   font-size: 22px;
   width: 22px;
   height: 22px;
@@ -45,7 +47,7 @@
   border: none !important;
   outline: none !important;
   font-size: 0.98rem;
-  color: #111827;
+  color: var(--rz-text-main);
   background: transparent !important;
   padding: 13px 8px 13px 34px !important;
   font-family: 'Outfit', inherit;
@@ -53,14 +55,14 @@
 }
 
 .input-group input::placeholder {
-  color: #9ca3af;
+  color: var(--rz-text-faint);
   font-weight: 400;
 }
 
 .divider {
   width: 1px;
   height: 28px;
-  background: #e5e7eb;
+  background: var(--rz-border);
   flex-shrink: 0;
   margin: 0 4px;
 }
@@ -79,10 +81,10 @@
   font-family: 'Outfit', inherit;
 }
 
-::ng-deep .custom-mat-select .mat-mdc-select-value { color: #111827; font-weight: 500; }
-::ng-deep .custom-mat-select .mat-mdc-select-placeholder { color: #6b7280; font-weight: 500; }
+::ng-deep .custom-mat-select .mat-mdc-select-value { color: var(--rz-text-main); font-weight: 500; }
+::ng-deep .custom-mat-select .mat-mdc-select-placeholder { color: var(--rz-text-muted); font-weight: 500; }
 ::ng-deep .custom-mat-select .mat-mdc-select-trigger { padding: 8px 0; }
-::ng-deep .custom-mat-select .mat-mdc-select-arrow svg { fill: #94a3b8; }
+::ng-deep .custom-mat-select .mat-mdc-select-arrow svg { fill: var(--rz-text-faint); }
 
 /* ---- Search button — isolated, never inherits btn-primary ---- */
 .search-btn {
@@ -101,7 +103,7 @@
   font-size: 1rem !important;
   font-weight: 600 !important;
   white-space: nowrap !important;
-  background: #196153 !important;
+  background: var(--rz-primary) !important;
   color: #fff !important;
   border: none !important;
   cursor: pointer !important;
@@ -116,7 +118,7 @@
   color: #fff;
 }
 
-.search-btn:hover { background: #134d42 !important; }
+.search-btn:hover { background: var(--rz-primary-hover) !important; }
 .search-btn:active { opacity: 0.9; }
 
 /* ============================================================

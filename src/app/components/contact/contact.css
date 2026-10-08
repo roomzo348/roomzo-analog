@@ -43,7 +43,7 @@ input, textarea, .custom-contact-select {
   font-size: 1rem;
   font-family: inherit;
   color: var(--rz-text-main);
-  background: #f8fafc; /* Very subtle grey inside input */
+  background: var(--rz-input-bg); /* Theme-aware input fill */
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -57,7 +57,7 @@ input, textarea, .custom-contact-select {
 
 input:focus, textarea:focus, .custom-contact-select.mat-focused { 
   border-color: var(--rz-primary); 
-  background: #ffffff;
+  background: var(--rz-bg-card);
   box-shadow: 0 0 0 3px rgba(25, 97, 83, 0.1); /* Soft teal glow */
 }
 
@@ -159,7 +159,11 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .service-areas-card {
   height: auto;
   min-height: unset;
-  background: linear-gradient(165deg, #f0f7f5 0%, #ffffff 55%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--rz-primary) 8%, var(--rz-bg-card)) 0%,
+    var(--rz-bg-card) 55%
+  );
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -182,12 +186,18 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 }
 .service-areas-body h3 {
   margin: 12px 0 8px;
-  color: var(--rz-text-main);
+  color: var(--rz-text-main) !important;
   font-size: 1.15rem;
+}
+.service-areas-body p,
+.service-areas-body li,
+.service-areas-body .service-note {
+  color: var(--rz-text-muted) !important;
 }
 .service-areas-body ul {
   margin: 8px 0 12px;
   padding-left: 1.2rem;
+  color: var(--rz-text-muted);
 }
 .service-areas-body .service-note {
   font-size: 0.9rem;
@@ -227,7 +237,7 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 
 .directions-btn {
   position: absolute; bottom: 16px; left: 16px;
-  background: white; color: var(--rz-text-main);
+  background: var(--rz-bg-card); color: var(--rz-text-main);
   padding: 10px 16px; border-radius: var(--rz-radius-sm); font-weight: 500; font-size: 0.95rem;
   text-decoration: none; display: flex; align-items: center; gap: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s;
@@ -248,7 +258,7 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .faq-content p { color: var(--rz-text-muted); margin: 0; font-size: 1rem; }
 
 .btn-white {
-  background: white; border: 1px solid var(--rz-border); padding: 12px 24px;
+  background: var(--rz-bg-card); border: 1px solid var(--rz-border); padding: 12px 24px;
   border-radius: var(--rz-radius-pill); font-weight: 500; cursor: pointer; transition: 0.2s;
   color: var(--rz-text-main); font-family: inherit; font-size: 1rem;
 }
@@ -296,7 +306,7 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 ======================================================== */
 .page-wrapper.is-embedded {
   padding: 28px 0 48px;
-  background: linear-gradient(180deg, #f3faf6 0%, #ffffff 28%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--rz-bg-elevated) 0%, var(--rz-bg) 28%, var(--rz-bg) 100%);
 }
 
 .page-wrapper.is-embedded .page-header {
@@ -311,7 +321,7 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #196153;
+  color: var(--rz-primary);
   margin-bottom: 8px;
 }
 
@@ -320,13 +330,13 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   font-weight: 800 !important;
   letter-spacing: -0.02em;
   margin: 0 0 8px !important;
-  color: #0f172a !important;
+  color: var(--rz-text-main) !important;
   line-height: 1.25 !important;
 }
 
 .page-wrapper.is-embedded .page-header p {
   font-size: 0.92rem !important;
-  color: #64748b !important;
+  color: var(--rz-text-muted) !important;
   max-width: 52ch;
   margin: 0 !important;
   line-height: 1.5 !important;
@@ -336,9 +346,18 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .page-wrapper.is-embedded .info-card,
 .page-wrapper.is-embedded .service-areas-card {
   border-radius: 16px;
-  border: 1px solid #e2efe8;
-  box-shadow: 0 4px 18px rgba(25, 97, 83, 0.06);
+  border: 1px solid var(--rz-border);
+  background: var(--rz-bg-card);
+  box-shadow: var(--rz-shadow-sm);
   animation: contactEmbedIn 0.55s ease both;
+}
+
+.page-wrapper.is-embedded .service-areas-card {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--rz-primary) 10%, var(--rz-bg-card)) 0%,
+    var(--rz-bg-card) 55%
+  );
 }
 
 .page-wrapper.is-embedded .info-card { animation-delay: 0.06s; }
@@ -349,19 +368,20 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .page-wrapper.is-embedded .service-areas-body h3 {
   font-size: 1.05rem !important;
   font-weight: 800 !important;
-  color: #0f172a !important;
+  color: var(--rz-text-main) !important;
 }
 
 .page-wrapper.is-embedded .submit-btn {
-  background: #196153;
+  background: var(--rz-primary);
   border-radius: 12px;
   font-weight: 700;
   font-size: 0.95rem;
   padding: 13px 22px;
+  color: #ffffff;
 }
 
 .page-wrapper.is-embedded .submit-btn:hover {
-  background: #144a40;
+  background: var(--rz-primary-hover);
 }
 
 .page-wrapper.is-embedded .faq-banner {
@@ -383,8 +403,8 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 }
 
 .page-wrapper.is-embedded .faq-banner .btn-white {
-  background: #ffffff;
-  color: #196153;
+  background: var(--rz-bg-card);
+  color: var(--rz-primary);
   border: none;
   font-weight: 700;
   border-radius: 999px;
@@ -393,6 +413,39 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 @keyframes contactEmbedIn {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dark mode: keep contact cards readable (no white card + light text) */
+:host-context([data-theme='dark']) .service-areas-card,
+:host-context([data-theme='dark']) .page-wrapper.is-embedded .service-areas-card {
+  background: linear-gradient(165deg, #152338 0%, #151d2e 60%) !important;
+  border-color: var(--rz-border) !important;
+}
+
+:host-context([data-theme='dark']) .service-areas-body h3,
+:host-context([data-theme='dark']) .page-wrapper.is-embedded .service-areas-body h3,
+:host-context([data-theme='dark']) .info-card h3,
+:host-context([data-theme='dark']) .form-card h2 {
+  color: #f1f5f9 !important;
+}
+
+:host-context([data-theme='dark']) .service-areas-body,
+:host-context([data-theme='dark']) .service-areas-body p,
+:host-context([data-theme='dark']) .service-areas-body li,
+:host-context([data-theme='dark']) .service-areas-body .service-note {
+  color: #94a3b8 !important;
+}
+
+:host-context([data-theme='dark']) .form-card,
+:host-context([data-theme='dark']) .info-card,
+:host-context([data-theme='dark']) .page-wrapper.is-embedded .form-card,
+:host-context([data-theme='dark']) .page-wrapper.is-embedded .info-card {
+  background: var(--rz-bg-card) !important;
+  border-color: var(--rz-border) !important;
+}
+
+:host-context([data-theme='dark']) .icon-circle {
+  background: rgba(20, 184, 166, 0.16);
 }
 
 @media (max-width: 900px) {

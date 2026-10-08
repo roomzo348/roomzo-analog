@@ -7,22 +7,22 @@
 
 /* --- The Elegant Card (explore city / explore listing screenshot) --- */
 .elegant-card {
-  background: #ffffff;
+  background: var(--rz-bg-card);
   border-radius: 16px;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #e8eef3;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid var(--rz-border);
+  box-shadow: var(--rz-shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
   cursor: pointer;
 }
 
 .elegant-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
-  border-color: #dbe4ec;
+  box-shadow: var(--rz-shadow-md);
+  border-color: var(--rz-border-strong);
 }
 
 /* --- Media Section --- */
@@ -30,7 +30,7 @@
   position: relative;
   height: 168px;
   flex-shrink: 0;
-  background: #f8fafc;
+  background: var(--rz-bg-elevated);
   overflow: hidden;
 }
 
@@ -57,8 +57,8 @@
   top: 10px;
   left: 10px;
   z-index: 3;
-  background: #ffffff;
-  color: #196153;
+  background: var(--rz-bg-card);
+  color: var(--rz-primary);
   padding: 4px 10px;
   border-radius: 999px;
   border: 1.5px solid #196153;
@@ -72,7 +72,7 @@
   backdrop-filter: none;
 }
 
-.glass-badge mat-icon { font-size: 14px; width: 14px; height: 14px; color: #196153; }
+.glass-badge mat-icon { font-size: 14px; width: 14px; height: 14px; color: var(--rz-primary); }
 
 .favorite-ring {
   position: absolute;
@@ -83,8 +83,8 @@
   height: 34px;
   border: none;
   border-radius: 50%;
-  background: #ffffff;
-  color: #64748b;
+  background: var(--rz-bg-card);
+  color: var(--rz-text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +95,7 @@
 }
 
 .favorite-ring:hover {
-  background: #ffffff;
+  background: var(--rz-bg-card);
   transform: scale(1.08);
   color: #ef4444; /* Subtle red hint on hover */
 }
@@ -259,7 +259,7 @@
   font-size: 0.65rem;
   font-weight: 600;
   line-height: 1.2;
-  color: #1e293b;
+  color: var(--rz-text-main);
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
@@ -267,6 +267,18 @@
 .media-pill.city-pill {
   background: rgba(241, 245, 249, 0.95);
   color: #334155;
+}
+
+:host-context([data-theme='dark']) .media-pill {
+  background: rgba(15, 23, 42, 0.88) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: none;
+}
+
+:host-context([data-theme='dark']) .media-pill.city-pill {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #e2e8f0 !important;
 }
 
 .elegant-card.is-compact .card-body {
@@ -277,7 +289,7 @@
 .elegant-card.is-compact .property-title {
   font-size: 0.8rem !important;
   font-weight: 600 !important;
-  color: #0f172a;
+  color: var(--rz-text-main);
   margin: 0 !important;
   line-height: 1.3 !important;
   white-space: normal;
@@ -337,8 +349,8 @@
 }
 
 .elegant-card.is-compact .compact-icon-btn.call {
-  background: rgba(25, 97, 83, 0.1);
-  color: #196153;
+  background: var(--rz-primary-soft);
+  color: var(--rz-primary);
 }
 
 .elegant-card.is-compact .compact-icon-btn.whatsapp {
@@ -362,13 +374,13 @@
 .elegant-card.is-compact .price-value {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #196153;
+  color: var(--rz-primary);
   letter-spacing: -0.02em;
 }
 
 .elegant-card.is-compact .price-unit {
   font-size: 0.72rem;
-  color: #196153;
+  color: var(--rz-primary);
   font-weight: 600;
   margin-left: 2px;
 }
@@ -393,22 +405,22 @@
 .price-value {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #196153;
+  color: var(--rz-primary);
   letter-spacing: -0.02em;
 }
 
 .price-unit {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   font-weight: 500;
   margin-left: 2px;
 }
 
 .post-date {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   font-weight: 600;
-  background: #f1f5f9;
+  background: var(--rz-bg-hover);
   padding: 3px 7px;
   border-radius: 6px;
 }
@@ -416,7 +428,7 @@
 .elegant-card:not(.is-compact) .property-title {
   font-size: 0.95rem !important;
   font-weight: 700 !important;
-  color: #0f172a !important;
+  color: var(--rz-text-main) !important;
   margin: 0 0 4px 0 !important;
   line-height: 1.25 !important;
   white-space: nowrap;
@@ -426,7 +438,7 @@
 
 .property-location {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--rz-text-faint);
   display: flex;
   align-items: center;
   gap: 3px;
@@ -443,7 +455,7 @@
   text-overflow: ellipsis;
 }
 
-.property-location mat-icon { font-size: 14px; width: 14px; height: 14px; color: #94a3b8; flex-shrink: 0; }
+.property-location mat-icon { font-size: 14px; width: 14px; height: 14px; color: var(--rz-text-faint); flex-shrink: 0; }
 
 /* --- Specs --- */
 .specs-ribbon {
@@ -465,10 +477,10 @@
   gap: 4px;
   font-size: 0.72rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
-.spec-item mat-icon { font-size: 15px; width: 15px; height: 15px; color: #94a3b8; }
+.spec-item mat-icon { font-size: 15px; width: 15px; height: 15px; color: var(--rz-text-faint); }
 
 .spec-divider { display: none; }
 
@@ -500,8 +512,8 @@
   flex: 0 0 auto;
   min-width: 58px;
   padding: 0 10px;
-  background: #ffffff;
-  color: #196153;
+  background: var(--rz-bg-card);
+  color: var(--rz-primary);
   border: 1.5px solid #196153;
   flex-direction: row;
   gap: 4px;
@@ -571,7 +583,7 @@
 
   .elegant-card:not(.is-compact) .price-value { font-size: 0.92rem; }
 
-  .elegant-card:not(.is-compact) .price-unit { font-size: 0.62rem; color: #64748b; }
+  .elegant-card:not(.is-compact) .price-unit { font-size: 0.62rem; color: var(--rz-text-muted); }
 
   .elegant-card:not(.is-compact) .property-title {
     font-size: 0.78rem !important;

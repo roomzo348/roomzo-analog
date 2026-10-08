@@ -1,6 +1,6 @@
 :host {
   display: block;
-  background: #f3f5f8;
+  background: var(--rz-bg);
   min-height: 100vh;
 }
 
@@ -22,8 +22,8 @@
   height: 38px;
   border: none;
   border-radius: 10px;
-  background: #fff;
-  color: #334155;
+  background: var(--rz-bg-card);
+  color: var(--rz-text-main);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,13 +34,13 @@
 .unlocked-top h1 {
   margin: 0 0 4px;
   font-size: 1.2rem;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .unlocked-top p {
   margin: 0;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .loading-block {
@@ -49,7 +49,7 @@
   justify-content: center;
   gap: 10px;
   padding: 40px 16px;
-  color: #64748b;
+  color: var(--rz-text-muted);
 }
 
 .spinner {
@@ -82,11 +82,11 @@
   object-fit: cover;
   border-radius: 18px;
   scroll-snap-align: start;
-  background: #e2e8f0;
+  background: var(--rz-border);
 }
 
 .detail-card {
-  background: #fff;
+  background: var(--rz-bg-card);
   border-radius: 18px;
   padding: 16px;
   margin-bottom: 12px;
@@ -114,7 +114,7 @@
 .detail-card h2 {
   margin: 0;
   font-size: 1.15rem;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .price {
@@ -128,7 +128,7 @@
   display: flex;
   align-items: flex-start;
   gap: 4px;
-  color: #64748b;
+  color: var(--rz-text-muted);
   font-size: 0.88rem;
 }
 
@@ -144,7 +144,7 @@
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 12px;
-  color: #334155;
+  color: var(--rz-text-main);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -184,11 +184,11 @@
 
 .owner-row strong {
   display: block;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .owner-row span {
-  color: #64748b;
+  color: var(--rz-text-muted);
   font-size: 0.8rem;
 }
 
@@ -228,15 +228,15 @@
 
 .contact-btn.mail {
   grid-column: 1 / -1;
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--rz-border);
+  color: var(--rz-text-main);
 }
 
 .phone-line {
   margin: 10px 0 0;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .safety {
@@ -251,7 +251,7 @@
 .detail-card h3 {
   margin: 0 0 10px;
   font-size: 1rem;
-  color: #0f172a;
+  color: var(--rz-text-main);
 }
 
 .bio {
@@ -274,8 +274,8 @@
   height: 32px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--rz-bg-elevated);
+  color: var(--rz-text-main);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -294,7 +294,7 @@
   gap: 6px;
   height: 46px;
   border-radius: 14px;
-  background: #fff;
+  background: var(--rz-bg-card);
   color: #0f766e;
   font-weight: 700;
   text-decoration: none;

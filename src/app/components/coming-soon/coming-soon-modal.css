@@ -7,7 +7,7 @@
   max-height: 94vh;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--rz-bg-card);
 }
 
 .modal-close-btn {
@@ -17,21 +17,33 @@
   z-index: 5;
   width: 36px;
   height: 36px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
   color: #0f172a;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28);
 }
 
 .modal-close-btn mat-icon {
   font-size: 20px;
   width: 20px;
   height: 20px;
+  color: #0f172a;
+}
+
+:host-context([data-theme='dark']) .modal-close-btn {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+:host-context([data-theme='dark']) .modal-close-btn mat-icon {
+  color: #0f172a !important;
 }
 
 .live-modal-hero {
@@ -168,8 +180,8 @@
   gap: 3px;
   padding: 10px 6px;
   border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--rz-bg-elevated);
+  border: 1px solid var(--rz-border);
 }
 
 .live-stat-card mat-icon {
@@ -182,7 +194,7 @@
 .live-stat-card .stat-number {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--rz-text-main);
   line-height: 1.1;
 }
 
@@ -238,7 +250,7 @@
 }
 
 .plans-live-copy strong {
-  color: #0f172a;
+  color: var(--rz-text-main);
   font-size: 0.82rem;
   line-height: 1.25;
 }

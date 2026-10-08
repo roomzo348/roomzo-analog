@@ -25,6 +25,22 @@
     </nav>
 
     <div class="actions">
+      <button
+        type="button"
+        class="rz-theme-toggle"
+        [class.is-dark]="isDarkMode"
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+        [attr.title]="isDarkMode ? 'Light mode' : 'Dark mode'">
+        <span class="rz-theme-toggle__icon rz-theme-toggle__icon--sun" aria-hidden="true">
+          <mat-icon>light_mode</mat-icon>
+        </span>
+        <span class="rz-theme-toggle__icon rz-theme-toggle__icon--moon" aria-hidden="true">
+          <mat-icon>dark_mode</mat-icon>
+        </span>
+        <span class="rz-theme-toggle__thumb" aria-hidden="true"></span>
+      </button>
+
       <div class="auth-desktop">
         <ng-container *ngIf="!isLoggedIn">
           <a routerLink="/owner-auth" class="login-link">Login/SignUp</a>
@@ -104,8 +120,8 @@
   <div class="mobile-dropdown">
     <div class="user-info" style="padding: 24px; text-align: center;">
       <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 12px; margin-left:auto; margin-right:auto;">account_circle</mat-icon>
-      <h3 style="margin: 0; font-size: 18px;">Welcome to RoomZo</h3>
-      <p style="font-size: 14px; color: #6b7280; margin-top: 8px;">Log in to manage your listings and profile.</p>
+      <h3 style="margin: 0; font-size: 18px; color: var(--rz-text-main);">Welcome to RoomZo</h3>
+      <p style="font-size: 14px; color: var(--rz-text-muted); margin-top: 8px;">Log in to manage your listings and profile.</p>
       <button class="btn-primary" routerLink="/owner-auth" (click)="closeMenu()" style="width: 100%; margin-top: 20px;">
         Login / Sign Up
       </button>

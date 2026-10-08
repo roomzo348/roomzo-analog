@@ -124,7 +124,7 @@ export interface PendingAction {
       margin: 0;
       font-size: 22px;
       font-weight: 700;
-      color: #111827;
+      color: var(--rz-text-main);
     }
 
     .subtitle {

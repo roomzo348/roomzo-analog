@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ComingSoonModalComponent } from './components/coming-soon/coming-soon-modal';
 import { isPlatformBrowser } from '@angular/common';
 import { ChatBotComponent } from "./components/chat-bot/chat-bot";
+import { ThemeService } from './services/theme.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -85,8 +86,12 @@ export class App implements OnInit {
   private dialog = inject(MatDialog);
   private propertyService = inject(PropertyService);
   private platformId = inject(PLATFORM_ID);
+  private theme = inject(ThemeService);
 
   constructor() {
+    // Ensure theme service is constructed so preference applies on boot
+    void this.theme.mode;
+
     this.router.events.subscribe((event) => {
     if (event instanceof NavigationStart) {
       this.isRouteLoading = true;

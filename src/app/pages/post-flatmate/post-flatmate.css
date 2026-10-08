@@ -44,7 +44,7 @@
   padding: 14px 16px;
   font-size: 1rem;
   font-family: var(--font-sans);
-  background: #F9FAFB;
+  background: var(--rz-input-bg);
   border: 1px solid var(--rz-border);
   border-radius: var(--rz-radius, 12px);
   color: var(--rz-text-main);
@@ -55,14 +55,14 @@
 .fm-control::placeholder { color: var(--rz-text-muted); opacity: 0.6; }
 
 .fm-control:focus {
-  background: #FFFFFF;
+  background: var(--rz-bg-card);
   border-color: var(--rz-primary);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); 
 }
 
 .fm-control.is-invalid {
   border-color: #ef4444;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.12);
 }
 
 textarea.fm-control { resize: vertical; min-height: 100px; }
@@ -70,7 +70,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
 /* ── Seamless Input Groups (For Icons & Buttons) ── */
 .fm-input-group {
   display: flex;
-  background: #F9FAFB;
+  background: var(--rz-input-bg);
   border: 1px solid var(--rz-border);
   border-radius: var(--rz-radius, 12px);
   overflow: hidden;
@@ -79,11 +79,11 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
 
 .fm-input-group.is-invalid {
   border-color: #ef4444;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.12);
 }
 
 .fm-input-group:focus-within {
-  background: #FFFFFF;
+  background: var(--rz-bg-card);
   border-color: var(--rz-primary);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
@@ -144,7 +144,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
 /* ── Photo Upload Zone ── */
 .fm-upload-zone {
   border: 2px dashed var(--rz-border);
-  background: #F9FAFB;
+  background: var(--rz-input-bg);
   border-radius: var(--rz-radius, 12px);
   padding: 32px 20px;
   display: flex;
@@ -159,7 +159,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
 
 .fm-upload-zone:hover {
   border-color: var(--rz-primary);
-  background: #FFFFFF;
+  background: var(--rz-bg-card);
 }
 
 .fm-upload-zone mat-icon { font-size: 36px; width: 36px; height: 36px; color: var(--rz-primary); }
@@ -206,7 +206,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   white-space: nowrap;
   padding: 10px 18px;
   border-radius: 100px;
-  background: #F9FAFB;
+  background: var(--rz-input-bg);
   border: 1px solid var(--rz-border);
   color: var(--rz-text-muted);
   font-size: 0.9rem;
@@ -236,7 +236,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   left: 0;
   right: 0;
   z-index: 1050;
-  background: #ffffff;
+  background: var(--rz-bg-card);
   border: 1px solid var(--rz-border);
   border-radius: var(--rz-radius, 12px);
   margin-top: 4px;
@@ -244,7 +244,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   list-style: none;
   max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--rz-shadow-lg);
 }
 
 .fm-suggestions-list li {
@@ -254,7 +254,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   font-size: 0.9rem;
   color: var(--rz-text-main);
   cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--rz-border);
   transition: background 0.15s ease;
 }
 
@@ -274,7 +274,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   left: 0;
   right: 0;
   z-index: 9999; /* Forces it above all other cards */
-  background: #ffffff;
+  background: var(--rz-bg-card);
   border: 1px solid var(--rz-border);
   border-radius: var(--rz-radius, 12px);
   padding: 0;
@@ -282,7 +282,7 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   list-style: none;
   max-height: 220px;
   overflow-y: auto;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+  box-shadow: var(--rz-shadow-lg);
 }
 
 .fm-suggestions-list li {
@@ -294,8 +294,8 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
   line-height: 1.4;
   color: var(--rz-text-main);
   cursor: pointer;
-  background: #ffffff;
-  border-bottom: 1px solid #f3f4f6;
+  background: var(--rz-bg-card);
+  border-bottom: 1px solid var(--rz-border);
   transition: background 0.15s ease;
 }
 
@@ -306,4 +306,17 @@ textarea.fm-control { resize: vertical; min-height: 100px; }
 .fm-suggestions-list li:hover {
   background: rgba(37, 99, 235, 0.08);
   color: var(--rz-primary);
+}
+
+:host-context([data-theme='dark']) .fm-chip {
+  background: var(--rz-bg-elevated);
+}
+
+:host-context([data-theme='dark']) .fm-chip.active {
+  background: rgba(20, 184, 166, 0.16);
+  box-shadow: none;
+}
+
+:host-context([data-theme='dark']) .fm-suggestions-list {
+  box-shadow: var(--rz-shadow-lg);
 }
