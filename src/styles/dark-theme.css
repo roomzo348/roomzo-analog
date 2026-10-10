@@ -1052,6 +1052,12 @@ html[data-theme='dark'] {
   color: var(--rz-text-main) !important;
 }
 
+[data-theme='dark'] .custom-status-select .mat-mdc-select-value,
+[data-theme='dark'] .custom-status-select .mat-mdc-select-min-line,
+[data-theme='dark'] .custom-status-select .mat-mdc-select-arrow {
+  color: inherit !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rz-theme-toggle__thumb {
     transition: none;
