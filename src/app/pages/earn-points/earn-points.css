@@ -1,0 +1,134 @@
+:host { display: block; background: var(--rz-bg); min-height: 100vh; }
+
+.earn-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(96px + env(safe-area-inset-top, 0px)) 20px 96px;
+}
+
+.earn-card {
+  background: var(--rz-bg-card, #fff);
+  border: 1px solid var(--rz-border, #e2e8f0);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.kicker {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  margin-bottom: 8px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 1.55rem;
+  line-height: 1.25;
+  color: var(--rz-text-main, #0f172a);
+}
+
+.lead {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--rz-text-main, #0f172a);
+}
+
+.lead.muted {
+  color: var(--rz-text-muted, #64748b);
+  font-size: 0.92rem;
+}
+
+.steps {
+  list-style: none;
+  margin: 22px 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+}
+
+.n {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0f766e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.step-copy strong {
+  display: block;
+  min-height: 28px;
+  font-size: 0.92rem;
+  line-height: 28px;
+  color: var(--rz-text-main, #0f172a);
+}
+
+.step-copy p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--rz-text-muted, #64748b);
+  line-height: 1.4;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: #0f766e;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.cta mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+.status-link {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+.fine {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: var(--rz-text-muted, #64748b);
+  text-align: center;
+  line-height: 1.4;
+}
+
+:host-context([data-theme='dark']) .earn-card {
+  background: var(--rz-bg-card);
+  border-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .n,
+:host-context([data-theme='dark']) .cta {
+  background: #14b8a6;
+  color: #042f2e;
+}

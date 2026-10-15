@@ -1,6 +1,8 @@
 import mysql from 'mysql2/promise';
 import { getServerRuntime } from '../utils/runtime-config';
 
+type SqlParams = any[];
+
 let pool: mysql.Pool | null = null;
 
 export function getMysqlPool(): mysql.Pool {
@@ -18,7 +20,7 @@ export function getMysqlPool(): mysql.Pool {
     connectTimeout: 30000,
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
-  });
+  } as Parameters<typeof mysql.createPool>[0]);
   return pool;
 }
 
@@ -52,7 +54,7 @@ async function withDbRetry<T>(operation: () => Promise<T>, retries = 2): Promise
 
 export async function sqlQuery<T = Record<string, unknown>>(
   query: string,
-  params: unknown[] = []
+  params: SqlParams = []
 ): Promise<T[]> {
   return withDbRetry(async () => {
     const db = getMysqlPool();
@@ -63,7 +65,7 @@ export async function sqlQuery<T = Record<string, unknown>>(
 
 export async function sqlExecute(
   query: string,
-  params: unknown[] = []
+  params: SqlParams = []
 ): Promise<mysql.ResultSetHeader> {
   return withDbRetry(async () => {
     const db = getMysqlPool();
@@ -75,7 +77,7 @@ export async function sqlExecute(
 export async function connQuery<T = Record<string, unknown>>(
   conn: mysql.PoolConnection,
   query: string,
-  params: unknown[] = []
+  params: SqlParams = []
 ): Promise<T[]> {
   const [rows] = await conn.query(query, params);
   return rows as T[];
@@ -84,7 +86,7 @@ export async function connQuery<T = Record<string, unknown>>(
 export async function connExecute(
   conn: mysql.PoolConnection,
   query: string,
-  params: unknown[] = []
+  params: SqlParams = []
 ): Promise<mysql.ResultSetHeader> {
   const [result] = await conn.execute(query, params);
   return result as mysql.ResultSetHeader;

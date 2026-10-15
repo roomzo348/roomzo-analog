@@ -1,0 +1,42 @@
+<div class="admin-wrap">
+  <header class="admin-head">
+    <div>
+      <p class="kicker">Admin</p>
+      <h1>Listing queue</h1>
+      <p class="sub">Approve genuine posts to go live and grant contact points once. Direct/internal listings skip this queue.</p>
+    </div>
+    <div class="tabs">
+      <button type="button" [class.active]="status === 'pending'" (click)="setStatus('pending')">Pending</button>
+      <button type="button" [class.active]="status === 'approved'" (click)="setStatus('approved')">Approved</button>
+      <button type="button" [class.active]="status === 'rejected'" (click)="setStatus('rejected')">Rejected</button>
+    </div>
+  </header>
+
+  <p *ngIf="loading" class="muted">Loading…</p>
+  <p *ngIf="!loading && !listings.length" class="muted">No {{ status }} listings.</p>
+
+  <article class="card" *ngFor="let listing of listings">
+    <img [src]="photo(listing)" [alt]="listing.propertyName || 'Listing'" />
+    <div class="body">
+      <div class="title-row">
+        <h2>{{ listing.propertyName || listing.propertyType }}</h2>
+        <span class="flag intent" *ngIf="listing.listingIntent === 'reward'">Wants free points</span>
+        <span class="flag owner" *ngIf="listing.listingIntent !== 'reward'">Owner listing</span>
+        <span class="flag" *ngIf="listing.duplicateFlag">Possible duplicate{{ listing.duplicateOfListingId ? ' of #' + listing.duplicateOfListingId : '' }}</span>
+      </div>
+      <p class="meta">
+        #{{ listing.id }} · {{ listing.city }}, {{ listing.state }}
+        · ₹{{ listing.rentAmount }}
+        · {{ listing.bedrooms }} BHK
+      </p>
+      <p class="meta">{{ listing.street }} {{ listing.landmark }} {{ listing.zone }}</p>
+      <p class="meta">Phone {{ listing.tempContactNo || '—' }} · {{ listing.ownerEmail || listing.ownerName }}</p>
+      <div class="actions" *ngIf="status === 'pending'">
+        <button type="button" class="ok" [disabled]="actingId === listing.id" (click)="approve(listing)">Approve + points</button>
+        <button type="button" [disabled]="actingId === listing.id" (click)="reject(listing, 'duplicate')">Reject duplicate</button>
+        <button type="button" class="warn" [disabled]="actingId === listing.id" (click)="reject(listing, 'not_legit')">Not legit</button>
+        <a [href]="'/room/' + listing.id" target="_blank" rel="noopener">Open</a>
+      </div>
+    </div>
+  </article>
+</div>

@@ -264,6 +264,34 @@ html[data-theme='dark'] {
   background: var(--rz-bg-card) !important;
 }
 
+[data-theme='dark'] .plan-row {
+  background: var(--rz-bg-card) !important;
+  color: var(--rz-text-main) !important;
+  border-color: var(--rz-border) !important;
+}
+
+[data-theme='dark'] .plan-row.selected {
+  background: var(--rz-primary-soft) !important;
+  border-color: var(--rz-primary) !important;
+  box-shadow: none !important;
+  color: var(--rz-text-main) !important;
+}
+
+[data-theme='dark'] .plan-includes {
+  background: var(--rz-bg-elevated) !important;
+  border-color: var(--rz-border) !important;
+  color: var(--rz-text-main) !important;
+}
+
+[data-theme='dark'] .plan-includes li,
+[data-theme='dark'] .plan-includes .includes-title {
+  color: var(--rz-text-main) !important;
+}
+
+[data-theme='dark'] .plan-includes .includes-title {
+  color: var(--rz-text-muted) !important;
+}
+
 /* --- Header / chrome --- */
 [data-theme='dark'] .rz-header.scrolled {
   background: var(--rz-bg-card) !important;
@@ -1210,6 +1238,7 @@ html[data-theme='dark'] {
 [data-theme='dark'] .blog-card,
 [data-theme='dark'] .profile-progress-card,
 [data-theme='dark'] .credits-card,
+[data-theme='dark'] .credits-strip,
 [data-theme='dark'] .action-card,
 [data-theme='dark'] .saved-header,
 [data-theme='dark'] .sidebar-panel,

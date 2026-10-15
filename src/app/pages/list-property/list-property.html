@@ -1,6 +1,8 @@
 <div class="page-wrapper">
   <div class="container">
 
+    <p class="intent-chip" *ngIf="listingIntent === 'reward'">Free points after Roomzo approval</p>
+
     <div class="modern-stepper desktop-only">
       <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
         <div class="step-icon"><mat-icon *ngIf="currentStep > 1">check</mat-icon><span *ngIf="currentStep <= 1">1</span></div>

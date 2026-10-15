@@ -1,5 +1,160 @@
 :host { display: block; background-color: var(--rz-bg); }
 
+.home-points-ad-wrap {
+  padding: 0 20px 16px;
+  background: var(--rz-bg-card);
+}
+
+.home-points-ad {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  min-height: 48px;
+  padding: 8px 8px 8px 8px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #ecfdf5;
+  background:
+    linear-gradient(105deg, #0b3d38 0%, #0f766e 42%, #134e4a 78%, #0f766e 100%);
+  background-size: 220% 100%;
+  box-shadow:
+    0 8px 22px rgba(15, 70, 60, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  animation: homePointsAdFlow 8s ease-in-out infinite;
+}
+
+.home-points-ad-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  transform: translateX(-60%);
+  animation: homePointsAdShine 3.8s ease-in-out infinite;
+}
+
+.home-points-ad-spark {
+  position: absolute;
+  right: 28%;
+  top: -6px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 68%);
+  pointer-events: none;
+  animation: homePointsAdSpark 3.2s ease-in-out infinite;
+}
+
+.home-points-ad-badge {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+  animation: homePointsAdBadge 2.4s ease-in-out infinite;
+}
+
+.home-points-ad-badge mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #fde68a;
+}
+
+.home-points-ad-copy {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.84rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-points-ad-cta {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 12px 0 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.home-points-ad-cta mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  transition: transform 0.25s ease;
+}
+
+.home-points-ad:hover .home-points-ad-cta mat-icon {
+  transform: translateX(3px);
+}
+
+@keyframes homePointsAdFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes homePointsAdShine {
+  0%, 55% { transform: translateX(-70%); opacity: 0; }
+  70% { opacity: 1; }
+  100% { transform: translateX(70%); opacity: 0; }
+}
+
+@keyframes homePointsAdSpark {
+  0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.45; }
+  50% { transform: translateY(8px) scale(1.15); opacity: 0.85; }
+}
+
+@keyframes homePointsAdBadge {
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.08); }
+}
+
+@media (max-width: 640px) {
+  .home-points-ad-wrap { padding: 0 16px 14px; }
+  .home-points-ad { gap: 8px; min-height: 44px; }
+  .home-points-ad-copy { font-size: 0.78rem; }
+  .home-points-ad-cta { padding: 0 10px; font-size: 0.7rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-points-ad,
+  .home-points-ad-shine,
+  .home-points-ad-spark,
+  .home-points-ad-badge {
+    animation: none;
+  }
+}
+
 .featured-section { padding: 24px 20px 20px; background-color: var(--rz-bg-card); }
 
 /* Featured uses same header row as Category / Cities */
@@ -185,6 +340,17 @@
 
 .owner-list-cta-btn:active {
   transform: translateY(0) scale(0.98);
+}
+
+.owner-list-cta-link {
+  display: inline-flex;
+  margin-top: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.92;
 }
 
 @keyframes ownerCtaBtnGlow {

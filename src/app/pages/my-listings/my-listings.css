@@ -210,6 +210,32 @@ h1, h2, h3, h4, p { margin: 0; }
 .badge-active { background: rgba(16, 185, 129, 0.95); } /* Emerald Green */
 .badge-rented { background: rgba(100, 116, 139, 0.95); } /* Slate Gray */
 .badge-hidden { background: rgba(245, 158, 11, 0.95); } /* Amber Yellow */
+.badge-under-review { background: rgba(37, 99, 235, 0.95); }
+.badge-not-published { background: rgba(185, 28, 28, 0.92); }
+.review-hint {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--rz-text-muted, #64748b);
+  padding: 6px 10px;
+}
+.status-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+.status-note[data-mod='rejected'] {
+  background: #fef2f2;
+  color: #991b1b;
+}
+.status-note[data-mod='approved'] {
+  background: #ecfdf5;
+  color: #065f46;
+}
 .dot { width: 6px; height: 6px; background: var(--rz-bg-card); border-radius: 50%; }
 
 /* Posted Date Badge */

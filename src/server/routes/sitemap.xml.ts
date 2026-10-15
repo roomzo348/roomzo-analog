@@ -4,6 +4,7 @@ import { ROOMZO_CATEGORIES } from '../../app/config/categories.config';
 import { BLOG_POSTS } from '../../app/services/blog-contents';
 import { SEO_CONFIG } from '../../app/config/seo.config';
 import { sqlQuery } from '../db/mysql';
+import { ensureListingSchema, PUBLIC_MODERATION_SQL } from '../services/listing-repository';
 
 const HOST = SEO_CONFIG.siteUrl;
 
@@ -18,8 +19,12 @@ function urlEntry(
 
 async function fetchListingIds(): Promise<string[]> {
   try {
+    await ensureListingSchema();
     const rows = await sqlQuery<{ id: number }>(
-      `SELECT id FROM property_listings WHERE COALESCE(is_rented, 0) = 0 ORDER BY created_on DESC LIMIT 5000`
+      `SELECT id FROM property_listings
+       WHERE COALESCE(is_rented, 0) = 0
+         AND ${PUBLIC_MODERATION_SQL}
+       ORDER BY created_on DESC LIMIT 5000`
     );
     return rows.map((r) => String(r.id));
   } catch {

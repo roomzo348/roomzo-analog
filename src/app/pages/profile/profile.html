@@ -65,25 +65,22 @@
         </p>
       </div>
 
-      <button
-        type="button"
-        class="credits-card"
-        (click)="openPointsPaywall($event)"
-        [disabled]="openingPaywall"
-        [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
-        <span class="credits-icon" aria-hidden="true">
-          <mat-icon>stars</mat-icon>
-        </span>
-        <div class="credits-copy">
-          <span class="credits-label">Remaining contact points</span>
-          <strong class="credits-value">{{ wallet ? remainingPoints : '—' }}</strong>
-          <span class="credits-meta">{{ creditsMeta }}</span>
+      <div class="credits-strip" [attr.aria-label]="'Remaining contact points: ' + remainingPoints">
+        <div class="credits-balance">
+          <mat-icon aria-hidden="true">stars</mat-icon>
+          <strong>{{ wallet ? remainingPoints : '—' }}</strong>
+          <span>points</span>
         </div>
-        <span class="credits-cta">
-          {{ openingPaywall ? 'Opening…' : (wallet?.planCode ? 'Top up' : 'Get points') }}
-          <mat-icon>chevron_right</mat-icon>
-        </span>
-      </button>
+        <div class="credits-actions">
+          <button
+            type="button"
+            (click)="openPointsPaywall($event)"
+            [disabled]="openingPaywall">
+            {{ openingPaywall ? '…' : (wallet?.planCode ? 'Top up' : 'Buy') }}
+          </button>
+          <a routerLink="/earn-points">Earn free</a>
+        </div>
+      </div>
     </div>
 
     <div class="action-cards">
@@ -108,7 +105,13 @@
     <div class="menu-list">
       <a routerLink="/my-listings" class="menu-row" *ngIf="isOwner">
         <span class="menu-icon"><mat-icon>list_alt</mat-icon></span>
-        <span class="menu-text">Manage Listings</span>
+        <span class="menu-text">My listings &amp; status</span>
+        <mat-icon class="menu-chevron">chevron_right</mat-icon>
+      </a>
+
+      <a routerLink="/admin/listings" class="menu-row" *ngIf="isAdmin">
+        <span class="menu-icon"><mat-icon>fact_check</mat-icon></span>
+        <span class="menu-text">Approve listings</span>
         <mat-icon class="menu-chevron">chevron_right</mat-icon>
       </a>
 

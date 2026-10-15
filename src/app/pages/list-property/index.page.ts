@@ -13,7 +13,7 @@ import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map, startWith } from 'rxjs/operators';
 import { of, forkJoin, combineLatest } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { resolveZoneName, suggestZonesForLandmark } from '../../utils/location-search.util';
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
@@ -51,6 +51,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   selectedStateIso: string | null = null;
   readonly WATERMARK_TEXT = 'Roomzo.in';
   isSubmitting = false;
+  listingIntent: 'reward' | 'owner' = 'owner';
 
   searchControl = new FormControl('');
   searchResults: any[] = [];
@@ -114,12 +115,15 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     private cd: ChangeDetectorRef,
     private toastr: ToastrService,
     private http: HttpClient,
-    private router: Router, // <-- Add this line
+    private router: Router,
+    private route: ActivatedRoute,
     private zone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
+    this.listingIntent =
+      this.route.snapshot.queryParamMap.get('from') === 'earn-points' ? 'reward' : 'owner';
     this.listingForm = this.fb.group({
       details: this.fb.group({
         propertyType: ['', Validators.required],
@@ -480,6 +484,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       // 1. Format the description (converting newlines to pipe separators)
       const payload = {
         ...rawData,
+        listingIntent: this.listingIntent,
         details: {
           ...rawData.details,
           // Form title lives in final.name; DB column is property_name via details.propertyName
@@ -526,17 +531,21 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
             this.isSubmitting = false;
             return;
           }
-          this.toastr.success('Listing uploaded successfully!', 'Success');
+          const pending = response?.data?.pending !== false;
+          this.toastr.success(
+            pending
+              ? 'Submitted for review. It goes live after Roomzo approval — points are added then, not instantly.'
+              : 'Listing uploaded successfully!',
+            'Success'
+          );
           this.isSubmitting = false;
-          
-          // Assuming your backend returns the new object in response.data or directly in response
-          const newListingId = response?.data?.listingId || response?.listingId;
 
-          if (newListingId) {
-            // Navigate directly to the new property details page
+          const newListingId = response?.data?.listingId || response?.listingId;
+          if (pending) {
+            this.router.navigate(['/my-listings']);
+          } else if (newListingId) {
             this.router.navigate(['/room', newListingId]);
           } else {
-            // Fallback just in case the ID isn't returned
             this.router.navigate(['/explore-listing']);
           }
         },

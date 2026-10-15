@@ -30,3 +30,16 @@ export async function sendMail(options: {
     text: options.text,
   });
 }
+
+export async function sendMailSafe(options: {
+  to: string | string[];
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<void> {
+  try {
+    await sendMail(options);
+  } catch (error) {
+    console.error('[mail] send failed', error);
+  }
+}
