@@ -11,6 +11,7 @@ import {
 import { createUserSession } from '../../../services/session-repository';
 import { sendMail } from '../../../services/email.service';
 import { apiResponse } from '../../../utils/api-response';
+import { isAdminUser } from '../../../utils/admin';
 import {
   getAuthUser,
   getClientIp,
@@ -74,7 +75,7 @@ export default defineEventHandler(async (event) => {
       ip: getClientIp(event),
     });
     setSessionCookie(event, token);
-    return apiResponse(1, 'Login successful', { user });
+    return apiResponse(1, 'Login successful', { user: { ...user, isAdmin: isAdminUser(user) } });
   }
 
   if (segments[0] === 'logout' && method === 'POST') {
@@ -87,7 +88,7 @@ export default defineEventHandler(async (event) => {
     if (!user) {
       return apiResponse(0, 'Not authenticated', null);
     }
-    return apiResponse(1, 'Session valid', user);
+    return apiResponse(1, 'Session valid', { ...user, isAdmin: isAdminUser(user) });
   }
 
   if (segments[0] === 'owner-info' && segments[1] && method === 'GET') {

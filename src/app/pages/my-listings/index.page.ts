@@ -334,12 +334,45 @@ export default class MyListingsComponent implements OnInit {
     });
   }
 
-  getStatusLabel(status: any): string {
-    const code = Number(status); 
+  moderationOf(listing: any): string {
+    return String(listing?.moderationStatus ?? listing?.moderation_status ?? '').toLowerCase();
+  }
+
+  statusNote(listing: any): string {
+    const mod = this.moderationOf(listing);
+    if (mod === 'pending') {
+      return 'Waiting for Roomzo approval. Not visible to seekers yet. Points are added only after approval.';
+    }
+    if (mod === 'rejected') {
+      return 'Not published. Seekers cannot see this listing, and points were not added.';
+    }
+    if ((listing?.listingIntent ?? listing?.listing_intent) === 'reward') {
+      return 'Live on Roomzo. Contact points for this listing are in your wallet.';
+    }
+    return '';
+  }
+
+  getStatusLabel(statusOrListing: any): string {
+    if (statusOrListing && typeof statusOrListing === 'object') {
+      const mod = this.moderationOf(statusOrListing);
+      if (mod === 'pending') return 'UNDER REVIEW';
+      if (mod === 'rejected') return 'NOT PUBLISHED';
+      return this.getStatusLabel(statusOrListing.isRented);
+    }
+    const code = Number(statusOrListing);
     if (code === 1) return 'RENTED';
     if (code === 2) return 'HIDDEN';
     if (code === 3) return 'EXPIRED';
-    return 'ACTIVE'; 
+    return 'ACTIVE';
+  }
+
+  statusBadgeClass(listing: any): string {
+    return 'badge-' + this.getStatusLabel(listing).toLowerCase().replace(/\s+/g, '-');
+  }
+
+  canChangeStatus(listing: any): boolean {
+    const mod = listing?.moderationStatus ?? listing?.moderation_status;
+    return mod !== 'pending' && mod !== 'rejected';
   }
 
   formatPostedDate(dateString?: string): string {

@@ -263,10 +263,13 @@ saveListing(formData: any): Observable<any> {
         return this.toPublicImageUrl(String(res.url));
       }),
       catchError((err) => {
+        const status = Number(err?.status || err?.statusCode || 0);
         const msg =
-          err?.error?.message ||
-          err?.message ||
-          `Photo ${index} upload failed. Listing was not created.`;
+          status === 401 || status === 403
+            ? 'Photo upload was blocked. Stay logged in and try again.'
+            : err?.error?.message ||
+              err?.message ||
+              `Photo ${index} upload failed. Listing was not created.`;
         console.error(`[File ${index}] Upload FAILED:`, err);
         return throwError(() => new Error(msg));
       })
@@ -510,5 +513,29 @@ updateSafetyConsent(userId: number | string, consentGiven: boolean): Observable<
     payload: { userId: number; rating: number; comment?: string }
   ): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/listings/${listingId}/reviews`, payload);
+  }
+
+  getListingRewardConfig(): Observable<{ credits: number; rupees: number }> {
+    return this.http.get<any>(`${this.baseUrl}/api/listing-rewards`).pipe(
+      map((res) => ({
+        credits: Number(res?.data?.credits ?? res?.credits ?? 3) || 3,
+        rupees: Number(res?.data?.rupees ?? res?.rupees ?? 19) || 19,
+      })),
+      catchError(() => of({ credits: 3, rupees: 19 }))
+    );
+  }
+
+  getAdminModerationQueue(status = 'pending'): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/admin/listings`, {
+      params: new HttpParams().set('status', status),
+    });
+  }
+
+  approveAdminListing(id: number | string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/admin/listings/${id}/approve`, {});
+  }
+
+  rejectAdminListing(id: number | string, reason: 'duplicate' | 'not_legit'): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/admin/listings/${id}/reject`, { reason });
   }
 }

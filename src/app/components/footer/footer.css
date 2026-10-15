@@ -1,12 +1,13 @@
 :host {
   display: block;
-  background-color: var(--rz-text-main, #111827);
-  color: #9ca3af;
+  background: #0f172a;
+  color: #94a3b8;
   font-family: var(--font-sans);
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .rz-footer {
-  padding: 80px 0 32px;
+  padding: 40px 0 28px;
 }
 
 .container {
@@ -15,237 +16,214 @@
   padding: 0 20px;
 }
 
-/* --- Top Layout: Switched to Fluid Flexbox --- */
 .footer-top {
-  display: flex;
-  flex-wrap: wrap; /* Allows wrapping on smaller desktops/tablets */
-  justify-content: space-between;
-  gap: 40px;
-  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) minmax(140px, 0.9fr) minmax(160px, 1fr) minmax(150px, 1fr);
+  gap: 28px 24px;
+  margin-bottom: 20px;
 }
 
-/* Assign flexible bases so they can breathe instead of fighting for rigid grid space */
-.brand-col { flex: 2 1 280px; }
-.links-col { flex: 1 1 140px; }
-.subscribe-col { flex: 1.5 1 260px; }
-
-/* 1. Brand Column */
 .brand-col .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #ffffff;
+  gap: 6px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
   text-decoration: none;
-  margin-bottom: 16px;
-  transition: color 0.2s;
+  margin-bottom: 10px;
 }
-.brand-col .logo mat-icon { color: var(--rz-primary); font-size: 32px; width: 32px; height: 32px; }
-.brand-col .logo:hover { color: var(--rz-primary); }
 
-.brand-col p { 
-  line-height: 1.6; 
-  max-width: 320px; 
-  font-size: 1.05rem; 
-  margin: 0; 
+.brand-col .logo mat-icon {
+  color: #2dd4bf;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
 }
-.brand-col a { color: #93c5fd; }
+
+.brand-col p {
+  margin: 0;
+  max-width: 340px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+.footer-mail {
+  color: #5eead4;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .footer-identity {
-  margin-top: 12px !important;
-  font-size: 0.875rem;
-  color: #9ca3af;
-  max-width: 360px;
+  margin-top: 10px !important;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #7b8696;
 }
 
-/* 2. Links Column (Now a Flex Column for better control) */
+.footer-identity a {
+  color: #5eead4;
+  text-decoration: none;
+}
+
+.footer-seo {
+  margin: 0 0 16px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #7b8696;
+}
+
 .links-col {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.links-col h4, .subscribe-col h4 { 
-  color: #ffffff; 
-  font-size: 1.2rem; 
-  font-weight: 600; 
-  margin: 0 0 24px 0; 
+.links-col h4 {
+  margin: 0 0 4px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .links-col a {
-  align-self: flex-start; /* Keeps the hover effect tight to the text */
-  color: #9ca3af;
+  color: #94a3b8;
   text-decoration: none;
-  margin-bottom: 16px;
-  font-size: 1.05rem;
-  transition: all 0.2s ease;
+  font-size: 0.86rem;
+  line-height: 1.35;
 }
 
-.links-col a:hover { 
-  color: var(--rz-primary); 
-  transform: translateX(6px); 
+.links-col a:hover {
+  color: #5eead4;
 }
 
-/* 3. Subscribe Column */
-.subscribe-desc {
-  margin: 0 0 16px 0;
-  font-size: 0.95rem;
-}
-
-.subscribe-form { 
-  display: flex; 
-  gap: 8px; 
-  background: #1f2937; 
-  padding: 6px;
-  border-radius: var(--rz-radius-pill, 50px);
-  border: 1px solid #374151;
-  transition: border-color 0.2s;
-}
-.subscribe-form:focus-within {
-  border-color: var(--rz-primary);
-}
-
-.subscribe-form input {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 1rem;
-  outline: none;
-}
-.subscribe-form input::placeholder { color: #6b7280; }
-
-.subscribe-btn {
-  background: var(--rz-primary);
-  color: #ffffff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: var(--rz-radius-pill, 50px);
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-.subscribe-btn:hover { background: var(--rz-primary-hover); }
-
-/* --- Bottom Bar --- */
 .bottom-bar {
-  border-top: 1px solid #374151; 
-  padding-top: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  font-size: 0.78rem;
 }
 
-.social-links { display: flex; gap: 16px; }
+.social-links {
+  display: flex;
+  gap: 8px;
+}
 
 .social-link {
-  color: #9ca3af;
-  background: #1f2937;
-  width: 44px; 
-  height: 44px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  transition: all 0.3s ease;
+  display: grid;
+  place-items: center;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06);
 }
-.social-link:hover { 
-  background: var(--rz-primary); 
-  color: #ffffff; 
-  transform: translateY(-4px); 
-  box-shadow: 0 8px 16px rgba(25, 97, 83, 0.4); 
-}
-.social-link svg { width: 20px; height: 20px; fill: currentColor; }
-.social-link[aria-label="Instagram"] svg { fill: none; } 
 
-/* ========================================================
-   RESPONSIVE ADJUSTMENTS (FOOTER FIX)
-======================================================== */
+.social-link svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.social-link[aria-label="Instagram"] svg {
+  fill: none;
+}
+
+:host ::ng-deep .related-searches.compact {
+  margin: 0 0 20px;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0;
+  background: transparent;
+}
+
+:host ::ng-deep .related-searches.compact .related-title {
+  margin: 0 0 8px;
+  color: #fff !important;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:host ::ng-deep .related-searches.compact .related-desc {
+  margin: 0 0 10px;
+  color: #94a3b8 !important;
+  font-size: 0.75rem;
+}
+
+:host ::ng-deep .related-searches.compact .related-chip {
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 @media (max-width: 900px) {
-  .rz-footer { 
-    padding: 60px 0 24px; 
-    overflow: hidden; 
+  .rz-footer {
+    padding: 28px 0 calc(92px + env(safe-area-inset-bottom, 0px));
   }
-  
+
   .container {
-    width: 100% !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    box-sizing: border-box;
+    padding: 0 16px;
   }
 
-  .footer-top { 
-    flex-direction: column; /* Stack everything on mobile */
-    align-items: center; /* Centers all flex children cross-axis */
-    gap: 40px; 
-    text-align: center;
-    width: 100%;
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 16px;
+    margin-bottom: 20px;
   }
 
-  .brand-col .logo { justify-content: center; }
-  .brand-col p { max-width: 100%; margin: 0 auto; }
-  
-  /* --- The Mobile Centering Fix for Links --- */
-  .links-col {
-    align-items: center; /* Forces the links to be perfectly centered */
-  }
-  
-  .links-col a {
-    align-self: center; /* Overrides the flex-start we set for desktop */
-  }
-  
-  /* UX Tweaks: Slide links UP on hover instead of right when centered */
-  .links-col a:hover {
-    transform: translateY(-4px);
+  .brand-col {
+    grid-column: 1 / -1;
   }
 
-  /* --- Newsletter Mobile Fix --- */
-  .subscribe-col { 
-    width: 100%; 
+  .links-col.cats {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-  }
-  
-  .subscribe-form {
-    display: flex;
-    flex-direction: column; 
-    background: transparent;
-    border: none;
-    padding: 0;
-    gap: 12px;
-    width: 100%;
-    max-width: 400px; /* Prevents input from getting ridiculously wide on tablets */
-  }
-  
-  .subscribe-form input {
-    width: 100%;
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 12px; 
-    padding: 14px 16px;
-    text-align: center;
-    box-sizing: border-box;
-  }
-  
-  .subscribe-btn {
-    width: 100%;
-    border-radius: 12px;
-    padding: 14px 16px;
+    gap: 8px;
   }
 
-  /* --- Bottom Bar --- */
-  .bottom-bar { 
-    flex-direction: column-reverse; 
-    gap: 24px; 
-    text-align: center; 
+  .links-col.cats h4 {
     width: 100%;
+    margin-bottom: 2px;
   }
-  
-  .social-links { 
-    justify-content: center; 
-    flex-wrap: wrap; 
+
+  .links-col.cats a {
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.75rem;
+  }
+
+  .bottom-bar {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 14px;
+  }
+
+  .bottom-bar small {
+    min-width: 0;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .footer-seo {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .links-col a {
+    font-size: 0.8rem;
   }
 }

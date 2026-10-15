@@ -246,7 +246,7 @@
   align-items: center;
   gap: 5px;
   background: var(--rz-bg-elevated);
-  color: #14584a;
+  color: var(--rz-primary, #14584a);
   border-radius: 999px;
   padding: 5px 11px;
   font-size: 0.7rem;
@@ -291,7 +291,7 @@
 
 .plan-row.selected {
   border-color: var(--rz-primary, #196153);
-  background: #f2faf7;
+  background: var(--rz-primary-soft, rgba(25, 97, 83, 0.1));
   box-shadow: 0 6px 18px rgba(25, 97, 83, 0.1);
 }
 
@@ -432,7 +432,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--rz-text-muted, #94a3b8);
 }
 
 .plan-includes ul {
@@ -450,7 +450,7 @@
   gap: 6px;
   font-size: 0.79rem;
   line-height: 1.35;
-  color: #374151;
+  color: var(--rz-text-main, #374151);
 }
 
 .plan-includes li mat-icon {
@@ -533,6 +533,42 @@
   font-size: 0.72rem;
   font-weight: 500;
   color: #94a3b8;
+}
+
+.earn-link {
+  display: block;
+  margin: 8px auto 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rz-link, #0f766e);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+:host-context([data-theme='dark']) .plan-row.selected {
+  background: rgba(20, 184, 166, 0.16);
+  border-color: var(--rz-primary);
+  box-shadow: none;
+}
+
+:host-context([data-theme='dark']) .plan-includes {
+  background: var(--rz-bg-elevated);
+  border-color: var(--rz-border);
+}
+
+:host-context([data-theme='dark']) .plan-badge {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+}
+
+:host-context([data-theme='dark']) .plan-badge--blue {
+  background: rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
 }
 
 /* ============================================

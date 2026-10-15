@@ -14,13 +14,21 @@ import {
   getOwnerListings,
   getOwnerName,
   getRecentListings,
+  isListingApproved,
   searchListings,
   setListingStatus,
   updateListing,
 } from '../../services/listing-repository';
+import { findListingDuplicates } from '../../services/listing-duplicate';
+import {
+  duplicateSubmitMessage,
+  emailAdminListingPending,
+  emailListingDuplicate,
+} from '../../services/listing-moderation-mail';
 import { notifyNewProperty } from '../../services/onesignal.service';
 import { getListingReviews, upsertReview } from '../../services/review-repository';
 import { apiListResponse, apiResponse } from '../../utils/api-response';
+import { isAdminUser } from '../../utils/admin';
 import { getAuthUser, requireAuth } from '../../utils/auth-session';
 import { redactListingContact } from '../../utils/contact-access';
 import { canRevealContact } from '../../services/contact-access-repository';
@@ -74,10 +82,70 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'At least 2 uploaded photos are required. Listing was not created.',
       });
     }
-    const listingId = await createListing({ ...payload, photos, ownerId: user.id });
+    const details = payload?.details ?? {};
+    const address = details?.address ?? {};
+    const finalInfo = payload?.final ?? {};
+    const directPublish = Boolean(payload?.directPublish) && isAdminUser(user);
+    const listingIntent = directPublish
+      ? 'direct'
+      : payload?.listingIntent === 'reward'
+        ? 'reward'
+        : 'owner';
+    const waitForApproval = listingIntent === 'reward';
+
+    const duplicate = await findListingDuplicates({
+      city: address?.city,
+      street: address?.street,
+      landmark: address?.landmark,
+      zone: address?.zone,
+      propertyName: details?.propertyName ?? finalInfo?.name,
+      bedrooms: details?.bedrooms,
+      rentAmount: finalInfo?.rentAmount,
+      latitude: address?.latitude,
+      longitude: address?.longitude,
+      phone: finalInfo?.contactNo,
+    });
+    if (duplicate.kind === 'hard') {
+      await emailListingDuplicate(user.email, details?.propertyName ?? finalInfo?.name);
+      throw createError({
+        statusCode: 409,
+        statusMessage: duplicateSubmitMessage(),
+      });
+    }
+
+    const listingId = await createListing(
+      { ...payload, photos, ownerId: user.id },
+      {
+        moderationStatus: waitForApproval ? 'pending' : 'approved',
+        duplicateOfListingId: duplicate.matchId ?? null,
+        duplicateFlag: duplicate.kind === 'soft' ? duplicate.reason ?? 'possible' : null,
+        listingIntent,
+      }
+    );
     const listing = await getListingById(listingId);
+
+    if (waitForApproval) {
+      await emailAdminListingPending({
+        listingId,
+        propertyName: listing?.propertyName ?? details?.propertyName ?? finalInfo?.name,
+        city: listing?.city ?? address?.city,
+        state: listing?.state ?? address?.state,
+        rentAmount: listing?.rentAmount ?? finalInfo?.rentAmount,
+        ownerName: user?.name ?? user?.displayName,
+        ownerEmail: user?.email,
+        ownerPhone: user?.phone ?? finalInfo?.contactNo,
+        duplicateFlag: listing?.duplicateFlag ?? listing?.duplicate_flag,
+      });
+      return {
+        status: 1,
+        message:
+          'Listing submitted for review. It will go live after Roomzo approval. Contact points are added only after approval.',
+        data: { listingId, listing, pending: true },
+      };
+    }
+
     await notifyNewProperty(listingId, listing?.propertyName ?? 'New listing');
-    return { status: 1, message: 'Listing added successfully', data: { listingId, listing } };
+    return { status: 1, message: 'Listing added successfully', data: { listingId, listing, pending: false } };
   }
 
   if (segments[0] === 'all' && method === 'GET') {
@@ -241,6 +309,12 @@ export default defineEventHandler(async (event) => {
       return apiResponse(0, 'Listing not found', null);
     }
     const viewer = await getAuthUser(event);
+    const ownerId = Number(listing.ownerId ?? listing.owner_id);
+    const canViewPending =
+      Boolean(viewer && Number(viewer.id) === ownerId) || isAdminUser(viewer);
+    if (!isListingApproved(listing) && !canViewPending) {
+      return apiResponse(0, 'Listing not found', null);
+    }
     const ownerName = await getOwnerName(listing.owner_id ?? listing.ownerId);
     return {
       status: 1,
@@ -252,7 +326,7 @@ export default defineEventHandler(async (event) => {
 
     return apiResponse(0, 'Endpoint not implemented');
   } catch (error: any) {
-    if (error?.statusCode === 401 || error?.statusCode === 403) {
+    if (error?.statusCode === 401 || error?.statusCode === 403 || error?.statusCode === 409 || error?.statusCode === 400) {
       throw error;
     }
     return apiResponse(-1, error?.message || 'Failed to fetch listings');

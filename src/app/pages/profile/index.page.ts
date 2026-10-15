@@ -55,9 +55,11 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   unlockedItems: UnlockedListingItem[] = [];
   unlockedLoading = false;
   isOwner = false;
+  isAdmin = false;
   wallet: BillingWallet | null = null;
   openingPaywall = false;
   private walletSub?: Subscription;
+  private authSub?: Subscription;
 
   profilePhotoUrl: string | null = null;
   profilePhotoPreview: string | null = null;
@@ -97,6 +99,13 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
     this.userId = parseInt(String(stored.id), 10);
     this.isOwner = localStorage.getItem('userVerifiedWithOtp') === 'true';
+    this.isAdmin = this.authService.isAdmin();
+    this.authSub = this.authService.isLoggedIn$.subscribe((ok) => {
+      if (ok) {
+        this.isAdmin = this.authService.isAdmin();
+        this.cd.detectChanges();
+      }
+    });
     this.applyProfileData(stored);
     this.isLoading = false;
     this.loadAll();
@@ -114,6 +123,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.walletSub?.unsubscribe();
+    this.authSub?.unsubscribe();
     this.clearLocalPreview();
     if (isPlatformBrowser(this.platformId)) {
       document.body.classList.remove('profile-sidebar-open');
@@ -243,16 +253,6 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
   get remainingPoints(): number {
     if (!this.wallet) return 0;
     return Number(this.wallet.creditsRemaining || 0);
-  }
-
-  get creditsMeta(): string {
-    if (!this.wallet) return 'Loading your contact balance…';
-    if (this.wallet.planCode) {
-      const name = planDisplayName(this.wallet.planCode);
-      const points = this.remainingPoints;
-      return `${name} plan · ${points} paid point${points === 1 ? '' : 's'} · never expires`;
-    }
-    return 'Buy a plan to view owner contacts.';
   }
 
   get planSummary(): string {
@@ -599,7 +599,7 @@ export default class ProfilePageComponent implements OnInit, OnDestroy {
               this.profile = res.data;
               this.applyProfileData(res.data);
               const stored = this.getStoredUser() || {};
-              this.authService.saveSession({ ...stored, ...res.data });
+              this.authService.saveSession({ ...stored, ...res.data, isAdmin: Boolean(stored.isAdmin) });
               this.profileLoadWarning = '';
               this.isSaving = false;
               this.isUploadingPhoto = false;

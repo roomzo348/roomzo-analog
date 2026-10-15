@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 import { Subscription, take } from 'rxjs';
 import { BillingService, BillingPlan, BillingWallet } from '../../services/billing.service';
 
@@ -82,7 +83,8 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: Partial<BillingWallet> & { plans?: BillingPlan[]; returnUrl?: string },
     private billing: BillingService,
     private toastr: ToastrService,
-    private zone: NgZone
+    private zone: NgZone,
+    private router: Router
   ) {
     this.plans = this.withPlanDefaults(data?.plans || []);
     if (!this.plans.length) {
@@ -192,6 +194,13 @@ export class ContactPaywallComponent implements OnInit, OnDestroy {
 
   close(): void {
     this.dialogRef.close('cancelled');
+  }
+
+  goEarnPoints(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    void this.router.navigate(['/earn-points']);
+    this.close();
   }
 
   private withPlanDefaults(plans: BillingPlan[]): BillingPlan[] {

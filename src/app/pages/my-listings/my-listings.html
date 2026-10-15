@@ -5,7 +5,7 @@
             <div class="header-text">
                 <span class="header-kicker mobile-only">Owner dashboard</span>
                 <h1>{{ activeTab === 'favorites' ? (savedKind === 'flatmates' ? 'Saved Flatmates' : 'Saved Properties') : 'My Properties' }}</h1>
-                <p class="header-desc">Manage your listings, update statuses, and track performance.</p>
+                <p class="header-desc">See if a listing is under review, live, or not published. Update rented/hidden after it is live.</p>
                 <p class="header-meta mobile-only" *ngIf="!isLoading">
                     <ng-container *ngIf="activeTab === 'my-properties'">{{ listings.length }} listing{{ listings.length === 1 ? '' : 's' }}</ng-container>
                     <ng-container *ngIf="activeTab === 'favorites' && savedKind === 'properties'">{{ favoriteListings.length }} saved</ng-container>
@@ -112,8 +112,8 @@
             <div class="card-image" (click)="editProperty(prop.id)" style="cursor: pointer;">
                 <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
                 
-                <div class="status-badge" [ngClass]="'badge-' + getStatusLabel(prop.isRented).toLowerCase()">
-                    <span class="dot"></span> {{ getStatusLabel(prop.isRented) | titlecase }}
+                <div class="status-badge" [ngClass]="statusBadgeClass(prop)">
+                    <span class="dot"></span> {{ getStatusLabel(prop) | titlecase }}
                 </div>
 
                 <div class="posted-date-badge" title="When you added this listing">
@@ -131,6 +131,10 @@
                 <p class="location">
                     <mat-icon>location_on</mat-icon>
                     <span>{{ prop.city }}, {{ prop.state }}</span>
+                </p>
+
+                <p class="status-note" *ngIf="statusNote(prop)" [attr.data-mod]="moderationOf(prop)">
+                  {{ statusNote(prop) }}
                 </p>
 
                 <div class="listing-insights" *ngIf="activeTab === 'my-properties'">
@@ -158,8 +162,9 @@
 
                <div class="action-row">
                     
-                    <mat-select 
-    [value]="prop.isRented" 
+                    <mat-select
+    *ngIf="canChangeStatus(prop)"
+    [value]="prop.isRented"
     (selectionChange)="changeStatus(prop, $event)"
     class="custom-status-select"
     [ngClass]="'select-' + getStatusLabel(prop.isRented).toLowerCase()"
@@ -168,6 +173,7 @@
     <mat-option [value]="1">Rented</mat-option>
     <mat-option [value]="2">Hidden</mat-option>
 </mat-select>
+                    <span class="review-hint" *ngIf="!canChangeStatus(prop)">{{ getStatusLabel(prop) | titlecase }}</span>
 
                   <div class="btn-group">
     <a [routerLink]="['/room', prop.id]" class="btn-icon" title="View Property">

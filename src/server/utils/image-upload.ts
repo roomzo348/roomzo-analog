@@ -2,8 +2,14 @@ import { writeFile } from 'node:fs/promises';
 import { createError, type H3Event, readMultipartFormData } from 'h3';
 import { getImageStorageDir, imageFilePath, publicImageUrl } from './image-storage-path';
 
-const UPLOAD_SECRET = process.env['UPLOAD_SECRET_KEY'] || 'vK9#mP2$xL5@jR8&qW3';
+const FALLBACK_UPLOAD_SECRET = 'vK9#mP2$xL5@jR8&qW3';
 const MAX_BYTES = 12 * 1024 * 1024;
+
+function allowedUploadSecrets(): string[] {
+  const fromEnv =
+    typeof process !== 'undefined' ? String(process.env['UPLOAD_SECRET_KEY'] || '').trim() : '';
+  return [fromEnv, FALLBACK_UPLOAD_SECRET].filter(Boolean);
+}
 
 function safeName(original: string): string {
   const base = original.replace(/\\/g, '/').split('/').pop() || 'photo.jpg';
@@ -20,7 +26,7 @@ export async function handleImageUpload(
 
   const secretPart = parts.find((p) => p.name === 'secret_key');
   const clientKey = String(secretPart?.data?.toString?.() || '').trim();
-  if (clientKey !== UPLOAD_SECRET) {
+  if (!allowedUploadSecrets().includes(clientKey)) {
     throw createError({ statusCode: 403, statusMessage: 'Unauthorized' });
   }
 

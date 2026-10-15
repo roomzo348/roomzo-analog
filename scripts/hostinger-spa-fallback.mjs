@@ -227,7 +227,9 @@ async function loadListingsFromMysql() {
 
   try {
     const [rows] = await conn.query(
-      'SELECT * FROM property_listings WHERE is_rented IS NULL OR is_rented <> 2'
+      `SELECT * FROM property_listings
+       WHERE (is_rented IS NULL OR is_rented <> 2)
+         AND (moderation_status IS NULL OR moderation_status = 'approved')`
     );
     const listings = rows || [];
     if (!listings.length) return [];

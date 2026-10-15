@@ -27,8 +27,19 @@ h1, h2, h3, h4, p { margin: 0; }
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
-  padding: 100px 20px 60px;
+  padding: calc(108px + env(safe-area-inset-top, 0px)) 20px 80px;
   flex: 1;
+}
+
+.intent-chip {
+  display: inline-flex;
+  margin: 0 0 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #0f766e 14%, var(--rz-bg-card, #fff));
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 /* Animations */
@@ -499,7 +510,7 @@ input:focus, textarea:focus {
   .desktop-only { display: none !important; }
   .mobile-only { display: block; }
   
-  .container { padding: 100px 16px 40px; }
+  .container { padding: calc(112px + env(safe-area-inset-top, 0px)) 16px 96px; }
   .main-card { padding: 32px 20px; border-radius: 20px; margin-bottom: 20px; }
   .section-title { font-size: 1.25rem !important; }
   .section-subtitle { font-size: 0.88rem !important; margin-bottom: 24px; }

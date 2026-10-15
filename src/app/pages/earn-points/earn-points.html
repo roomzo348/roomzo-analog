@@ -1,0 +1,44 @@
+<section class="earn-page">
+  <div class="earn-card">
+    <span class="kicker">For property owners</span>
+    <h1>Get free contact points</h1>
+    <p class="lead">
+      List a genuine property you own. After Roomzo approval it goes live and you get
+      <strong>{{ credits }} contact points</strong> (about <strong>₹{{ rupees }}</strong>).
+    </p>
+    <p class="lead muted">
+      Points are not instant. Seekers still buy plans to unlock owner numbers — this is a thank-you for a real listing.
+    </p>
+
+    <ol class="steps">
+      <li>
+        <span class="n">1</span>
+        <div class="step-copy">
+          <strong>You list</strong>
+          <p>Use the same listing form as today.</p>
+        </div>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <div class="step-copy">
+          <strong>Roomzo reviews</strong>
+          <p>Your listing stays off live pages until we mark it genuine.</p>
+        </div>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <div class="step-copy">
+          <strong>It goes live + points</strong>
+          <p>Then you can see it on Roomzo, and points land in your wallet once.</p>
+        </div>
+      </li>
+    </ol>
+
+    <a routerLink="/list-property" [queryParams]="{ from: 'earn-points' }" class="cta">
+      List your property
+      <mat-icon>arrow_forward</mat-icon>
+    </a>
+    <a routerLink="/my-listings" class="status-link">See if your listing is approved</a>
+    <p class="fine">Internal / Roomzo-posted listings skip review and do not earn points.</p>
+  </div>
+</section>

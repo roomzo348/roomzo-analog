@@ -1,0 +1,50 @@
+:host { display: block; }
+.admin-wrap { max-width: 960px; margin: 0 auto; padding: 96px 20px 48px; }
+.kicker { margin: 0; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rz-text-muted, #64748b); }
+h1 { margin: 4px 0 8px; font-size: 1.6rem; color: var(--rz-text-main, #0f172a); }
+.sub { margin: 0 0 16px; color: var(--rz-text-muted, #64748b); max-width: 42rem; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tabs button {
+  border: 1px solid var(--rz-border, #e2e8f0);
+  background: var(--rz-bg-card, #fff);
+  color: var(--rz-text-main, #0f172a);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.tabs button.active { background: #0f766e; color: #fff; border-color: #0f766e; }
+.muted { color: var(--rz-text-muted, #64748b); }
+.card {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  background: var(--rz-bg-card, #fff);
+  border: 1px solid var(--rz-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.card img { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; }
+.title-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+h2 { margin: 0; font-size: 1.05rem; }
+.flag { font-size: 0.75rem; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; }
+.flag.intent { background: #ccfbf1; color: #115e59; }
+.flag.owner { background: #e2e8f0; color: #334155; }
+.meta { margin: 4px 0; font-size: 0.85rem; color: var(--rz-text-muted, #475569); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.actions button, .actions a {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border: 1px solid var(--rz-border, #cbd5e1);
+  background: var(--rz-bg, #f8fafc);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.actions .ok { background: #0f766e; color: #fff; border-color: #0f766e; }
+.actions .warn { background: #fff; color: #b91c1c; border-color: #fecaca; }
+@media (max-width: 640px) {
+  .card { grid-template-columns: 1fr; }
+  .card img { height: 160px; }
+}

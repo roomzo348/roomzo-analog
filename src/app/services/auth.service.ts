@@ -143,6 +143,10 @@ export class AuthService {
     }
   }
 
+  isAdmin(): boolean {
+    return Boolean(this.getCurrentUser()?.isAdmin);
+  }
+
   hasStoredSession(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
     return localStorage.getItem('userVerifiedWithOtp') === 'true' && Boolean(this.getCurrentUser()?.id);

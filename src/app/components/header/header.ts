@@ -19,6 +19,7 @@ import { Subscription } from 'rxjs';
 })
 export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoggedIn = false;
+  isAdmin = false;
   isOwner = false;
   isMenuOpen = false;
   userMobile = '';
@@ -85,10 +86,12 @@ export default class HeaderComponent implements OnInit, AfterViewInit, OnDestroy
 
       if (status && isPlatformBrowser(this.platformId)) {
         this.isOwner = localStorage.getItem('userVerifiedWithOtp') === 'true';
+        this.isAdmin = this.authService.isAdmin();
         this.userMobile = localStorage.getItem('userEmail') || 'User';
         this.syncUserAvatar();
       } else {
         this.isOwner = false;
+        this.isAdmin = false;
         this.userMobile = '';
         this.profilePhotoUrl = '';
         this.userInitial = 'U';

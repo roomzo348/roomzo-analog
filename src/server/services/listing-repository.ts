@@ -4,6 +4,34 @@ import { getServerRuntime } from '../utils/runtime-config';
 
 let listingSchemaReady = false;
 
+const MODERATION_COLUMNS: Array<{ name: string; ddl: string }> = [
+  { name: 'has_kitchen', ddl: 'has_kitchen TINYINT(1) NOT NULL DEFAULT 0' },
+  { name: 'electricity_included', ddl: 'electricity_included TINYINT(1) NOT NULL DEFAULT 0' },
+  { name: 'moderation_status', ddl: 'moderation_status VARCHAR(16) NULL' },
+  { name: 'moderation_reason', ddl: 'moderation_reason VARCHAR(64) NULL' },
+  { name: 'reward_credited_at', ddl: 'reward_credited_at DATETIME NULL' },
+  { name: 'duplicate_of_listing_id', ddl: 'duplicate_of_listing_id INT NULL' },
+  { name: 'duplicate_flag', ddl: 'duplicate_flag VARCHAR(32) NULL' },
+  { name: 'listing_intent', ddl: 'listing_intent VARCHAR(16) NULL' },
+];
+
+const LISTING_INDEXES: Array<{ name: string; ddl: string }> = [
+  { name: 'idx_listings_temp_contact', ddl: 'INDEX idx_listings_temp_contact (temp_contact_no)' },
+  { name: 'idx_listings_city_zip', ddl: 'INDEX idx_listings_city_zip (city, zip_code)' },
+  { name: 'idx_listings_lat_lng', ddl: 'INDEX idx_listings_lat_lng (latitude, longitude)' },
+  { name: 'idx_listings_moderation', ddl: 'INDEX idx_listings_moderation (moderation_status)' },
+];
+
+export const PUBLIC_MODERATION_SQL =
+  `(moderation_status IS NULL OR moderation_status = 'approved')`;
+export const PUBLIC_MODERATION_SQL_P =
+  `(p.moderation_status IS NULL OR p.moderation_status = 'approved')`;
+
+export function isListingApproved(listing: any): boolean {
+  const status = listing?.moderationStatus ?? listing?.moderation_status;
+  return status == null || status === '' || status === 'approved';
+}
+
 /** Ensure optional listing columns exist (safe to call repeatedly). */
 export async function ensureListingSchema(): Promise<void> {
   if (listingSchemaReady) return;
@@ -11,19 +39,43 @@ export async function ensureListingSchema(): Promise<void> {
     `SELECT COLUMN_NAME FROM information_schema.COLUMNS
      WHERE TABLE_SCHEMA = DATABASE()
        AND TABLE_NAME = 'property_listings'
-       AND COLUMN_NAME IN ('electricity_included', 'has_kitchen')`
+       AND COLUMN_NAME IN (${MODERATION_COLUMNS.map(() => '?').join(',')})`,
+    MODERATION_COLUMNS.map((c) => c.name)
   );
   const existing = new Set(rows.map((r) => r.COLUMN_NAME));
-  if (!existing.has('has_kitchen')) {
-    await sqlExecute(
-      `ALTER TABLE property_listings ADD COLUMN has_kitchen TINYINT(1) NOT NULL DEFAULT 0`
-    );
+  for (const col of MODERATION_COLUMNS) {
+    if (!existing.has(col.name)) {
+      await sqlExecute(`ALTER TABLE property_listings ADD COLUMN ${col.ddl}`);
+    }
   }
-  if (!existing.has('electricity_included')) {
-    await sqlExecute(
-      `ALTER TABLE property_listings ADD COLUMN electricity_included TINYINT(1) NOT NULL DEFAULT 0`
-    );
+
+  const indexRows = await sqlQuery<{ INDEX_NAME: string }>(
+    `SELECT DISTINCT INDEX_NAME FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'property_listings'
+       AND INDEX_NAME IN (${LISTING_INDEXES.map(() => '?').join(',')})`,
+    LISTING_INDEXES.map((i) => i.name)
+  );
+  const existingIndexes = new Set(indexRows.map((r) => r.INDEX_NAME));
+  for (const idx of LISTING_INDEXES) {
+    if (!existingIndexes.has(idx.name)) {
+      try {
+        await sqlExecute(`ALTER TABLE property_listings ADD ${idx.ddl}`);
+      } catch {
+        // Index may already exist under another name.
+      }
+    }
   }
+
+  await sqlExecute(
+    `CREATE TABLE IF NOT EXISTS listing_reward_credits (
+      listing_id INT NOT NULL PRIMARY KEY,
+      user_id INT NOT NULL,
+      credits INT NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_listing_reward_user (user_id)
+    )`
+  );
   listingSchemaReady = true;
 }
 
@@ -78,6 +130,7 @@ export async function getOwnerName(ownerId: number | null | undefined): Promise<
 }
 
 export async function getOwnerListings(ownerId: number): Promise<any[]> {
+  await ensureListingSchema();
   const rows = await sqlQuery<any>(
     `SELECT * FROM property_listings WHERE owner_id = ? ORDER BY created_on DESC`,
     [ownerId]
@@ -103,7 +156,10 @@ export async function deleteListing(id: number): Promise<boolean> {
 }
 
 function buildFilterWhere(filters: ListingSearchInput, values: unknown[]): string {
-  const where: string[] = [`(p.is_rented IS NULL OR p.is_rented <> 2)`];
+  const where: string[] = [
+    `(p.is_rented IS NULL OR p.is_rented <> 2)`,
+    PUBLIC_MODERATION_SQL_P,
+  ];
   if (filters.isRented != null) {
     where.push(`p.is_rented = ?`);
     values.push(filters.isRented);
@@ -231,9 +287,11 @@ export async function searchListings(filters: ListingSearchInput): Promise<{
 }
 
 export async function getFeaturedListings(limit: number): Promise<any[]> {
+  await ensureListingSchema();
   const rows = await sqlQuery<any>(
     `SELECT * FROM property_listings
      WHERE COALESCE(is_featured, 0) = 1 AND (is_rented IS NULL OR is_rented = 0)
+       AND ${PUBLIC_MODERATION_SQL}
      ORDER BY COALESCE(featured_priority, 0) DESC, created_on DESC
      LIMIT ?`,
     [limit]
@@ -242,9 +300,11 @@ export async function getFeaturedListings(limit: number): Promise<any[]> {
 }
 
 export async function getRecentListings(limit: number): Promise<any[]> {
+  await ensureListingSchema();
   const rows = await sqlQuery<any>(
     `SELECT * FROM property_listings
      WHERE (is_rented IS NULL OR is_rented = 0)
+       AND ${PUBLIC_MODERATION_SQL}
      ORDER BY created_on DESC
      LIMIT ?`,
     [limit]
@@ -252,7 +312,17 @@ export async function getRecentListings(limit: number): Promise<any[]> {
   return hydrateListings(rows);
 }
 
-export async function createListing(payload: any): Promise<number> {
+export interface CreateListingOptions {
+  moderationStatus?: 'pending' | 'approved';
+  duplicateOfListingId?: number | null;
+  duplicateFlag?: string | null;
+  listingIntent?: 'reward' | 'owner' | 'direct' | null;
+}
+
+export async function createListing(
+  payload: any,
+  options: CreateListingOptions = {}
+): Promise<number> {
   await ensureListingSchema();
   const details = payload?.details ?? {};
   const address = details?.address ?? {};
@@ -267,8 +337,9 @@ export async function createListing(payload: any): Promise<number> {
       has_bed, has_almirah, has_study_table, has_fan_light, has_ro_water, has_inverter, has_cooling, has_geyser, has_wifi, has_parking, has_cctv, has_washing_machine, has_kitchen,
       electricity_included,
       couple_friendly, for_boys, for_girls, water24x7, veg_only, family_friendly, students_only, working_professionals,
-      rent_amount, description, is_rented, temp_contact_no, zone
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      rent_amount, description, is_rented, temp_contact_no, zone,
+      moderation_status, moderation_reason, duplicate_of_listing_id, duplicate_flag, listing_intent
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       Number(payload?.ownerId),
       details?.propertyName ?? finalInfo?.name ?? null,
@@ -310,6 +381,11 @@ export async function createListing(payload: any): Promise<number> {
       0,
       finalInfo?.contactNo ?? null,
       address?.zone ?? null,
+      options.moderationStatus ?? 'pending',
+      options.duplicateFlag ? 'possible_duplicate' : null,
+      options.duplicateOfListingId ?? null,
+      options.duplicateFlag ?? null,
+      options.listingIntent ?? 'owner',
     ]
   );
 
@@ -317,6 +393,48 @@ export async function createListing(payload: any): Promise<number> {
   await replacePhotos(listingId, payload?.photos ?? []);
   await replaceGuidebook(listingId, payload?.guidebook ?? {});
   return Number(listingId);
+}
+
+export async function listModerationQueue(status = 'pending', limit = 80): Promise<any[]> {
+  await ensureListingSchema();
+  const allowed = new Set(['pending', 'approved', 'rejected']);
+  const filter = allowed.has(status) ? status : 'pending';
+  const rows = await sqlQuery<any>(
+    `SELECT p.*, u.email AS owner_email, u.name AS owner_name, u.phone AS owner_phone
+     FROM property_listings p
+     LEFT JOIN users u ON u.id = p.owner_id
+     WHERE p.moderation_status = ?
+     ORDER BY CASE WHEN p.duplicate_flag IS NULL OR p.duplicate_flag = '' THEN 1 ELSE 0 END,
+              p.created_on DESC
+     LIMIT ?`,
+    [filter, limit]
+  );
+  const listings = await hydrateListings(rows);
+  return listings.map((listing, i) => ({
+    ...listing,
+    ownerEmail: rows[i]?.owner_email ?? null,
+    ownerName: rows[i]?.owner_name ?? null,
+    ownerPhone: rows[i]?.owner_phone ?? null,
+  }));
+}
+
+export async function setListingModeration(
+  id: number,
+  status: 'approved' | 'rejected',
+  reason?: string | null
+): Promise<boolean> {
+  await ensureListingSchema();
+  const isRented = status === 'approved' ? 0 : 2;
+  const result = await sqlExecute(
+    `UPDATE property_listings
+     SET moderation_status = ?,
+         moderation_reason = ?,
+         is_rented = ?,
+         duplicate_flag = CASE WHEN ? = 'approved' THEN NULL ELSE duplicate_flag END
+     WHERE id = ?`,
+    [status, reason ?? null, isRented, status, id]
+  );
+  return result.affectedRows > 0;
 }
 
 export async function updateListing(id: number, payload: any): Promise<boolean> {
@@ -483,6 +601,12 @@ function mapListingRow(row: Record<string, unknown>): Record<string, unknown> {
     description: row.description,
     createdOn: row.created_on ?? row.createdOn,
     isRented: row.is_rented ?? row.isRented,
+    moderationStatus: row.moderation_status ?? row.moderationStatus ?? null,
+    moderationReason: row.moderation_reason ?? row.moderationReason ?? null,
+    rewardCreditedAt: row.reward_credited_at ?? row.rewardCreditedAt ?? null,
+    duplicateOfListingId: row.duplicate_of_listing_id ?? row.duplicateOfListingId ?? null,
+    duplicateFlag: row.duplicate_flag ?? row.duplicateFlag ?? null,
+    listingIntent: row.listing_intent ?? row.listingIntent ?? null,
     isFeatured: row.is_featured ?? row.isFeatured,
     featuredPriority: row.featured_priority ?? row.featuredPriority,
     tempContactNo: row.temp_contact_no ?? row.tempContactNo,

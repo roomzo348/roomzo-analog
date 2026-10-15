@@ -6,6 +6,7 @@ import { RouteMeta } from '@analogjs/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth.service';
 import { BillingService, BillingPlan, BillingWallet } from '../../services/billing.service';
+import { ListingRewardOfferComponent } from '../../components/listing-reward-offer/listing-reward-offer';
 import { PaymentReturnStatus, paymentReturnNotice } from '../../utils/billing-return';
 
 export const routeMeta: RouteMeta = {
@@ -22,7 +23,7 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-pricing',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, ListingRewardOfferComponent],
   templateUrl: './pricing.html',
   styleUrls: ['./pricing.css'],
 })
