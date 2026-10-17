@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastrService } from 'ngx-toastr';
 import { authGuard } from '../../../auth.guard';
@@ -16,7 +16,7 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-admin-listings',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, RouterLink],
   templateUrl: './admin-listings.html',
   styleUrls: ['./admin-listings.css'],
 })

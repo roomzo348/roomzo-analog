@@ -1,0 +1,89 @@
+<div class="review-wrap" *ngIf="!forbidden">
+  <a routerLink="/admin/listings" class="back">← Back to queue</a>
+
+  <p *ngIf="loading" class="muted">Loading listing…</p>
+  <p *ngIf="!loading && !listing" class="muted">Listing not found.</p>
+
+  <ng-container *ngIf="listing">
+    <header class="review-head">
+      <div>
+        <p class="kicker">Admin review</p>
+        <h1>{{ listing.propertyName || listing.propertyType || 'Listing' }}</h1>
+        <p class="sub">
+          #{{ listing.id }}
+          · {{ listing.moderationStatus || 'pending' }}
+          · {{ listing.listingIntent === 'reward' ? 'Wants free points' : 'Owner listing' }}
+        </p>
+      </div>
+      <div class="mod-bar" *ngIf="listing.moderationStatus === 'pending'">
+        <button type="button" class="mod-btn approve" [disabled]="acting" (click)="approve()">
+          <mat-icon>check_circle</mat-icon>
+          <span>Approve</span>
+        </button>
+        <button type="button" class="mod-btn reject" [disabled]="acting" (click)="reject('not_legit')">
+          <mat-icon>cancel</mat-icon>
+          <span>Reject</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Photos</h2>
+      <p class="muted" *ngIf="!photos.length">No photos uploaded.</p>
+      <div class="gallery" *ngIf="photos.length">
+        <button type="button" class="hero" (click)="openZoom(activePhoto)">
+          <img [src]="activePhoto" [alt]="listing.propertyName || 'Listing photo'" />
+          <span class="zoom-hint">Tap to zoom</span>
+        </button>
+        <div class="thumbs" *ngIf="photos.length > 1">
+          <button
+            type="button"
+            *ngFor="let url of photos; let i = index"
+            [class.active]="url === activePhoto"
+            (click)="selectPhoto(url)">
+            <img [src]="url" [alt]="'Photo ' + (i + 1)" />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Owner details</h2>
+        <dl>
+          <div><dt>Name</dt><dd>{{ listing.ownerName || '—' }}</dd></div>
+          <div><dt>Email</dt><dd>{{ listing.ownerEmail || '—' }}</dd></div>
+          <div><dt>Phone</dt><dd>{{ listing.ownerPhone || listing.tempContactNo || '—' }}</dd></div>
+          <div><dt>Listing phone</dt><dd>{{ listing.tempContactNo || '—' }}</dd></div>
+        </dl>
+      </article>
+
+      <article class="panel">
+        <h2>Location</h2>
+        <dl>
+          <div><dt>Address</dt><dd>{{ addressLine }}</dd></div>
+          <div><dt>City / state</dt><dd>{{ listing.city || '—' }}{{ listing.state ? ', ' + listing.state : '' }}</dd></div>
+          <div><dt>Landmark / zone</dt><dd>{{ listing.landmark || '—' }} · {{ listing.zone || '—' }}</dd></div>
+          <div><dt>Coordinates</dt><dd>{{ listing.latitude || '—' }}, {{ listing.longitude || '—' }}</dd></div>
+        </dl>
+        <a *ngIf="mapLink" class="map-link" [href]="mapLink" target="_blank" rel="noopener">Open in Google Maps</a>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Listing details</h2>
+      <p class="meta">
+        {{ listing.propertyType || '—' }}
+        · {{ listing.bedrooms || '—' }} BHK
+        · ₹{{ listing.rentAmount || '—' }}
+      </p>
+      <h3>Description</h3>
+      <p class="desc">{{ listing.description || 'No description provided.' }}</p>
+    </section>
+  </ng-container>
+</div>
+
+<div class="lightbox" *ngIf="zoomOpen" (click)="closeZoom()">
+  <button type="button" class="lightbox-close" (click)="closeZoom(); $event.stopPropagation()" aria-label="Close photo">×</button>
+  <img [src]="activePhoto" alt="Zoomed listing photo" (click)="$event.stopPropagation()" />
+</div>

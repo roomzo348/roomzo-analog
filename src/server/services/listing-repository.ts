@@ -418,6 +418,28 @@ export async function listModerationQueue(status = 'pending', limit = 80): Promi
   }));
 }
 
+export async function getAdminListingById(id: number): Promise<any | null> {
+  await ensureListingSchema();
+  const rows = await sqlQuery<any>(
+    `SELECT p.*, u.email AS owner_email, u.name AS owner_name, u.phone AS owner_phone
+     FROM property_listings p
+     LEFT JOIN users u ON u.id = p.owner_id
+     WHERE p.id = ?
+     LIMIT 1`,
+    [id]
+  );
+  if (!rows[0]) return null;
+  const listings = await hydrateListings(rows);
+  const listing = listings[0];
+  if (!listing) return null;
+  return {
+    ...listing,
+    ownerEmail: rows[0].owner_email ?? null,
+    ownerName: rows[0].owner_name ?? null,
+    ownerPhone: rows[0].owner_phone ?? listing.tempContactNo ?? null,
+  };
+}
+
 export async function setListingModeration(
   id: number,
   status: 'approved' | 'rejected',

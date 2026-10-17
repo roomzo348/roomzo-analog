@@ -35,21 +35,30 @@
       </p>
       <p class="meta">{{ listing.street }} {{ listing.landmark }} {{ listing.zone }}</p>
       <p class="meta">Phone {{ listing.tempContactNo || '—' }} · {{ listing.ownerEmail || listing.ownerName }}</p>
-      <div class="actions" *ngIf="status === 'pending'">
-        <button type="button" class="ok" [disabled]="actingId != null" (click)="approve(listing)">
+      <div class="mod-bar">
+        <button
+          *ngIf="status === 'pending' || (status === 'approved' && !listing.rewardCreditedAt)"
+          type="button"
+          class="mod-btn approve"
+          [disabled]="actingId != null"
+          (click)="approve(listing)">
           <span class="btn-spinner" *ngIf="actingId === listing.id && actingKind === 'approve'"></span>
-          {{ actingId === listing.id && actingKind === 'approve' ? 'Approving…' : 'Approve + points' }}
+          <mat-icon *ngIf="!(actingId === listing.id && actingKind === 'approve')">check_circle</mat-icon>
+          <span>{{ status === 'pending' ? 'Approve' : 'Grant' }}</span>
         </button>
-        <button type="button" [disabled]="actingId != null" (click)="reject(listing, 'duplicate')">Reject duplicate</button>
-        <button type="button" class="warn" [disabled]="actingId != null" (click)="reject(listing, 'not_legit')">Not legit</button>
-        <a [href]="'/room/' + listing.id" target="_blank" rel="noopener">Open</a>
-      </div>
-      <div class="actions" *ngIf="status === 'approved' && !listing.rewardCreditedAt">
-        <button type="button" class="ok" [disabled]="actingId != null" (click)="approve(listing)">
-          <span class="btn-spinner" *ngIf="actingId === listing.id && actingKind === 'approve'"></span>
-          {{ actingId === listing.id && actingKind === 'approve' ? 'Granting points…' : 'Grant points' }}
+        <button
+          *ngIf="status === 'pending'"
+          type="button"
+          class="mod-btn reject"
+          [disabled]="actingId != null"
+          (click)="reject(listing, 'not_legit')">
+          <mat-icon>cancel</mat-icon>
+          <span>Reject</span>
         </button>
-        <a [href]="'/room/' + listing.id" target="_blank" rel="noopener">Open</a>
+        <a class="mod-btn view" [routerLink]="['/admin/listings', listing.id]">
+          <mat-icon>visibility</mat-icon>
+          <span>View</span>
+        </a>
       </div>
     </div>
   </article>

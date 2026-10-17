@@ -531,6 +531,10 @@ updateSafetyConsent(userId: number | string, consentGiven: boolean): Observable<
     });
   }
 
+  getAdminListingReview(id: number | string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/admin/listings/${id}`);
+  }
+
   approveAdminListing(id: number | string): Observable<any> {
     return this.http.post(`${this.baseUrl}/api/admin/listings/${id}/approve`, {});
   }

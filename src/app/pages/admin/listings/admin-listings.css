@@ -66,23 +66,66 @@ h2 { margin: 0; font-size: 1.05rem; }
 .flag.intent { background: #ccfbf1; color: #115e59; }
 .flag.owner { background: #e2e8f0; color: #334155; }
 .meta { margin: 4px 0; font-size: 0.85rem; color: var(--rz-text-muted, #475569); }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
-.actions button, .actions a {
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  border: 1px solid var(--rz-border, #cbd5e1);
-  background: var(--rz-bg, #f8fafc);
-  color: inherit;
+.mod-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rz-border, #e2e8f0);
+}
+.mod-bar .mod-btn { flex: 1; }
+.mod-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 650;
   text-decoration: none;
   cursor: pointer;
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.actions button:disabled {
-  opacity: 0.65;
-  cursor: wait;
+.mod-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.mod-btn.approve {
+  background: #ecfdf5;
+  color: #166534;
+  border-color: #bbf7d0;
 }
-.actions .ok { background: #0f766e; color: #fff; border-color: #0f766e; }
-.actions .warn { background: #fff; color: #b91c1c; border-color: #fecaca; }
+.mod-btn.reject {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.mod-btn.view {
+  background: var(--rz-bg, #f8fafc);
+  color: #334155;
+  border-color: var(--rz-border, #e2e8f0);
+}
+.mod-btn.approve:hover:not(:disabled) { background: #dcfce7; }
+.mod-btn.reject:hover:not(:disabled) { background: #fee2e2; }
+.mod-btn.view:hover { background: #eef2f6; }
+.mod-btn:disabled { opacity: 0.55; cursor: wait; }
+
+:host-context([data-theme='dark']) .mod-btn.approve {
+  background: rgba(22, 163, 74, 0.16);
+  color: #86efac;
+  border-color: rgba(134, 239, 172, 0.28);
+}
+:host-context([data-theme='dark']) .mod-btn.reject {
+  background: rgba(220, 38, 38, 0.16);
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.28);
+}
+:host-context([data-theme='dark']) .mod-btn.view {
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  border-color: var(--rz-border);
+}
 @media (max-width: 640px) {
   .card { grid-template-columns: 1fr; }
   .card img { height: 160px; }

@@ -73,6 +73,7 @@ export async function emailAdminListingPending(opts: {
   const cfg = getServerRuntime();
   const site = String(cfg.siteUrl || 'https://www.roomzo.in').replace(/\/$/, '');
   const queueLink = `${site}/admin/listings`;
+  const reviewLink = `${queueLink}/${opts.listingId}`;
   const name = opts.propertyName ? escapeHtml(opts.propertyName) : `Listing #${opts.listingId}`;
   const place = [opts.city, opts.state].filter(Boolean).map(escapeHtml).join(', ');
   const rent = Number(opts.rentAmount);
@@ -85,13 +86,14 @@ export async function emailAdminListingPending(opts: {
   await sendMailSafe({
     to,
     subject: `Approve listing #${opts.listingId} — ${opts.propertyName || 'new property'}`,
-    text: `A property is waiting for approval.\n\n#${opts.listingId} ${opts.propertyName || ''}\n${place}\nRent ${rentLine}\nOwner ${owner || '—'}\n\nOpen queue: ${queueLink}`,
+    text: `A property is waiting for approval.\n\n#${opts.listingId} ${opts.propertyName || ''}\n${place}\nRent ${rentLine}\nOwner ${owner || '—'}\n\nReview: ${reviewLink}\nQueue: ${queueLink}`,
     html: wrap(
       `<p>Someone listed a property. Please review and approve it.</p>
        <p><strong>#${opts.listingId} ${name}</strong><br/>${place || 'Location not set'}<br/>Rent ${rentLine}</p>
        <p>Owner: ${owner || '—'}</p>
        ${dup}
-       <p><a href="${queueLink}">Open listing queue and approve</a></p>`
+       <p><a href="${reviewLink}">Review photos, owner, description and location</a></p>
+       <p><a href="${queueLink}">Open listing queue</a></p>`
     ),
   });
 }

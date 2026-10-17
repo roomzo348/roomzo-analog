@@ -7,7 +7,7 @@ import {
   readBody,
 } from 'h3';
 import type { H3Event } from 'h3';
-import { listModerationQueue } from '../../../../services/listing-repository';
+import { getAdminListingById, listModerationQueue } from '../../../../services/listing-repository';
 import {
   approveQueuedListing,
   rejectQueuedListing,
@@ -43,6 +43,18 @@ export default defineEventHandler(async (event) => {
       const status = String(query.status || 'pending');
       const listings = await listModerationQueue(status);
       return apiResponse(1, 'ok', listings);
+    }
+
+    if (segments.length === 1 && method === 'GET') {
+      const listingId = Number(segments[0]);
+      if (!Number.isFinite(listingId) || listingId <= 0) {
+        throw createError({ statusCode: 400, statusMessage: 'Invalid listing' });
+      }
+      const listing = await getAdminListingById(listingId);
+      if (!listing) {
+        throw createError({ statusCode: 404, statusMessage: 'Listing not found' });
+      }
+      return apiResponse(1, 'ok', listing);
     }
 
     if (segments.length === 2 && method === 'POST' && segments[1] === 'approve') {
