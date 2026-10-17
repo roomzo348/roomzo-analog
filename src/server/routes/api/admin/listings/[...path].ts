@@ -1,26 +1,42 @@
-import { defineEventHandler, createError, getMethod, getQuery, getRouterParam, readBody } from 'h3';
 import {
-  getListingById,
-  listModerationQueue,
-  setListingModeration,
-} from '../../../../services/listing-repository';
-import { creditListingRewardOnce } from '../../../../services/listing-reward';
+  defineEventHandler,
+  createError,
+  getMethod,
+  getQuery,
+  getRouterParam,
+  readBody,
+} from 'h3';
+import type { H3Event } from 'h3';
+import { listModerationQueue } from '../../../../services/listing-repository';
 import {
-  emailListingApproved,
-  emailListingDuplicate,
-  emailListingRejected,
-} from '../../../../services/listing-moderation-mail';
-import { notifyNewProperty } from '../../../../services/onesignal.service';
-import { getUserById } from '../../../../services/auth-repository';
+  approveQueuedListing,
+  rejectQueuedListing,
+} from '../../../../services/listing-admin-actions';
 import { apiResponse } from '../../../../utils/api-response';
 import { requireAdmin } from '../../../../utils/admin';
+
+function adminListingSegments(event: H3Event): string[] {
+  const fromParam = getRouterParam(event, 'path');
+  if (Array.isArray(fromParam)) {
+    return fromParam.map(String).filter(Boolean);
+  }
+  if (fromParam) {
+    return String(fromParam).split('/').filter(Boolean);
+  }
+  const url = String(event.path || event.node?.req?.url || '').split('?')[0];
+  const marker = '/api/admin/listings/';
+  const idx = url.indexOf(marker);
+  if (idx >= 0) {
+    return url.slice(idx + marker.length).split('/').filter(Boolean);
+  }
+  return [];
+}
 
 export default defineEventHandler(async (event) => {
   try {
     const admin = await requireAdmin(event);
     const method = getMethod(event).toUpperCase();
-    const path = String(getRouterParam(event, 'path') || '');
-    const segments = path.split('/').filter(Boolean);
+    const segments = adminListingSegments(event);
     const query = getQuery(event);
 
     if (segments.length === 0 && method === 'GET') {
@@ -31,51 +47,21 @@ export default defineEventHandler(async (event) => {
 
     if (segments.length === 2 && method === 'POST' && segments[1] === 'approve') {
       const listingId = Number(segments[0]);
-      const listing = await getListingById(listingId);
-      if (!listing) {
-        throw createError({ statusCode: 404, statusMessage: 'Listing not found' });
+      if (!Number.isFinite(listingId) || listingId <= 0) {
+        throw createError({ statusCode: 400, statusMessage: 'Invalid listing' });
       }
-      await setListingModeration(listingId, 'approved', null);
-      const ownerId = Number(listing.ownerId ?? listing.owner_id);
-      const wantsPoints = (listing.listingIntent ?? listing.listing_intent) === 'reward';
-      const reward = wantsPoints
-        ? await creditListingRewardOnce(listingId, ownerId)
-        : { credited: false, credits: 0 };
-      const live = await getListingById(listingId);
-      try {
-        await notifyNewProperty(listingId, live?.propertyName ?? listing.propertyName ?? 'New listing');
-      } catch (error) {
-        console.error('[admin] notify failed', error);
-      }
-      await emailListingApproved(await resolveOwnerEmail(listing), {
-        propertyName: live?.propertyName ?? listing.propertyName,
-        listingId,
-        credited: reward.credited,
-      });
-      return apiResponse(1, 'Listing approved', {
-        listing: live,
-        credited: reward.credited,
-        credits: reward.credits,
-        adminId: admin.id,
-      });
+      const data = await approveQueuedListing(listingId);
+      return apiResponse(1, 'Listing approved', { ...data, adminId: admin.id });
     }
 
     if (segments.length === 2 && method === 'POST' && segments[1] === 'reject') {
       const listingId = Number(segments[0]);
-      const listing = await getListingById(listingId);
-      if (!listing) {
-        throw createError({ statusCode: 404, statusMessage: 'Listing not found' });
+      if (!Number.isFinite(listingId) || listingId <= 0) {
+        throw createError({ statusCode: 400, statusMessage: 'Invalid listing' });
       }
       const body = await readBody(event).catch(() => ({}));
-      const reason = String(body?.reason || 'not_legit') === 'duplicate' ? 'duplicate' : 'not_legit';
-      await setListingModeration(listingId, 'rejected', reason);
-      const ownerEmail = await resolveOwnerEmail(listing);
-      if (reason === 'duplicate') {
-        await emailListingDuplicate(ownerEmail, listing.propertyName);
-      } else {
-        await emailListingRejected(ownerEmail, { propertyName: listing.propertyName, reason });
-      }
-      return apiResponse(1, 'Listing rejected', { listingId, reason });
+      const data = await rejectQueuedListing(listingId, String(body?.reason || 'not_legit'));
+      return apiResponse(1, 'Listing rejected', data);
     }
 
     return apiResponse(0, 'Endpoint not implemented');
@@ -83,14 +69,7 @@ export default defineEventHandler(async (event) => {
     if (error?.statusCode === 401 || error?.statusCode === 403 || error?.statusCode === 404) {
       throw error;
     }
-    return apiResponse(-1, error?.message || 'Admin listings failed');
+    console.error('[admin listings]', error);
+    return apiResponse(-1, error?.statusMessage || error?.message || 'Admin listings failed');
   }
 });
-
-async function resolveOwnerEmail(listing: any): Promise<string | null> {
-  if (listing?.ownerEmail) return String(listing.ownerEmail);
-  const ownerId = Number(listing?.ownerId ?? listing?.owner_id);
-  if (!ownerId) return null;
-  const user = await getUserById(ownerId);
-  return user?.email ?? null;
-}

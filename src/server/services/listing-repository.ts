@@ -424,17 +424,22 @@ export async function setListingModeration(
   reason?: string | null
 ): Promise<boolean> {
   await ensureListingSchema();
-  const isRented = status === 'approved' ? 0 : 2;
   const result = await sqlExecute(
-    `UPDATE property_listings
-     SET moderation_status = ?,
-         moderation_reason = ?,
-         is_rented = ?,
-         duplicate_flag = CASE WHEN ? = 'approved' THEN NULL ELSE duplicate_flag END
-     WHERE id = ?`,
-    [status, reason ?? null, isRented, status, id]
+    status === 'approved'
+      ? `UPDATE property_listings
+         SET moderation_status = 'approved',
+             moderation_reason = NULL,
+             is_rented = 0,
+             duplicate_flag = NULL
+         WHERE id = ?`
+      : `UPDATE property_listings
+         SET moderation_status = 'rejected',
+             moderation_reason = ?,
+             is_rented = 2
+         WHERE id = ?`,
+    status === 'approved' ? [id] : [reason ?? null, id]
   );
-  return result.affectedRows > 0;
+  return Number(result.affectedRows) > 0;
 }
 
 export async function updateListing(id: number, payload: any): Promise<boolean> {

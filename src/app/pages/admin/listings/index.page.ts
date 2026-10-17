@@ -25,6 +25,7 @@ export default class AdminListingsPage implements OnInit {
   status: 'pending' | 'approved' | 'rejected' = 'pending';
   loading = true;
   actingId: number | null = null;
+  actingKind: 'approve' | 'reject' | null = null;
   forbidden = false;
 
   constructor(
@@ -71,35 +72,61 @@ export default class AdminListingsPage implements OnInit {
   }
 
   approve(listing: any): void {
-    this.actingId = listing.id;
+    if (this.actingId != null) return;
+    this.actingId = Number(listing.id);
+    this.actingKind = 'approve';
+    this.cd.detectChanges();
     this.propertyService.approveAdminListing(listing.id).subscribe({
       next: (res: any) => {
-        this.toastr.success(
-          res?.data?.credited
-            ? `Approved and ${res.data.credits} points granted`
-            : 'Approved (points already granted earlier)'
-        );
         this.actingId = null;
+        this.actingKind = null;
+        if (Number(res?.status) !== 1) {
+          this.toastr.error(res?.message || 'Approve failed');
+          this.cd.detectChanges();
+          return;
+        }
+        if (res?.data?.credited) {
+          this.toastr.success(`Approved and ${res.data.credits} points granted`);
+        } else if (Number(res?.data?.credits) > 0) {
+          this.toastr.info(`Approved. ${res.data.credits} points were already on this listing.`);
+        } else {
+          this.toastr.error('Listing went live, but points were not added. Use Grant points.');
+        }
+        this.listings = this.listings.filter((item) => Number(item.id) !== Number(listing.id));
+        this.cd.detectChanges();
         this.load();
       },
-      error: () => {
+      error: (err) => {
         this.actingId = null;
-        this.toastr.error('Approve failed');
+        this.actingKind = null;
+        this.toastr.error(err?.error?.message || err?.error?.statusMessage || 'Approve failed');
         this.cd.detectChanges();
       },
     });
   }
 
   reject(listing: any, reason: 'duplicate' | 'not_legit'): void {
-    this.actingId = listing.id;
+    if (this.actingId != null) return;
+    this.actingId = Number(listing.id);
+    this.actingKind = 'reject';
+    this.cd.detectChanges();
     this.propertyService.rejectAdminListing(listing.id, reason).subscribe({
-      next: () => {
-        this.toastr.success(reason === 'duplicate' ? 'Rejected as duplicate' : 'Rejected');
+      next: (res: any) => {
         this.actingId = null;
+        this.actingKind = null;
+        if (Number(res?.status) !== 1) {
+          this.toastr.error(res?.message || 'Reject failed');
+          this.cd.detectChanges();
+          return;
+        }
+        this.toastr.success(reason === 'duplicate' ? 'Rejected as duplicate' : 'Rejected');
+        this.listings = this.listings.filter((item) => Number(item.id) !== Number(listing.id));
+        this.cd.detectChanges();
         this.load();
       },
       error: () => {
         this.actingId = null;
+        this.actingKind = null;
         this.toastr.error('Reject failed');
         this.cd.detectChanges();
       },
