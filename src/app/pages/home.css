@@ -84,9 +84,6 @@
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .home-points-ad-cta {
@@ -141,9 +138,20 @@
 
 @media (max-width: 640px) {
   .home-points-ad-wrap { padding: 0 16px 14px; }
-  .home-points-ad { gap: 8px; min-height: 44px; }
-  .home-points-ad-copy { font-size: 0.78rem; }
-  .home-points-ad-cta { padding: 0 10px; font-size: 0.7rem; }
+  .home-points-ad {
+    gap: 8px;
+    min-height: 52px;
+    align-items: stretch;
+    padding: 8px;
+  }
+  .home-points-ad-copy {
+    font-size: 0.74rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .home-points-ad-cta { padding: 0 10px; font-size: 0.7rem; align-self: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -45,6 +45,7 @@ export async function approveQueuedListing(listingId: number) {
     propertyName: live?.propertyName ?? listing.propertyName,
     listingId,
     credited: reward.credited,
+    credits: reward.credits,
   });
 
   return {

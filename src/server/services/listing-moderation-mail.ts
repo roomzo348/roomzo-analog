@@ -27,6 +27,32 @@ function adminInbox(): string[] {
     .filter((email) => email.includes('@'));
 }
 
+async function sendUserMailAndCopyAdmin(opts: {
+  to?: string | null;
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<void> {
+  const admins = adminInbox();
+  const user = String(opts.to || '')
+    .trim()
+    .toLowerCase();
+  const userOk = user.includes('@');
+  const to = userOk ? [user] : admins;
+  const bcc = userOk ? admins.filter((email) => email !== user) : [];
+  if (!to.length) {
+    console.warn('[mail] no user or ADMIN_EMAIL for listing mail:', opts.subject);
+    return;
+  }
+  await sendMailSafe({
+    to,
+    bcc: bcc.length ? bcc : undefined,
+    subject: userOk ? opts.subject : `[No owner email] ${opts.subject}`,
+    text: opts.text,
+    html: opts.html,
+  });
+}
+
 export async function emailAdminListingPending(opts: {
   listingId: number;
   propertyName?: string | null;
@@ -75,9 +101,8 @@ export function duplicateSubmitMessage(): string {
 }
 
 export async function emailListingDuplicate(to: string | null | undefined, propertyName?: string): Promise<void> {
-  if (!to) return;
   const name = propertyName ? ` (${propertyName})` : '';
-  await sendMailSafe({
+  await sendUserMailAndCopyAdmin({
     to,
     subject: 'This property already looks listed on Roomzo',
     text: `We could not publish your listing${name} because it matches one we already have. No contact points are added until a unique listing is approved.`,
@@ -90,21 +115,26 @@ export async function emailListingDuplicate(to: string | null | undefined, prope
 
 export async function emailListingApproved(
   to: string | null | undefined,
-  opts: { propertyName?: string; listingId: number; credited: boolean }
+  opts: { propertyName?: string; listingId: number; credited: boolean; credits?: number }
 ): Promise<void> {
-  if (!to) return;
   const { credits, rupees } = getListingRewardConfig();
+  const granted = Number(opts.credits) > 0 ? Number(opts.credits) : credits;
   const site = getServerRuntime().siteUrl.replace(/\/$/, '');
   const link = `${site}/room/${opts.listingId}`;
+  const name = opts.propertyName ? ` <strong>${escapeHtml(opts.propertyName)}</strong>` : '';
   const rewardLine = opts.credited
-    ? `We added <strong>${credits} contact points</strong> (about ₹${rupees}) to your wallet.`
-    : 'Your listing is live. Reward points were already granted for this listing earlier.';
-  await sendMailSafe({
+    ? `We added <strong>${granted} contact points</strong> (about ₹${rupees}) to your wallet.`
+    : 'Your listing is live. Reward points for this listing were already in your wallet.';
+  await sendUserMailAndCopyAdmin({
     to,
-    subject: 'Your Roomzo listing is live',
-    text: `Your listing is approved and live. ${opts.credited ? `${credits} contact points (about ₹${rupees}) were added to your wallet.` : ''} View it: ${link}`,
+    subject: opts.credited
+      ? `You received ${granted} contact points — listing is live`
+      : 'Your Roomzo listing is live',
+    text: `Your listing is approved and live. ${
+      opts.credited ? `${granted} contact points (about ₹${rupees}) were added to your wallet.` : ''
+    } View it: ${link}`,
     html: wrap(
-      `<p>Your listing${opts.propertyName ? ` <strong>${opts.propertyName}</strong>` : ''} is approved and now live on Roomzo.</p>
+      `<p>Your listing${name} is approved and now live on Roomzo.</p>
        <p>${rewardLine}</p>
        <p><a href="${link}">View listing</a></p>`
     ),
@@ -115,9 +145,8 @@ export async function emailListingRejected(
   to: string | null | undefined,
   opts: { propertyName?: string; reason: 'duplicate' | 'not_legit' | string }
 ): Promise<void> {
-  if (!to) return;
   const isDup = opts.reason === 'duplicate';
-  await sendMailSafe({
+  await sendUserMailAndCopyAdmin({
     to,
     subject: isDup ? 'This property already looks listed on Roomzo' : 'Your Roomzo listing was not published',
     text: isDup
@@ -125,9 +154,9 @@ export async function emailListingRejected(
       : 'We could not publish this listing after review. It is not live and no contact points were added.',
     html: wrap(
       isDup
-        ? `<p>We could not publish your listing${opts.propertyName ? ` <strong>${opts.propertyName}</strong>` : ''} because it matches one we already have.</p>
+        ? `<p>We could not publish your listing${opts.propertyName ? ` <strong>${escapeHtml(opts.propertyName)}</strong>` : ''} because it matches one we already have.</p>
            <p>It is not live and no contact points were added.</p>`
-        : `<p>We reviewed your listing${opts.propertyName ? ` <strong>${opts.propertyName}</strong>` : ''} and could not publish it.</p>
+        : `<p>We reviewed your listing${opts.propertyName ? ` <strong>${escapeHtml(opts.propertyName)}</strong>` : ''} and could not publish it.</p>
            <p>It is not live and no contact points were added. You can post a genuine, unique property anytime.</p>`
     ),
   });

@@ -3,6 +3,7 @@ import { getServerRuntime } from '../utils/runtime-config';
 
 export async function sendMail(options: {
   to: string | string[];
+  bcc?: string | string[];
   subject: string;
   html: string;
   text?: string;
@@ -25,6 +26,7 @@ export async function sendMail(options: {
   await transporter.sendMail({
     from: cfg.smtpFrom,
     to: options.to,
+    bcc: options.bcc,
     subject: options.subject,
     html: options.html,
     text: options.text,
@@ -33,6 +35,7 @@ export async function sendMail(options: {
 
 export async function sendMailSafe(options: {
   to: string | string[];
+  bcc?: string | string[];
   subject: string;
   html: string;
   text?: string;

@@ -21,7 +21,7 @@ export class ComingSoonModalComponent {
 
   readonly stats = [
     { icon: 'home', value: '500+', label: 'Listings' },
-    { icon: 'group', value: '1000+', label: 'Users' },
+    { icon: 'group', value: '2k+', label: 'Users' },
     { icon: 'location_city', value: '4+', label: 'Cities' },
     { icon: 'trending_up', value: '50K+', label: 'Visitors' },
   ];
