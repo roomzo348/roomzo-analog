@@ -14,6 +14,10 @@
           · {{ listing.moderationStatus || 'pending' }}
           · {{ listing.listingIntent === 'reward' ? 'Wants free points' : 'Owner listing' }}
         </p>
+        <p class="dup-note" *ngIf="listing.duplicateOfListingId">
+          Possible duplicate of listing #{{ listing.duplicateOfListingId }}
+          <a [routerLink]="['/admin/listings', listing.duplicateOfListingId]">Open matching listing</a>
+        </p>
       </div>
       <div class="mod-bar" *ngIf="listing.moderationStatus === 'pending'">
         <button type="button" class="mod-btn approve" [disabled]="acting" (click)="approve()">

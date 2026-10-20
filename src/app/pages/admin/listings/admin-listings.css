@@ -65,6 +65,18 @@ h2 { margin: 0; font-size: 1.05rem; }
 .flag { font-size: 0.75rem; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 999px; }
 .flag.intent { background: #ccfbf1; color: #115e59; }
 .flag.owner { background: #e2e8f0; color: #334155; }
+.dup-note {
+  margin: 6px 0 2px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: #9a3412;
+}
+.dup-note a {
+  margin-left: 8px;
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+}
 .meta { margin: 4px 0; font-size: 0.85rem; color: var(--rz-text-muted, #475569); }
 .mod-bar {
   display: flex;

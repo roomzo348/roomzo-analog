@@ -1,7 +1,7 @@
 import { sqlQuery } from '../db/mysql';
 import { haversineMeters, normalizeAddressPart, normalizePhone } from './listing-duplicate.util';
 
-export type DuplicateKind = 'hard' | 'soft' | 'ok';
+export type DuplicateKind = 'soft' | 'ok';
 export { haversineMeters, normalizeAddressPart, normalizePhone, digitsOnly } from './listing-duplicate.util';
 
 export interface DuplicateCheckInput {
@@ -95,7 +95,8 @@ export async function findListingDuplicates(
     params
   );
 
-  let soft: DuplicateCheckResult | null = null;
+  let match: DuplicateCheckResult | null = null;
+  let matchRank = 99;
 
   for (const row of rows) {
     const id = Number(row.id);
@@ -110,33 +111,33 @@ export async function findListingDuplicates(
     const rowLat = Number(row.latitude);
     const rowLng = Number(row.longitude);
 
-    if (phone.length >= 10 && rowPhone === phone) {
-      return { kind: 'hard', matchId: id, reason: 'duplicate_phone' };
-    }
-
     const sameCity = Boolean(city && rowCity && city === rowCity);
     const sameStreetOrLandmark =
       Boolean(street && rowStreet && street === rowStreet) ||
       Boolean(landmark && rowLandmark && landmark === rowLandmark);
-    if (sameCity && sameStreetOrLandmark && rentWithin(rent, rowRent, HARD_RENT_TOLERANCE)) {
-      return { kind: 'hard', matchId: id, reason: 'duplicate_address' };
-    }
 
-    if (
+    let candidate: DuplicateCheckResult | null = null;
+    let rank = 99;
+
+    if (phone.length >= 10 && rowPhone === phone) {
+      candidate = { kind: 'soft', matchId: id, reason: 'duplicate_phone' };
+      rank = 1;
+    } else if (sameCity && sameStreetOrLandmark && rentWithin(rent, rowRent, HARD_RENT_TOLERANCE)) {
+      candidate = { kind: 'soft', matchId: id, reason: 'duplicate_address' };
+      rank = 2;
+    } else if (
       sameCity &&
       hasCoords &&
       Number.isFinite(rowLat) &&
       Number.isFinite(rowLng) &&
       haversineMeters(lat, lng, rowLat, rowLng) <= HARD_DISTANCE_M
     ) {
-      return { kind: 'hard', matchId: id, reason: 'duplicate_location' };
-    }
-
-    if (!soft && sameCity && namesSimilar(name, rowName)) {
-      soft = { kind: 'soft', matchId: id, reason: 'similar_name' };
-    }
-    if (
-      !soft &&
+      candidate = { kind: 'soft', matchId: id, reason: 'duplicate_location' };
+      rank = 3;
+    } else if (sameCity && namesSimilar(name, rowName)) {
+      candidate = { kind: 'soft', matchId: id, reason: 'similar_name' };
+      rank = 4;
+    } else if (
       zone &&
       rowZone &&
       zone === rowZone &&
@@ -144,9 +145,15 @@ export async function findListingDuplicates(
       bedrooms === rowBeds &&
       rentWithin(rent, rowRent, SOFT_RENT_TOLERANCE)
     ) {
-      soft = { kind: 'soft', matchId: id, reason: 'similar_zone_rent' };
+      candidate = { kind: 'soft', matchId: id, reason: 'similar_zone_rent' };
+      rank = 5;
+    }
+
+    if (candidate && rank < matchRank) {
+      match = candidate;
+      matchRank = rank;
     }
   }
 
-  return soft ?? { kind: 'ok' };
+  return match ?? { kind: 'ok' };
 }

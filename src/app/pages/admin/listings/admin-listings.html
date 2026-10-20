@@ -26,8 +26,12 @@
         <h2>{{ listing.propertyName || listing.propertyType }}</h2>
         <span class="flag intent" *ngIf="listing.listingIntent === 'reward'">Wants free points</span>
         <span class="flag owner" *ngIf="listing.listingIntent !== 'reward'">Owner listing</span>
-        <span class="flag" *ngIf="listing.duplicateFlag">Possible duplicate{{ listing.duplicateOfListingId ? ' of #' + listing.duplicateOfListingId : '' }}</span>
+        <span class="flag" *ngIf="listing.duplicateFlag || listing.duplicateOfListingId">Possible duplicate</span>
       </div>
+      <p class="dup-note" *ngIf="listing.duplicateOfListingId">
+        Matches listing #{{ listing.duplicateOfListingId }}
+        <a [routerLink]="['/admin/listings', listing.duplicateOfListingId]">Open matching listing</a>
+      </p>
       <p class="meta">
         #{{ listing.id }} · {{ listing.city }}, {{ listing.state }}
         · ₹{{ listing.rentAmount }}

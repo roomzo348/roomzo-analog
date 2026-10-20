@@ -20,11 +20,7 @@ import {
   updateListing,
 } from '../../services/listing-repository';
 import { findListingDuplicates } from '../../services/listing-duplicate';
-import {
-  duplicateSubmitMessage,
-  emailAdminListingPending,
-  emailListingDuplicate,
-} from '../../services/listing-moderation-mail';
+import { emailAdminListingPending } from '../../services/listing-moderation-mail';
 import { notifyNewProperty } from '../../services/onesignal.service';
 import { getListingReviews, upsertReview } from '../../services/review-repository';
 import { apiListResponse, apiResponse } from '../../utils/api-response';
@@ -105,20 +101,15 @@ export default defineEventHandler(async (event) => {
       longitude: address?.longitude,
       phone: finalInfo?.contactNo,
     });
-    if (duplicate.kind === 'hard') {
-      await emailListingDuplicate(user.email, details?.propertyName ?? finalInfo?.name);
-      throw createError({
-        statusCode: 409,
-        statusMessage: duplicateSubmitMessage(),
-      });
-    }
+    const duplicateMatchId = duplicate.kind === 'soft' ? duplicate.matchId ?? null : null;
+    const duplicateFlag = duplicate.kind === 'soft' ? duplicate.reason ?? 'possible' : null;
 
     const listingId = await createListing(
       { ...payload, photos, ownerId: user.id },
       {
         moderationStatus: waitForApproval ? 'pending' : 'approved',
-        duplicateOfListingId: duplicate.matchId ?? null,
-        duplicateFlag: duplicate.kind === 'soft' ? duplicate.reason ?? 'possible' : null,
+        duplicateOfListingId: duplicateMatchId,
+        duplicateFlag,
         listingIntent,
       }
     );
@@ -135,6 +126,7 @@ export default defineEventHandler(async (event) => {
         ownerEmail: user?.email,
         ownerPhone: user?.phone ?? finalInfo?.contactNo,
         duplicateFlag: listing?.duplicateFlag ?? listing?.duplicate_flag,
+        duplicateOfListingId: listing?.duplicateOfListingId ?? listing?.duplicate_of_listing_id ?? duplicateMatchId,
       });
       return {
         status: 1,

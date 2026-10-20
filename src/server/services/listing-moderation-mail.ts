@@ -63,6 +63,7 @@ export async function emailAdminListingPending(opts: {
   ownerEmail?: string | null;
   ownerPhone?: string | null;
   duplicateFlag?: string | null;
+  duplicateOfListingId?: number | null;
 }): Promise<void> {
   const to = adminInbox();
   if (!to.length) {
@@ -79,14 +80,20 @@ export async function emailAdminListingPending(opts: {
   const rent = Number(opts.rentAmount);
   const rentLine = Number.isFinite(rent) && rent > 0 ? `₹${rent.toLocaleString('en-IN')}` : '—';
   const owner = [opts.ownerName, opts.ownerEmail, opts.ownerPhone].filter(Boolean).map(escapeHtml).join(' · ');
-  const dup = opts.duplicateFlag
-    ? `<p style="color:#9a3412">Possible duplicate: ${escapeHtml(opts.duplicateFlag)}</p>`
+  const matchId = Number(opts.duplicateOfListingId);
+  const matchLabel = Number.isFinite(matchId) && matchId > 0 ? `#${matchId}` : '';
+  const dup = matchLabel || opts.duplicateFlag
+    ? `<p style="color:#9a3412">Possible duplicate${matchLabel ? ` of listing ${matchLabel}` : ''}${
+        opts.duplicateFlag ? ` (${escapeHtml(opts.duplicateFlag)})` : ''
+      }. Admin decides whether to reject.</p>`
     : '';
 
   await sendMailSafe({
     to,
     subject: `Approve listing #${opts.listingId} — ${opts.propertyName || 'new property'}`,
-    text: `A property is waiting for approval.\n\n#${opts.listingId} ${opts.propertyName || ''}\n${place}\nRent ${rentLine}\nOwner ${owner || '—'}\n\nReview: ${reviewLink}\nQueue: ${queueLink}`,
+    text: `A property is waiting for approval.\n\n#${opts.listingId} ${opts.propertyName || ''}\n${place}\nRent ${rentLine}\nOwner ${owner || '—'}${
+      matchLabel ? `\nPossible duplicate of listing ${matchLabel}` : ''
+    }\n\nReview: ${reviewLink}\nQueue: ${queueLink}`,
     html: wrap(
       `<p>Someone listed a property. Please review and approve it.</p>
        <p><strong>#${opts.listingId} ${name}</strong><br/>${place || 'Location not set'}<br/>Rent ${rentLine}</p>
