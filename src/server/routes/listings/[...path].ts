@@ -89,18 +89,21 @@ export default defineEventHandler(async (event) => {
         : 'owner';
     const waitForApproval = listingIntent === 'reward';
 
-    const duplicate = await findListingDuplicates({
-      city: address?.city,
-      street: address?.street,
-      landmark: address?.landmark,
-      zone: address?.zone,
-      propertyName: details?.propertyName ?? finalInfo?.name,
-      bedrooms: details?.bedrooms,
-      rentAmount: finalInfo?.rentAmount,
-      latitude: address?.latitude,
-      longitude: address?.longitude,
-      phone: finalInfo?.contactNo,
-    });
+    // Duplicate matching is only an admin hint for reward listings; it must never block a submit.
+    const duplicate = waitForApproval
+      ? await findListingDuplicates({
+          city: address?.city,
+          street: address?.street,
+          landmark: address?.landmark,
+          zone: address?.zone,
+          propertyName: details?.propertyName ?? finalInfo?.name,
+          bedrooms: details?.bedrooms,
+          rentAmount: finalInfo?.rentAmount,
+          latitude: address?.latitude,
+          longitude: address?.longitude,
+          phone: finalInfo?.contactNo,
+        })
+      : ({ kind: 'ok' } as const);
     const duplicateMatchId = duplicate.kind === 'soft' ? duplicate.matchId ?? null : null;
     const duplicateFlag = duplicate.kind === 'soft' ? duplicate.reason ?? 'possible' : null;
 
